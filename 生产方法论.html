@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>生产方法论 · 猫波信号站</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F2EEDF;
+  --ink: #2A241B;
+  --ink-soft: #5C5345;
+  --muted: #8C8275;
+  --border: #D9D4C7;
+  --card: #fff;
+  --yellow: #E6A800;
+  --yellow-soft: #F2CC8F;
+  --yellow-bg: rgba(230,168,0,0.08);
+  --sage: #81B29A;
+  --pink: #E07A5F;
+  --lilac: #9A8FB5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; background: #1a1a1a; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: "Work Sans", "Noto Sans SC", sans-serif;
+  line-height: 1.75; font-weight: 350;
+}
+
+/* ── Fixed Nav ── */
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; gap: 0;
+  padding: 14px 48px;
+  background: rgba(242,238,223,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(42,36,27,0.08);
+  font-size: 14px; font-weight: 450;
+  overflow-x: auto; white-space: nowrap;
+}
+#topnav .brand {
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+  font-weight: 500; font-size: 20px; margin-right: 32px;
+  color: var(--ink); text-decoration: none;
+}
+#topnav a {
+  color: var(--ink-soft); text-decoration: none;
+  padding: 6px 16px; border-radius: 12px;
+  transition: all 0.15s; font-size: 13px;
+}
+#topnav a:hover, #topnav a.on { color: var(--ink); background: rgba(42,36,27,0.06); }
+#topnav .sep { width: 1px; height: 18px; background: var(--border); margin: 0 10px; flex-shrink: 0; }
+
+/* ── Hero ── */
+.hero {
+  margin-top: 60px; padding: 80px 48px 60px;
+  text-align: center;
+}
+.hero h1 {
+  font-family: "Noto Serif SC", "Cormorant Garamond", serif;
+  font-weight: 900; font-size: clamp(48px, 8vw, 80px);
+  letter-spacing: 0.04em; line-height: 1.1;
+}
+.hero h1 span {
+  font-weight: 400; display: block; font-size: 0.38em;
+  letter-spacing: 0.12em; color: var(--muted); margin-top: 8px;
+}
+.hero .tagline { font-size: 18px; color: var(--ink-soft); margin-top: 20px; font-weight: 300; }
+
+/* ── Layout ── */
+main { max-width: 960px; margin: 0 auto; padding: 0 32px 120px; }
+section { margin: 64px 0; }
+h2 {
+  font-family: "Noto Serif SC", "Cormorant Garamond", serif;
+  font-weight: 700; font-size: 28px; letter-spacing: 0.02em;
+  margin-bottom: 20px; padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+}
+h2 .num { font-weight: 400; color: var(--muted); font-size: 0.7em; margin-right: 10px; }
+h3 {
+  font-family: "Noto Serif SC", serif;
+  font-weight: 600; font-size: 20px; margin: 32px 0 12px; color: var(--ink);
+}
+h4 { font-weight: 600; font-size: 15px; margin: 20px 0 8px; color: var(--ink-soft); }
+
+p { margin: 8px 0; font-size: 15px; }
+ul, ol { padding-left: 22px; margin: 8px 0; }
+li { margin: 4px 0; font-size: 14px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card); border-radius: 14px; padding: 28px 32px;
+  margin: 20px 0; border: 1px solid var(--border);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+
+/* ── Tables ── */
+table { width: 100%; border-collapse: collapse; margin: 14px 0 22px; font-size: 13px; }
+thead th {
+  background: rgba(0,0,0,0.03); text-align: left; padding: 10px 14px;
+  font-weight: 600; color: var(--ink-soft); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid var(--border);
+}
+tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+td.nowrap { white-space: nowrap; }
+td code {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.9em; color: var(--yellow); background: var(--yellow-bg);
+  padding: 1px 6px; border-radius: 3px;
+}
+
+/* ── Code blocks ── */
+pre {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.84em; line-height: 1.7; padding: 16px 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow-x: auto; margin: 10px 0 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+pre .cmd { color: #22863a; }
+pre .arg { color: var(--yellow); font-weight: 600; }
+
+/* ── Highlight boxes ── */
+.hl {
+  padding: 14px 20px; border-radius: 10px; margin: 14px 0; font-size: 14px;
+}
+.hl-y { background: var(--yellow-bg); border: 1px solid rgba(230,168,0,0.18); }
+.hl-y strong { color: var(--yellow); }
+.hl-g { background: rgba(129,178,154,0.12); }
+.hl-g strong { color: var(--sage); }
+.hl-p { background: rgba(224,122,95,0.08); border: 1px solid rgba(224,122,95,0.18); }
+.hl-p strong { color: var(--pink); }
+.hl-l { background: rgba(154,143,181,0.10); }
+.hl-l strong { color: var(--lilac); }
+
+/* ── Cover layout diagram ── */
+.cover-diagram {
+  font-family: "SF Mono", "Cascadia Code", monospace;
+  font-size: 0.8em; line-height: 1.5; padding: 20px 24px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; text-align: center; margin: 14px 0;
+  color: var(--muted);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+.cover-diagram .hl { color: var(--yellow); }
+.cover-diagram .wh { color: var(--ink-soft); }
+
+/* ── Tree ── */
+.tree {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.85em; line-height: 1.85; padding: 16px 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow-x: auto; white-space: pre; margin: 12px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+.tree .hl { color: var(--yellow); }
+.tree .dim { color: var(--muted); }
+
+/* ── Pipeline steps ── */
+.pipe { display: flex; gap: 0; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; font-size: 13px; }
+.pipe span { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; white-space: nowrap; }
+.pipe .arr { color: var(--muted); padding: 4px 3px; border: none; background: none; }
+
+/* ── Grid ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
+
+/* ── Tags ── */
+.tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.tag-go { background: var(--sage); color: #fff; }
+.tag-warn { background: var(--yellow-soft); color: var(--ink); }
+.tag-no { background: var(--pink); color: #fff; }
+
+/* ── Blockquote ── */
+blockquote {
+  border-left: 3px solid var(--yellow); padding: 10px 18px; margin: 14px 0;
+  background: var(--yellow-bg); font-style: italic; color: var(--ink-soft);
+  font-size: 14px; border-radius: 0 8px 8px 0;
+}
+blockquote .attr { display: block; margin-top: 6px; font-style: normal; font-size: 12px; color: var(--muted); }
+
+/* ── Footer ── */
+.footer { text-align: center; padding: 40px 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 60px; }
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  #topnav { padding: 10px 20px; gap: 6px; }
+  #topnav .brand { margin-right: 16px; font-size: 18px; }
+  main { padding: 0 16px 80px; }
+  .hero { padding: 60px 24px 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ FIXED NAV ════════════════ -->
+<nav id="topnav">
+  <a href="#hero" class="brand">猫波信号站</a>
+  <span class="sep"></span>
+  <a href="#s0">管线总览</a>
+  <a href="#s0b">B站域研究</a>
+  <a href="#s1">选题方法论</a>
+  <a href="#s2">下载 & 断句</a>
+  <a href="#s3">翻译</a>
+  <span class="sep"></span>
+  <a href="#s4">字幕调优</a>
+  <a href="#s5">封面设计</a>
+  <a href="#s6">标题 & 元数据</a>
+  <a href="#s7">B站发布</a>
+  <span class="sep"></span>
+  <a href="#s8">选题库管理</a>
+  <a href="#s9">技能迭代</a>
+  <a href="#s10">目录结构</a>
+  <span class="sep"></span>
+  <a href="#s11">已知坑</a>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<div class="hero" id="hero">
+  <h1>生产方法论<span>猫波信号站 · Production Methodology</span></h1>
+  <p class="tagline">YouTube → B站 完整搬运管线。封面、标题、字幕、选题的全部可复用参数都在这里。</p>
+</div>
+
+<main>
+
+<!-- ════════════════ §0 管线总览 ════════════════ -->
+<section id="s0">
+  <h2><span class="num">00</span>管线总览</h2>
+
+  <div class="card">
+  <div class="pipe">
+    <span>① 选题</span><span class="arr">→</span>
+    <span>② 下载</span><span class="arr">→</span>
+    <span>③ 断句</span><span class="arr">→</span>
+    <span>④ 翻译</span><span class="arr">→</span>
+    <span>⑤ 字数</span><span class="arr">→</span>
+    <span>⑥ ASS</span><span class="arr">→</span>
+    <span>⑦ 渲染</span><span class="arr">→</span>
+    <span>⑧ 封面</span><span class="arr">→</span>
+    <span>⑨ 元数据</span><span class="arr">→</span>
+    <span>⑩ 发布</span>
+  </div>
+
+  <table>
+    <thead><tr><th>步骤</th><th>工具</th><th>输入 → 输出</th><th>耗时</th></tr></thead>
+    <tbody>
+    <tr><td class="nowrap">选题</td><td>WebFetch + 人工</td><td>URL → 评分</td><td>~5m</td></tr>
+    <tr><td class="nowrap">下载</td><td><code>yt-dlp</code></td><td>URL → mp4 + srt</td><td>~3m</td></tr>
+    <tr><td class="nowrap">断句</td><td><code>pipeline.py</code></td><td>01_raw.srt → 02_seg.srt</td><td>&lt;1s</td></tr>
+    <tr><td class="nowrap">翻译</td><td>DeepSeek API</td><td>02_seg.srt → 03_zh.srt</td><td>~1m</td></tr>
+    <tr><td class="nowrap">字数</td><td><code>pipeline.py</code></td><td>03_zh.srt → 04_split.srt</td><td>&lt;1s</td></tr>
+    <tr><td class="nowrap">ASS</td><td><code>pipeline.py</code></td><td>04_split.srt → 05.ass</td><td>&lt;1s</td></tr>
+    <tr><td class="nowrap">渲染</td><td><code>ffmpeg</code></td><td>mp4 + ass → mp4</td><td>~5m</td></tr>
+    <tr><td class="nowrap">封面</td><td><code>gen_cover.py</code></td><td>截图 + 文字 → cover.jpg</td><td>~2m</td></tr>
+    <tr><td class="nowrap">元数据</td><td>人工 + 发布面板</td><td>transcript → 标题/标签/简介</td><td>~10m</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-y"><strong>一键命令：</strong><code>python pipeline.py all &lt;url&gt; --slug &lt;name&gt; --output-title "标题"</code></div>
+  </div>
+</section>
+
+<!-- ════════════════ §0B B站搬运视频垂域全景 ════════════════ -->
+<section id="s0b">
+  <h2><span class="num">0B</span>B站搬运视频垂域全景</h2>
+  <p style="margin-bottom:24px;">YouTube → B站 搬运不是一个技术问题，是一个<strong>平台合规 + 审美适配 + 竞争定位</strong>问题。本章是垂域研究的系统整理，持续更新。</p>
+
+  <!-- 0B.1 平台规则 -->
+  <div class="card">
+  <h3>0B.1 平台规则与红线</h3>
+
+  <h4>投稿类型：转载 vs 自制（核心红线）</h4>
+  <table>
+    <thead><tr><th>类型</th><th>定义</th><th>适用</th></tr></thead>
+    <tbody>
+    <tr><td><strong>转载</strong></td><td>搬运他人作品，注明原作者和来源</td><td><span class="tag tag-go">我们</span></td></tr>
+    <tr><td><strong>自制</strong></td><td>含UP主独创性表达（特效包装、解说配音等）</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-p"><strong>仅添加翻译字幕 ≠ 自制。</strong>B站明确：未经版权方授权自行添加的翻译字幕不属于自制类型。转载冒充自制 = 严重违规，多次违规将被严肃处理。</div>
+
+  <h4>2026 年新规：内容标注强制</h4>
+  <p>自 2026 年起，B站发布必经「创作声明」环节，6 类必选标签：</p>
+  <table>
+    <thead><tr><th>标签</th><th>我们是否选</th></tr></thead>
+    <tbody>
+    <tr><td>✅ 内容为转载</td><td><strong>必选</strong> — 搬运视频必须勾此项</td></tr>
+    <tr><td>✅ 含有 AI 生成内容</td><td><strong>必选</strong> — 翻译使用 AI</td></tr>
+    <tr><td>含有虚构演绎内容</td><td>不选</td></tr>
+    <tr><td>含有营销信息</td><td>不选（除非含推广）</td></tr>
+    <tr><td>内容为个人观点</td><td>不选</td></tr>
+    <tr><td>无需标注</td><td>不选</td></tr>
+    </tbody>
+  </table>
+
+  <h4>一票否决红线</h4>
+  <table>
+    <thead><tr><th>红线</th><th>后果</th></tr></thead>
+    <tbody>
+    <tr><td>转载冒充自制</td><td>多次违规 → 严肃处理</td></tr>
+    <tr><td>色情低俗内容</td><td>退回/下架</td></tr>
+    <tr><td>政治敏感内容</td><td>退回/封号</td></tr>
+    <tr><td>截取影视剧/综艺片段</td><td>版权原因直接退回</td></tr>
+    <tr><td>假冒官方角标/认证标识</td><td>退回修改</td></tr>
+    <tr><td>竞品平台 Logo（西瓜/腾讯/优酷/爱奇艺）</td><td>限流/退回</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- 0B.2 封面规范 -->
+  <div class="card">
+  <h3>0B.2 封面设计规范（B站科技区）</h3>
+
+  <h4>技术规格</h4>
+  <table>
+    <thead><tr><th>参数</th><th>标准</th><th>说明</th></tr></thead>
+    <tbody>
+    <tr><td>分辨率</td><td><strong>1920×1080</strong></td><td>16:9，B站标准封面尺寸</td></tr>
+    <tr><td>安全区</td><td><strong>中央 1280×720</strong></td><td>首页和推荐页会被裁切为 4:3 或 1:1，关键信息必须在安全区内</td></tr>
+    <tr><td>文件大小</td><td><strong>≤ 5MB</strong></td><td>超 5MB 触发强压缩，文字发虚</td></tr>
+    <tr><td>推荐大小</td><td><strong>≤ 4.8MB</strong></td><td>留余量防压缩</td></tr>
+    <tr><td>格式</td><td><strong>JPG</strong></td><td>PNG 体积大易被压</td></tr>
+    <tr><td>动图</td><td><strong>禁止</strong></td><td>不能使用动态图片做封面</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ═══ 色彩策略 ═══ -->
+  <h4>色彩策略：B站科技区实测对比</h4>
+  <p style="color:var(--muted); font-size:12px;">基于 B站搜索 "OpenAI 访谈" / "双语字幕 AI" / "AI译片君" 实际封面采样对比</p>
+
+  <table>
+    <thead><tr><th>策略</th><th>配色</th><th>实例</th><th>效果评估</th><th>适用场景</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><strong>深黑底 + 暖黄大字</strong></td>
+      <td>背景 #0A0A0A / 文字 #FFC82D</td>
+      <td>Sam Altman 访谈类高播放封面主流</td>
+      <td><span class="tag tag-go">效果最佳</span> 白色信息流中对比度最高</td>
+      <td>深度访谈、人物观点类</td>
+    </tr>
+    <tr>
+      <td><strong>深蓝底 + 白色/荧光字</strong></td>
+      <td>背景 #0D1B2A / 文字 #FFFFFF 或 #00FF88</td>
+      <td>AI 技术讲解、编程类常见</td>
+      <td><span class="tag tag-go">效果好</span> 科技感强，但冷色不如暖色抓眼</td>
+      <td>技术教程、工具测评</td>
+    </tr>
+    <tr>
+      <td><strong>原视频截图 + 中文叠字</strong></td>
+      <td>原图亮度降低 + 白/黄文字 + 描边</td>
+      <td>大量低粉搬运号使用</td>
+      <td><span class="tag tag-warn">效果一般</span> 信息密度低，像机翻号</td>
+      <td>不推荐</td>
+    </tr>
+    <tr>
+      <td><strong>白底 + 产品图 + 黑字</strong></td>
+      <td>白色背景 + 黑色粗体</td>
+      <td>海外科技频道常见（如 MKBHD）</td>
+      <td><span class="tag tag-no">B站不适用</span> 白底淹没在白色信息流中</td>
+      <td>不推荐</td>
+    </tr>
+    <tr>
+      <td><strong>渐变深色 + 暖色大字 + 人物</strong></td>
+      <td>深灰→黑渐变 / 文字暖黄/暖橙</td>
+      <td>高质量科技搬运 UP主进阶选择</td>
+      <td><span class="tag tag-go">效果最佳</span> 有质感不单调</td>
+      <td><span class="tag tag-go">我们目标</span></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-y"><strong>结论：深色底（黑/深灰渐变）+ 暖色大字（黄/暖橙）+ 人物正脸 = B站科技访谈类最优解。</strong>白底策略在 B站白色信息流中天然吃亏，海外极简审美直接搬迁水土不服。</div>
+
+  <!-- ═══ 字体系统 ═══ -->
+  <h4>字体系统（Typography）</h4>
+
+  <h5>字体选择</h5>
+  <table>
+    <thead><tr><th>用途</th><th>字体</th><th>权重</th><th>备选</th></tr></thead>
+    <tbody>
+    <tr><td><strong>主标题（封面大字）</strong></td><td>思源黑体 Heavy / Bold</td><td>900</td><td>阿里巴巴普惠体 Bold、HarmonyOS Sans Black</td></tr>
+    <tr><td><strong>副标题</strong></td><td>思源黑体 Bold</td><td>700</td><td>同主标题家族</td></tr>
+    <tr><td><strong>出处/来源行</strong></td><td>思源黑体 Regular</td><td>400</td><td>Noto Sans SC</td></tr>
+    <tr><td><strong>English 辅助</strong></td><td>Segoe UI Bold / Inter Bold</td><td>700</td><td>SF Pro Display Bold</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-p"><strong>Windows 限制：</strong>PIL/FreeType 渲染下，只有 SimHei 能保证足够粗度。思源黑体在 PIL 中可能发虚。当前 gen_cover.py 用 SimHei + 2px 四周填充模拟超粗效果，是一种务实 workaround。<br>
+  <strong>改进方向：</strong>调研 Windows 下 PIL 字体渲染替代方案 → 如直接用 FreeType 绑定、或预渲染文字 PNG 叠到 PIL 图上。</div>
+
+  <h5>字号层级（基于 1920×1080 画布）</h5>
+  <table>
+    <thead><tr><th>层级</th><th>字号</th><th>占画布高度比</th><th>说明</th></tr></thead>
+    <tbody>
+    <tr><td><strong>L1 · 封面大字（钩子）</strong></td><td>140–180px</td><td>~13–17%</td><td>仅 4–8 字，一眼可读。B站缩略图下仍清晰</td></tr>
+    <tr><td><strong>L2 · 副标题（补充）</strong></td><td>60–80px</td><td>~6–7%</td><td>10–16 字，提供上下文</td></tr>
+    <tr><td><strong>L3 · 来源/出处</strong></td><td>24–32px</td><td>~2–3%</td><td>灰色，底部署名</td></tr>
+    </tbody>
+  </table>
+
+  <h5>文字处理</h5>
+  <table>
+    <thead><tr><th>处理</th><th>参数</th><th>目的</th></tr></thead>
+    <tbody>
+    <tr><td><strong>描边/填充</strong></td><td>2–4px 纯黑，四周 8 方向</td><td>确保在任何底图亮度下可读</td></tr>
+    <tr><td><strong>阴影</strong></td><td>offset 2-3px, blur 4-6px, 50% black</td><td>增加文字与背景分离感</td></tr>
+    <tr><td><strong>半透明黑底条</strong></td><td>rgba(0,0,0,0.5–0.7) 全宽横条</td><td>文字区加暗色衬底，保障可读性</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ═══ 排版形式 ═══ -->
+  <h4>排版形式（Layout Patterns）</h4>
+  <p style="color:var(--muted); font-size:12px;">基于 B站科技访谈类高播放封面采样，归纳 4 种主流布局</p>
+
+  <h5>布局 A：人物左 + 文字右（最主流）</h5>
+  <div class="cover-diagram">
+┌──────────────────────────────────────┐
+│  ┌──────────┐                        │
+│  │          │   主标题大字（4-8字）    │
+│  │  人物    │   暖黄 #FFC82D         │
+│  │  正脸    │   ─── 装饰线 ───       │
+│  │  占40%   │   副标题小字            │
+│  │          │   出处行               │
+│  └──────────┘                        │
+└──────────────────────────────────────┘
+  </div>
+  <p><strong>适用：</strong>人物半身照可清晰截取时。B站 "OpenAI 访谈" 搜索结果中高播放封面 <strong>80% 用此布局</strong>。人物视线应朝向文字方向。</p>
+
+  <h5>布局 B：全幅底图 + 文字叠层</h5>
+  <div class="cover-diagram">
+┌──────────────────────────────────────┐
+│  ╔══════════════════════════════════╗ │
+│  ║   [半透明黑底条 或 渐变遮罩]     ║ │
+│  ║    主标题大字（居中）            ║ │
+│  ║    副标题                       ║ │
+│  ╚══════════════════════════════════╝ │
+│  [底图：人物/场景，亮度 0.6–0.8]      │
+│                                       │
+│                          出处行        │
+└──────────────────────────────────────┘
+  </div>
+  <p><strong>适用：</strong>底图本身信息量高（如两人对谈、舞台场景）。文字区需要半透明黑底衬托。AI译片君大量使用此布局。</p>
+
+  <h5>布局 C：居中对称</h5>
+  <div class="cover-diagram">
+┌──────────────────────────────────────┐
+│                                       │
+│          主标题大字（居中）            │
+│          ─── 装饰线 ───              │
+│          副标题                       │
+│                                       │
+│          [人物居中，半身像]            │
+│                                       │
+│          出处行                       │
+└──────────────────────────────────────┘
+  </div>
+  <p><strong>适用：</strong>人物在画面正中央，文字在上方。正式感强，适合单人演讲截图。注意文字不能遮挡人脸。</p>
+
+  <h5>布局 D：上下分割</h5>
+  <div class="cover-diagram">
+┌──────────────────────────────────────┐
+│  ▓▓▓▓▓▓ 深色背景区 ▓▓▓▓▓▓▓▓▓▓▓▓▓ │
+│    主标题大字 + 副标题                │
+│  ░░░░░░ 图片区 ░░░░░░░░░░░░░░░░░░░ │
+│  [人物 / 场景截图的另一半]            │
+│                          出处行       │
+└──────────────────────────────────────┘
+  </div>
+  <p><strong>适用：</strong>底图不够大或不适合叠字时。上 30-40% 纯色区放文字，下 60-70% 放图片。YouTube 科技频道常用此风格。</p>
+
+  <h5>排版通用原则</h5>
+  <ul>
+    <li><strong>视觉焦点唯一</strong>：每张封面只有一个核心信息锚点（金句），其余为辅助</li>
+    <li><strong>文字非说明是钩子</strong>：封面文字的功能是「吸引点击」，不是「概括内容」</li>
+    <li><strong>人物面部 ≥ 画面 25%</strong>：表情和视线是点击率的核心驱动</li>
+    <li><strong>九宫格交点放核心元素</strong>：主体（人脸/主标题）落在四个交点之一</li>
+    <li><strong>构建三层亮度结构</strong>：亮主体（RGB 180–240）→ 中灰过渡（80–150）→ 深底色（≤50）</li>
+    <li><strong>不做信息过载</strong>：B站缩略图仅 ~200×120px，多余元素不可辨识 = 视觉噪音</li>
+  </ul>
+
+  <h4>搬运视频封面本土化要诀</h4>
+  <ul>
+    <li><strong>不直接用原视频封面</strong>：海外审美（白底/极简/英文为主）直接搬迁水土不服</li>
+    <li><strong>提取金句做中文大字</strong>：不是翻译原标题，是从内容中提炼最有冲击力的中文金句</li>
+    <li><strong>人物是信任资产</strong>：嘉宾正脸比产品图/抽象图点击率高 2-3 倍（行业数据）</li>
+    <li><strong>品牌锚点一致</strong>：固定暖黄 + 固定字体 + 固定底部出处行 = 频道视觉资产</li>
+    <li><strong>不加「双语字幕」标签</strong>：高质量字幕是默认配置不是卖点，挂标签反而像低质机翻号</li>
+  </ul>
+  </div>
+
+  <!-- 0B.3 标题规范 -->
+  <div class="card">
+  <h3>0B.3 标题规范</h3>
+
+  <table>
+    <thead><tr><th>参数</th><th>标准</th></tr></thead>
+    <tbody>
+    <tr><td>总字数</td><td><strong>≤ 80 字</strong>（B站硬限制）</td></tr>
+    <tr><td>推荐字数</td><td><strong>30–50 字</strong>（信息流完整展示）</td></tr>
+    <tr><td>语言</td><td>中文为主，人名保留英文原名</td></tr>
+    <tr><td>禁止</td><td>【】方括号、《》书名号、#话题标签、emoji 堆叠、??? / !!! 堆叠、繁体字、特殊符号</td></tr>
+    <tr><td>格式</td><td><code>嘉宾身份 嘉宾名：核心论断</code></td></tr>
+    </tbody>
+  </table>
+
+  <h4>高点击标题套路（科技区实测有效）</h4>
+  <ul>
+    <li><strong>数字 + 结果</strong>：「3 分钟看懂 XXX」</li>
+    <li><strong>反常识 + 悬念</strong>：「你现在用的 AI 是你余生最差的」← 我们 Kevin Weil 期用的</li>
+    <li><strong>权威 + 独家</strong>：「OpenAI CPO 首次透露」</li>
+    <li><strong>对比 + 冲突</strong>：「国产 VS 海外 差距有多大」</li>
+    <li><strong>紧迫感</strong>：「全网首发」「别再用了」</li>
+  </ul>
+
+  <div class="hl hl-y"><strong>我们不需要「双语字幕」后缀。</strong>高质量双语字幕是我们的默认配置，不需要在标题中声明。低质搬运号才挂这类标签。</div>
+  </div>
+
+  <!-- 0B.4 投稿合规 -->
+  <div class="card">
+  <h3>0B.4 投稿合规 Checklist</h3>
+
+  <table>
+    <thead><tr><th>#</th><th>检查项</th><th>操作</th></tr></thead>
+    <tbody>
+    <tr><td>1</td><td>投稿类型</td><td>选「转载」</td></tr>
+    <tr><td>2</td><td>创作声明</td><td>勾「内容为转载」+「含有 AI 生成内容」（2026 新规强制）</td></tr>
+    <tr><td>3</td><td>转载出处</td><td>原作者名 + 原平台 + 原链接</td></tr>
+    <tr><td>4</td><td>撞车检查</td><td>发布前搜索 B站是否已有相同视频，避免重复被驳回</td></tr>
+    <tr><td>5</td><td>分区</td><td>知识 > 科技 > 人工智能</td></tr>
+    <tr><td>6</td><td>合集</td><td>猫波译站</td></tr>
+    <tr><td>7</td><td>标签</td><td>≥ 3 个，≤ 10 个，与内容相关，英文逗号分隔</td></tr>
+    <tr><td>8</td><td>封面</td><td>1920×1080 JPG，≤ 4.8MB，内容与视频一致</td></tr>
+    <tr><td>9</td><td>视频文件名</td><td>= 标题文字，B站自动识别填入标题框</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- 0B.5 竞品格局 -->
+  <div class="card">
+  <h3>0B.5 竞品格局与定位</h3>
+
+  <h4>赛道玩家分类</h4>
+  <table>
+    <thead><tr><th>类型</th><th>代表</th><th>特点</th><th>数据</th></tr></thead>
+    <tbody>
+    <tr><td><strong>AI 批量翻译号</strong></td><td>AI译片君</td><td>AI 语音合成 + 批量产出，一天多更，量大管饱</td><td>27 万粉 / 3.2 亿播放</td></tr>
+    <tr><td><strong>人工精翻号</strong></td><td>传统"烤肉 Man"</td><td>质量高、时间长、更新慢</td><td>逐渐式微</td></tr>
+    <tr><td><strong>财经/新闻搬运</strong></td><td>彭博社中字频道</td><td>财经科技交叉，中英字幕</td><td>稳定更新</td></tr>
+    <tr><td><strong>原创科技 UP</strong></td><td>何同学等</td><td>完全原创，无版权风险</td><td>顶级流量</td></tr>
+    </tbody>
+  </table>
+
+  <h4>我们的定位</h4>
+  <div class="hl hl-y">
+    <strong>AI 辅助 + 人工品控的高质量双语字幕搬运。</strong><br>
+    差异化：① 人工精翻品质（非机翻），② 精选嘉宾/深度访谈（非新闻批量），③ 完整管线可复现（非一次性），④ 封面/标题本地化适配 B站审美。<br>
+    不做什么：① 不做 AI 配音（保持原声），② 不做日更/批量（质量优先），③ 不做纯新闻搬运（长期价值低）。
+  </div>
+
+  <h4>风险监控</h4>
+  <ul>
+    <li><strong>AI译片君模式风险</strong>：早期类似账号（牢君、牢斑马）已被处罚/封禁，原因是违规搬运 + 商业化使用</li>
+    <li><strong>版权收紧趋势</strong>：B站对未授权搬运的审核在持续收紧</li>
+    <li><strong>我们的优势</strong>：精选内容 + 人工品控 + 转载标注，合规风险远低于 AI 批量号</li>
+  </ul>
+  </div>
+
+  <!-- 0B.6 限流与审核 -->
+  <div class="card">
+  <h3>0B.6 限流因素与审核机制</h3>
+
+  <h4>B站审核流程：初审 → 人工复审 → 算法实时拦截</h4>
+  <table>
+    <thead><tr><th>限流/退回原因</th><th>机制</th><th>预防</th></tr></thead>
+    <tbody>
+    <tr><td><strong>撞车（重复内容）</strong></td><td>画质高 + 投稿早的优先存留</td><td>发布前搜索 B站确认无相同内容</td></tr>
+    <tr><td><strong>转载推流权重低</strong></td><td>算法优先推自制内容</td><td>封面/标题优化弥补，靠点击率驱动</td></tr>
+    <tr><td><strong>被举报</strong></td><td>触发人工复审</td><td>转载标注清晰、保留授权证据</td></tr>
+    <tr><td><strong>高播放触发奖励审核</strong></td><td>审核重新判断投稿类型</td><td>确保投稿类型正确</td></tr>
+    <tr><td><strong>版权方投诉</strong></td><td>直接下架</td><td>标注「侵删」、选转载类型</td></tr>
+    </tbody>
+  </table>
+
+  <h4>退回处理</h4>
+  <ul>
+    <li>违规稿件系统保留 <strong>15 天</strong>，超时无法申诉</li>
+    <li>申诉渠道：稿件管理 → 视频管理 → 稿件申诉</li>
+    <li>建议保留视频工程截图，有助于申诉</li>
+  </ul>
+  </div>
+
+  <!-- 0B.7 数据规格速查 -->
+  <div class="card">
+  <h3>0B.7 数据规格速查表</h3>
+
+  <table>
+    <thead><tr><th>项目</th><th>规格</th><th>备注</th></tr></thead>
+    <tbody>
+    <tr><td>视频编码</td><td><strong>H.264 (avc1) + AAC</strong></td><td>B站兼容最佳</td></tr>
+    <tr><td>分辨率</td><td>≤ 1080p</td><td>4K 需要更高等级</td></tr>
+    <tr><td>封面尺寸</td><td><strong>1920×1080</strong></td><td>安全区 1280×720</td></tr>
+    <tr><td>封面大小</td><td><strong>≤ 4.8MB JPG</strong></td><td>留余量防压缩</td></tr>
+    <tr><td>标题字数</td><td><strong>≤ 80 字</strong></td><td>推荐 30–50 字</td></tr>
+    <tr><td>标签数量</td><td><strong>3–10 个</strong></td><td>英文逗号分隔</td></tr>
+    <tr><td>简介字数</td><td>≤ 2000 字</td><td></td></tr>
+    <tr><td>视频文件</td><td>MP4 格式</td><td>文件名 = 标题</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ════════════════ §1 选题方法论 ════════════════ -->
+<section id="s1">
+  <h2><span class="num">01</span>选题方法论</h2>
+
+  <p style="margin-bottom:24px;">选题是管线的第一步。选错 = 全链路白跑。完整流程：<strong>发现 → 初筛 → B站交叉检索 → 五维评分 → 入库候选池 → 排期生产</strong>。</p>
+
+  <!-- 1.1 内容发现 -->
+  <div class="card">
+  <h3>1.1 内容发现：巡检机制</h3>
+  <p>每周至少一次按以下清单巡检。完整清单 + URL 见 <code>选题库/内容源.md</code>（唯一真相源）。</p>
+
+  <h4>YouTube 固定频道（每周巡检）</h4>
+  <table>
+    <thead><tr><th>频道</th><th>内容类型</th><th>优先级</th></tr></thead>
+    <tbody>
+    <tr><td>@Anthropic</td><td>Claude/Agent 一手信息</td><td>★★★</td></tr>
+    <tr><td>@OpenAI</td><td>GPT/o系列/DevDay</td><td>★★★</td></tr>
+    <tr><td>@AndrejKarpathy</td><td>AI 教育/教程</td><td>★★★</td></tr>
+    <tr><td>@GoogleDeepMind</td><td>Gemini/DeepMind 研究</td><td>★★☆</td></tr>
+    <tr><td>@GoogleDevelopers</td><td>NotebookLM/开发工具</td><td>★★☆</td></tr>
+    <tr><td>@mckaywrigley</td><td>AI coding/agent</td><td>★★☆</td></tr>
+    <tr><td>@YannicKilcher</td><td>AI 论文解读</td><td>★☆☆</td></tr>
+    <tr><td>@AIJason</td><td>AI 产品/工具评测</td><td>★☆☆</td></tr>
+    <tr><td>@TwoMinutePapers</td><td>论文速读科普</td><td>★☆☆</td></tr>
+    <tr><td>@rowancheung</td><td>AI 新闻/周报</td><td>★☆☆</td></tr>
+    <tr><td>@BrettMalinowski</td><td>AI 产品/创业</td><td>★☆☆</td></tr>
+    <tr><td>@StanfordGSB</td><td>商科视角 AI</td><td>★☆☆</td></tr>
+    </tbody>
+  </table>
+
+  <h4>播客/访谈栏目</h4>
+  <table>
+    <thead><tr><th>栏目</th><th>主持人/机构</th><th>优先级</th></tr></thead>
+    <tbody>
+    <tr><td>Lenny's Podcast</td><td>Lenny Rachitsky</td><td>★★★</td></tr>
+    <tr><td>Lex Fridman Podcast</td><td>Lex Fridman</td><td>★★★</td></tr>
+    <tr><td>No Priors</td><td>Elad Gil, Sarah Guo</td><td>★★★</td></tr>
+    <tr><td>Training Data</td><td>Sequoia Capital</td><td>★★★</td></tr>
+    <tr><td>Latent Space</td><td>swyx, Alessio</td><td>★★☆</td></tr>
+    <tr><td>The Cognitive Revolution</td><td>Nathan Labenz</td><td>★★☆</td></tr>
+    <tr><td>Google DeepMind Podcast</td><td>Hannah Fry</td><td>★★☆</td></tr>
+    <tr><td>AI & I</td><td>Dan Shipper (Every)</td><td>★★☆</td></tr>
+    <tr><td>Lightcone Podcast</td><td>Y Combinator</td><td>★★☆</td></tr>
+    <tr><td>Behind the Craft</td><td>—</td><td>★☆☆</td></tr>
+    <tr><td>Unsupervised Learning</td><td>Redpoint</td><td>★☆☆</td></tr>
+    <tr><td>Minus One</td><td>South Park Commons</td><td>★☆☆</td></tr>
+    <tr><td>The MAD Podcast</td><td>Matt Turck</td><td>★☆☆</td></tr>
+    <tr><td>Uncapped</td><td>Jack Altman</td><td>★☆☆</td></tr>
+    </tbody>
+  </table>
+
+  <h4>会议/活动系列</h4>
+  <table>
+    <thead><tr><th>活动</th><th>主办方</th><th>说明</th></tr></thead>
+    <tbody>
+    <tr><td>AI Ascent</td><td>Sequoia Capital</td><td>顶级 AI 创业者/投资人</td></tr>
+    <tr><td>AI Engineer Summit</td><td>AI Engineer</td><td>工程师视角</td></tr>
+    <tr><td>Google I/O (AI sessions)</td><td>Google</td><td>AI 产品发布</td></tr>
+    <tr><td>Anthropic Building Sessions</td><td>Anthropic</td><td>Claude 开发实践</td></tr>
+    <tr><td>Stripe Sessions</td><td>Stripe</td><td>偶有 AI 交叉</td></tr>
+    <tr><td>NeurIPS/ICML/ICLR</td><td>学术界</td><td>只挑 keynote/tutorial</td></tr>
+    </tbody>
+  </table>
+
+  <h4>聚合/导航站</h4>
+  <table>
+    <thead><tr><th>站点</th><th>用途</th></tr></thead>
+    <tbody>
+    <tr><td>Zara's AI Builder Library (zara.faces.site/ai)</td><td>人物/内容聚合，发现新嘉宾。Featured Videos = 选题金矿</td></tr>
+    <tr><td>Hugging Face Daily Papers</td><td>热门论文 → 找作者演讲</td></tr>
+    <tr><td>ArXiv Sanity</td><td>CS.AI/CL 论文 → 跟踪研究者 YouTube 演讲</td></tr>
+    <tr><td>TLDW / LongCut (tldw.us)</td><td>YouTube 视频高光提取，快速判断信息密度</td></tr>
+    </tbody>
+  </table>
+
+  <h4>X/Twitter 信号监控 — 重点关注人物</h4>
+  <p>这些人上节目 = 选题候选。完整 29 人清单见 <code>内容源.md</code>。</p>
+  <table>
+    <thead><tr><th>人物</th><th>身份</th><th>人物</th><th>身份</th></tr></thead>
+    <tbody>
+    <tr><td>Andrej Karpathy</td><td>最佳 AI 教育者</td><td>Boris Cherny</td><td>Claude Code 之父</td></tr>
+    <tr><td>Kevin Weil</td><td>Head of Product, OpenAI</td><td>Josh Woodward</td><td>VP Gemini, Google</td></tr>
+    <tr><td>Amanda Askell</td><td>Claude 性格/对齐</td><td>Steven Johnson</td><td>NotebookLM 灵魂人物</td></tr>
+    <tr><td>Swyx</td><td>AI Engineer 社区领袖</td><td>Greg Isenberg</td><td>AI 创业/产品</td></tr>
+    <tr><td>Mckay Wrigley</td><td>AI coding/agent</td><td>Amjad Masad</td><td>CEO, Replit</td></tr>
+    <tr><td>Guillermo Rauch</td><td>CEO, Vercel</td><td>Ryo Lu</td><td>Head of Design, Cursor</td></tr>
+    <tr><td>Raiza Martin</td><td>前 NotebookLM PM</td><td>Cat Wu</td><td>Claude Code PM</td></tr>
+    <tr><td>Garry Tan</td><td>President, YC</td><td>Justine Moore</td><td>a16z, 消费者 AI</td></tr>
+    </tbody>
+  </table>
+
+  <h4>主动搜索策略</h4>
+  <p>选题池空时主动搜索，不被动等推荐：</p>
+  <pre><span class="cmd">YouTube:</span> "claude" interview 2026 | "AI agent" talk keynote | "LLM" "fireside" | "Anthropic" "behind the scenes"
+<span class="cmd">X/Twitter:</span> youtube.com "talk" OR "interview" from:known_ai_account | Hacker News AI/Show HN 热门 → 作者演讲
+<span class="cmd">交叉发现:</span> 好节目 → YouTube 推荐/相关视频 | 好嘉宾 → 搜嘉宾其他演讲 → 发现新频道</pre>
+  </div>
+
+  <!-- 1.2 初筛 -->
+  <div class="card">
+  <h3>1.2 初筛（3分钟判断）</h3>
+  <p>打开视频，快速跳 3–5 个时间点。任意一项 NO → 放弃。</p>
+  <table>
+    <thead><tr><th>检查项</th><th>标准</th><th>方法</th></tr></thead>
+    <tbody>
+    <tr><td><strong>语言</strong></td><td>英文演讲，清晰可懂</td><td>跳 3 个时间点听 10 秒</td></tr>
+    <tr><td><strong>字幕</strong></td><td>有官方英文字幕或高质量 auto</td><td>打开 CC 看准确率</td></tr>
+    <tr><td><strong>信息密度</strong></td><td>不是纯娱乐/闲聊</td><td>看内容是否围绕一个核心观点展开</td></tr>
+    <tr><td><strong>视觉可用</strong></td><td>主讲人正脸清晰可截图</td><td>快速浏览缩略图时间线</td></tr>
+    </tbody>
+  </table>
+  <p>初筛通过 → 记录 URL + 标题 + 嘉宾名 + 日期 → 进入 B站交叉检索。</p>
+  </div>
+
+  <!-- 1.3 B站交叉检索 -->
+  <div class="card">
+  <h3>1.3 B站交叉检索</h3>
+  <p><strong>每期选题必须完成，不可跳过。</strong>这是独占性判定的唯一依据。</p>
+  <pre><span class="cmd">WebFetch</span> search.bilibili.com/video?keyword=<span class="arg">嘉宾名+标题关键词</span></pre>
+  <p>搜索词模板：<code>嘉宾英文名 中文</code>、<code>嘉宾常用译名</code>、<code>演讲核心主题</code>、<code>活动名 年份</code></p>
+  <table>
+    <thead><tr><th>B站状态</th><th>独占性评分</th><th>行动</th></tr></thead>
+    <tbody>
+    <tr><td>零中文搬运</td><td><strong>3 分</strong></td><td>独占成立，继续</td></tr>
+    <tr><td>有搬运但无中字</td><td><strong>2 分</strong></td><td>备选，价值高仍可做</td></tr>
+    <tr><td>已有精品双语翻译</td><td><strong>直接排除</strong></td><td>一票否决</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- 1.4 五维评分 -->
+  <div class="card">
+  <h3>1.4 五维评分</h3>
+  <table>
+    <thead><tr><th>维度</th><th>权重</th><th>3 分</th><th>2 分</th><th>1 分</th></tr></thead>
+    <tbody>
+    <tr><td><strong>时效性</strong></td><td>×3</td><td>6 个月内</td><td>1 年内</td><td>&gt;1 年</td></tr>
+    <tr><td><strong>独占性</strong></td><td>×3</td><td>B站零中字</td><td>有搬运无中字</td><td>已有精品中字 → 直接排除</td></tr>
+    <tr><td><strong>人物权威</strong></td><td>×2</td><td>Anthropic 核心 / CEO / 学界领袖</td><td>知名创作者</td><td>素人</td></tr>
+    <tr><td><strong>长期价值</strong></td><td>×2</td><td>方法论 / 框架 / 哲学</td><td>趋势分析</td><td>纯新闻</td></tr>
+    <tr><td><strong>字幕可用</strong></td><td>×1</td><td>官方字幕</td><td>高质量 auto</td><td>需 whisper</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-y"><strong>总分 = 时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2 + 字幕可用×1</strong>（满分 33）<br>
+  <span class="tag tag-go">≥25 立即做</span> &nbsp; <span class="tag tag-warn">20–24 备选</span> &nbsp; <span class="tag tag-no">&lt;20 排除</span></div>
+  </div>
+
+  <!-- 1.5 排除标准 -->
+  <div class="card">
+  <h3>1.5 排除标准（一票否决）</h3>
+  <table>
+    <thead><tr><th>#</th><th>条件</th><th>原因</th></tr></thead>
+    <tbody>
+    <tr><td class="nowrap">1</td><td>B站已有精品双语翻译</td><td>零独占性，搬运无增量</td></tr>
+    <tr><td class="nowrap">2</td><td>版权敏感（电影/音乐为主）</td><td>合规红线</td></tr>
+    <tr><td class="nowrap">3</td><td>纯娱乐 / 标题党 / 营销号风格</td><td>与频道定位不符</td></tr>
+    <tr><td class="nowrap">4</td><td>无英文字幕 + 语音质量差（口音重/噪音）</td><td>whisper 成本高，翻译不可控</td></tr>
+    <tr><td class="nowrap">5</td><td>翻译后主观判定搬运价值不足</td><td>Cat Wu Tokyo 2026 先例</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- 1.6 选题库 & 排期 -->
+  <div class="card">
+  <h3>1.6 选题库 & 排期决策</h3>
+  <p><strong>选题库 = <code>D:\workspace\_output\猫波信号站\选题库\</code></strong>。规范见 <code>选题库/CLAUDE.md</code>。</p>
+  <div class="tree">选题库/
+├── <span class="hl">内容源.md</span>      <span class="dim"># 输入端唯一真相源</span>
+├── 候选池/
+│   ├── <span class="hl">候选池.csv</span>   <span class="dim"># 主表，固定列 sort/filter 对比</span>
+│   └── slug.md        <span class="dim"># 仅≥25分追加详情</span>
+├── 已发布/         <span class="dim"># + BV号/标题/数据</span>
+└── 已废弃/         <span class="dim"># + 废弃原因/教训</span></div>
+
+  <p><strong>CSV 主表</strong> — 每个候选一行，固定列：<code>date, slug, 嘉宾, 标题, URL, 时效性, 独占性, 权威, 长期, 字幕, 总分, 状态, 来源</code>。所有人同一个维度下同一标准比对。排除行不删，防重复评估。</p>
+
+  <h4>排期优先级（候选池 > 1 个时）</h4>
+  <p>直接在 CSV 里排序列对比：总分降序 → 时效性降序 → 人物热度（CSV外判断）→ 多样性。</p>
+
+  <h4>状态流转</h4>
+  <pre>发现内容 → [初筛通过] → CSV 状态=候选 → [≥25分+排期] → 生产中
+                             → [已发布] → CSV 状态=已发布 + 已发布/slug.md
+                             → [<20分] → CSV 状态=排除</pre>
+  </div>
+</section>
+
+<!-- ════════════════ §2 下载 & 断句 ════════════════ -->
+<section id="s2">
+  <h2><span class="num">02</span>下载 & 断句</h2>
+
+  <div class="card">
+    <h3>下载命令</h3>
+    <pre><span class="cmd">yt-dlp</span> --write-auto-subs --sub-langs en --convert-subs srt \
+  -f "bestvideo[height&lt;=1080][vcodec^=avc1]+bestaudio[ext=m4a]/..." \
+  --output "%(title)s.%(ext)s" <span class="arg">&lt;url&gt;</span></pre>
+    <div class="hl hl-p"><strong>必须 H.264(avc1)+AAC(m4a)</strong>，否则拿到 webm/vp9 — B站不兼容</div>
+  </div>
+
+  <div class="card">
+    <h3>断句参数</h3>
+    <table>
+      <thead><tr><th>参数</th><th>值</th><th>说明</th></tr></thead>
+      <tbody>
+      <tr><td>目标词数</td><td>~18 英文词/句</td><td>单句阅读舒适区</td></tr>
+      <tr><td>切割触发</td><td><code>. ! ?</code></td><td>句尾标点</td></tr>
+      <tr><td>硬切上限</td><td>27 词 (18×1.5)</td><td>超此即使无标点也强制切割</td></tr>
+      <tr><td>carryover</td><td>只裁文本不移时间戳</td><td>避免字幕闪烁</td></tr>
+      <tr><td>输出</td><td><code>02_seg.srt</code></td><td>句子级字幕</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════ §3 翻译 ════════════════ -->
+<section id="s3">
+  <h2><span class="num">03</span>翻译</h2>
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">工程参数见 <a href="_ref/生产参数.md">_ref/生产参数.md</a> §3 — 唯一真相源</p>
+
+  <table>
+    <thead><tr><th>参数</th><th>值</th><th>说明</th></tr></thead>
+    <tbody>
+    <tr><td>API</td><td>DeepSeek Chat</td><td>性价比最高</td></tr>
+    <tr><td>model</td><td><code>deepseek-chat</code></td><td></td></tr>
+    <tr><td>temperature</td><td><strong>0.3</strong></td><td>字幕需要一致性，不要创意</td></tr>
+    <tr><td>批大小</td><td>10 条/批</td><td>平衡速度与上下文</td></tr>
+    <tr><td>并发</td><td>5</td><td>DeepSeek 免费版 ~5 QPS 限流</td></tr>
+    <tr><td>超时</td><td>120s</td><td>单批翻译</td></tr>
+    <tr><td>重试</td><td>3 次，退避 1s/2s/4s</td><td>网络抖动</td></tr>
+    <tr><td>行数对齐</td><td>多截断 / 少补空行</td><td>靠行位置对齐字幕 index</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <h3>Prompt</h3>
+    <pre>System: You are a professional EN→ZH subtitle translator.
+Output ONLY the Chinese translation for each line, one per line. No explanations.
+
+User: Translate these English subtitles to Chinese (Simplified).
+Keep it concise and natural. Preserve technical terms where appropriate.</pre>
+  </div>
+</section>
+
+<!-- ════════════════ §4 字幕调优 ════════════════ -->
+<section id="s4">
+  <h2><span class="num">04</span>字幕调优</h2>
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">工程参数见 <a href="_ref/生产参数.md">_ref/生产参数.md</a> §3 — 唯一真相源</p>
+
+  <div class="card">
+  <h3>ASS 参数（唯一标准）</h3>
+  <table>
+    <thead><tr><th>参数</th><th>值</th></tr></thead>
+    <tbody>
+    <tr><td>画布</td><td>1920×1080</td></tr>
+    <tr><td>中文</td><td>SimHei 42px（原生粗体，不需 \b1）</td></tr>
+    <tr><td>英文</td><td>Segoe UI 32px Bold（\b1）</td></tr>
+    <tr><td>分隔</td><td>\N 硬换行（中文上，英文下）</td></tr>
+    <tr><td>MarginV</td><td>45</td></tr>
+    <tr><td>Alignment</td><td>2（底部居中）</td></tr>
+    <tr><td>WrapStyle</td><td>2（智能换行）</td></tr>
+    <tr><td>事件模式</td><td><strong>单 Dialogue + \N</strong> — 不可拆为双 Dialogue</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-p"><strong>为什么不能双 Dialogue：</strong>libass 碰撞检测 — 两条相邻 Dialogue 时间重叠时自动隐藏一条。中英文随机消失。\N 单事件是唯一解。</div>
+
+  <h3>中文字数控制</h3>
+  <table>
+    <thead><tr><th>参数</th><th>值</th><th>依据</th></tr></thead>
+    <tbody>
+    <tr><td>上限</td><td>28 字</td><td>~4 字/秒 × 3-5s 停留</td></tr>
+    <tr><td>拆分点</td><td>，。！？；、</td><td>中文标点处拆分</td></tr>
+    <tr><td>硬切兜底</td><td>56 字 (max_chars×2)</td><td>无标点长句强制切割</td></tr>
+    <tr><td>时间分配</td><td>按字数比例</td><td>拆分后按比例分配时间戳</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-y"><strong>函数签名：</strong><code>enforce_max_chars(srt_path, max_chars=28)</code> — 不是 <code>(srt_path, output_path)</code>！</div>
+
+  <h3>渲染</h3>
+  <pre><span class="cmd">ffmpeg</span> -y -i video.mp4 -vf "ass=05.ass" -c:v libx264 -crf 23 -c:a aac -b:a 128k output.mp4</pre>
+  </div>
+</section>
+
+<!-- ════════════════ §5 封面设计 ════════════════ -->
+<section id="s5">
+  <h2><span class="num">05</span>封面设计</h2>
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">工程参数见 <a href="_ref/生产参数.md">_ref/生产参数.md</a> §1 — 唯一真相源。平台规范 + 字体排版研究见 <a href="#s0b">§0B.2 封面设计规范</a>。</p>
+
+  <div class="card">
+  <h3>布局模式选择</h3>
+  <p>根据底图人物位置和画面信息量，选择对应布局：</p>
+  <table>
+    <thead><tr><th>条件</th><th>推荐布局</th><th>理由</th></tr></thead>
+    <tbody>
+    <tr><td>人物半身、偏左或偏右、面部清晰</td><td><strong>布局 A：人物左 + 文字右</strong></td><td><span class="tag tag-go">首选</span> B站访谈类 80% 高播放封面用此</td></tr>
+    <tr><td>底图信息丰富（对谈/舞台）、人物居中</td><td><strong>布局 B：全幅底图 + 文字叠层</strong></td><td>文字区加半透明黑底条</td></tr>
+    <tr><td>单人演讲、正脸居中、画面干净</td><td><strong>布局 C：居中对称</strong></td><td>正式感强，文字在上方不挡脸</td></tr>
+    <tr><td>底图不够大或不适合叠字</td><td><strong>布局 D：上下分割</strong></td><td>上 35% 纯色区放文字，下 65% 图片</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="card">
+  <h3>字体层级</h3>
+  <table>
+    <thead><tr><th>层级</th><th>字体</th><th>字号</th><th>颜色</th><th>字数</th><th>功能</th></tr></thead>
+    <tbody>
+    <tr><td><strong>L1 · 封面大字</strong></td><td>SimHei + 2px 黑填充</td><td>140–180px</td><td>暖黄 #FFC82D</td><td><strong>4–8 字</strong></td><td>钩子，一眼可读</td></tr>
+    <tr><td><strong>L2 · 副标题</strong></td><td>SimHei</td><td>60–80px</td><td>暖白 #FCFAF5</td><td>10–16 字</td><td>补充上下文</td></tr>
+    <tr><td><strong>L3 · 出处行</strong></td><td>SimHei</td><td>24–28px</td><td>灰 #8C8275</td><td>不限</td><td>底部署名</td></tr>
+    <tr><td><strong>装饰线</strong></td><td>—</td><td>120×4px</td><td>暖黄 #FFC82D</td><td>—</td><td>视觉分隔</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-y"><strong>字号原则：</strong>L1 封面大字 = 画布高度的 13–17%。B站缩略图 ~200×120px 下，140px 以下字不可辨认。L2 字号为 L1 的 40-50%，保持层级跳跃明显（不是微差）。</div>
+  </div>
+
+  <div class="card">
+  <h3>视觉层级构建（三层亮度结构）</h3>
+  <table>
+    <thead><tr><th>层</th><th>亮度范围</th><th>元素</th><th>作用</th></tr></thead>
+    <tbody>
+    <tr><td><strong>前景 · 亮层</strong></td><td>RGB 180–255</td><td>主标题文字（暖黄 #FFC82D ≈ RGB 255,200,45）</td><td>视觉焦点，最先被看到</td></tr>
+    <tr><td><strong>中景 · 灰层</strong></td><td>RGB 80–160</td><td>底图人物面部、副标题文字</td><td>提供内容和情感连接</td></tr>
+    <tr><td><strong>背景 · 暗层</strong></td><td>RGB ≤ 60</td><td>底图暗区、半透明黑衬底</td><td>承载亮层，制造对比</td></tr>
+    </tbody>
+  </table>
+  <p>构建方法：① 底图先调亮度至 0.80（让暗区更暗、亮区不过曝）→ ② 加半透明黑底条（rgba 0,0,0,0.5）覆盖文字区 → ③ 暖黄文字置于最上层。三层分离明显时，缩略图下也能一眼看到文字。</p>
+  </div>
+
+  <div class="card">
+  <h3>视觉参数速查</h3>
+  <table>
+    <thead><tr><th>参数</th><th>值</th></tr></thead>
+    <tbody>
+    <tr><td>画布</td><td>1920×1080（16:9），安全区 1280×720 居中</td></tr>
+    <tr><td>底图</td><td>视频截图，主讲人正脸，LANCZOS 缩放</td></tr>
+    <tr><td>底图亮度</td><td><strong>0.80</strong>（PIL ImageEnhance.Brightness，不是不透明度）</td></tr>
+    <tr><td>主字体</td><td>SimHei（C:\Windows\Fonts\simhei.ttf）— Windows PIL 下唯一够粗的中文字体</td></tr>
+    <tr><td>描边</td><td>纯黑 2px 四周 8 方向填充（模拟 Bold→Heavy 加粗效果）</td></tr>
+    <tr><td>主色</td><td>暖黄 <strong style="color:#E6A800;">#FFC82D</strong>（不与 B站 UI 黄冲突，比纯黄有质感）</td></tr>
+    <tr><td>辅色</td><td>暖白 #FCFAF5（比纯白柔和，不刺眼）</td></tr>
+    <tr><td>文字衬底</td><td>rgba(0,0,0,0.5) 全宽横条（布局 B/C 必备，布局 A 按需）</td></tr>
+    <tr><td>JPG 质量</td><td>92（超 4.8MB 自动降至 75）</td></tr>
+    <tr><td>底部信息</td><td>灰色小字 "YouTube · 来源 | 猫波译站"</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>截图选帧（v2 改进）</h3>
+  <div class="hl hl-y"><strong>改进前（盲目抽帧）：</strong>均匀间隔抽 5 帧，人眼挑一张。Kevin Weil 期用的这个方式，挑到的帧不理想。<br>
+  <strong>改进后（文案定位 + 视觉确认）：</strong>① 从 transcript 中找最精彩的 3 句开场金句 → ② 定位时间戳 → ③ 提取对应帧 → ④ 视觉模型评分确认（清晰度 + 表情 + 构图 + 光照）→ ⑤ 选最高分帧。</div>
+  <pre><span class="cmd"># 步骤 1：从 transcript 定位金句时间戳</span>
+<span class="cmd"># 步骤 2：提取候选帧（3 个时间点）</span>
+<span class="cmd">ffmpeg</span> -i video.mp4 -ss <span class="arg">&lt;timestamp1&gt;</span> -vframes 1 frames/candidate_1.jpg
+<span class="cmd">ffmpeg</span> -i video.mp4 -ss <span class="arg">&lt;timestamp2&gt;</span> -vframes 1 frames/candidate_2.jpg
+<span class="cmd">ffmpeg</span> -i video.mp4 -ss <span class="arg">&lt;timestamp3&gt;</span> -vframes 1 frames/candidate_3.jpg
+<span class="cmd"># 步骤 3：视觉模型评分 → 选最高分</span></pre>
+
+  <h3>调用</h3>
+  <pre><span class="cmd">python</span> _tools/gen_cover.py frames/best.jpg output/cover.jpg \
+  --title <span class="arg">"核心金句（4-8字）"</span> --sub <span class="arg">"补充钩子（10-16字）"</span> --source <span class="arg">"YouTube · 来源名"</span></pre>
+
+  <h3>设计自检清单</h3>
+  <table>
+    <thead><tr><th>#</th><th>检查项</th><th>标准</th></tr></thead>
+    <tbody>
+    <tr><td>1</td><td>缩略图测试</td><td>缩到 200×120px，文字仍可辨认？</td></tr>
+    <tr><td>2</td><td>白底跳出</td><td>放在白色背景页面上，封面是否醒目？</td></tr>
+    <tr><td>3</td><td>安全区</td><td>核心元素是否在中央 1280×720 内？</td></tr>
+    <tr><td>4</td><td>对比度</td><td>文字与背景对比度 ≥ 4.5:1？</td></tr>
+    <tr><td>5</td><td>视觉焦点</td><td>3 米外看，第一眼看到的是主标题吗？</td></tr>
+    <tr><td>6</td><td>文件大小</td><td>≤ 4.8MB JPG？</td></tr>
+    <tr><td>7</td><td>品牌一致性</td><td>暖黄 + SimHei + 底部出处行风格统一？</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════ §6 标题 & 元数据 ════════════════ -->
+<section id="s6">
+  <h2><span class="num">06</span>标题 & 元数据</h2>
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">工程参数见 <a href="_ref/生产参数.md">_ref/生产参数.md</a> §2 — 唯一真相源。平台规范见 <a href="#s0b">§0B.3 标题规范</a>。</p>
+
+  <div class="hl hl-y" style="text-align:center;font-size:16px;padding:16px;">
+    <strong>&lt;嘉宾身份&gt; &lt;嘉宾名&gt;：&lt;核心论断&gt;</strong>
+  </div>
+
+  <table>
+    <thead><tr><th>部分</th><th>字数</th><th>示例</th></tr></thead>
+    <tbody>
+    <tr><td>嘉宾身份</td><td>4–10 字</td><td>"OpenAI CPO" / "Claude Code 之父"</td></tr>
+    <tr><td>嘉宾名</td><td>英文原名</td><td>"Kevin Weil" / "Boris Cherny"</td></tr>
+    <tr><td>核心论断</td><td>15–40 字</td><td>"你现在用的 AI 是你余生最差的"</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <h3>核心论断提取方法论</h3>
+    <p>从 transcript 中找满足 ≥2 个以下条件的句子：</p>
+    <table>
+      <thead><tr><th>维度</th><th>定义</th><th>检测方法</th></tr></thead>
+      <tbody>
+      <tr><td><strong>反直觉</strong></td><td>挑战常识、颠覆认知</td><td>"你可能会认为…但…"、"实际上…"</td></tr>
+      <tr><td><strong>可量化</strong></td><td>有具体数字/时间</td><td>数字、百分比、时间跨度</td></tr>
+      <tr><td><strong>独特性</strong></td><td>只有这个人会说</td><td>第一人称经历、公司内幕、个人判断</td></tr>
+      <tr><td><strong>情感张力</strong></td><td>令人惊讶/兴奋/担忧</td><td>极端形容词、对比、比喻</td></tr>
+      <tr><td><strong>行动导向</strong></td><td>暗示方法论/可操作</td><td>"你应该…"、"核心是…"、"关键是…"</td></tr>
+      </tbody>
+    </table>
+    <p>排除：通用描述、"AI 的未来"类空泛概念、嘉宾没说过的话、过于技术化的术语。</p>
+  </div>
+
+  <div class="card">
+    <h3>标题与封面的协同</h3>
+    <p style="color:var(--muted); font-size:13px;">封面和标题是 B站信息流中同时展示的两个元素，必须协同设计，不是各自独立。</p>
+    <table>
+      <thead><tr><th>策略</th><th>封面文字</th><th>标题后半段</th><th>效果</th></tr></thead>
+      <tbody>
+      <tr>
+        <td><strong>封面抛钩 + 标题展开</strong></td>
+        <td>「AI 每两个月就颠覆一次」</td>
+        <td>「OpenAI CPO Kevin Weil：你现在用的 AI 是你余生最差的」</td>
+        <td><span class="tag tag-go">最佳</span> 封面钩子先抓眼球，标题给完整上下文</td>
+      </tr>
+      <tr>
+        <td><strong>封面概括 + 标题重复</strong></td>
+        <td>「Kevin Weil 访谈精华」</td>
+        <td>「Kevin Weil 深度访谈」</td>
+        <td><span class="tag tag-no">浪费</span> 两个展示位说同一件事</td>
+      </tr>
+      <tr>
+        <td><strong>封面空洞 + 标题全押</strong></td>
+        <td>仅头像/Logo</td>
+        <td>超长标题塞全部信息</td>
+        <td><span class="tag tag-warn">低效</span> 封面在信息流中先被看到，封面没钩子=流失</td>
+      </tr>
+    </tbody>
+    </table>
+    <div class="hl hl-y"><strong>原则：封面和标题各承担 50% 的钩子功能。</strong>封面用 4-8 字金句制造好奇心，标题用完整句式提供权威背书和上下文。两者互补不重复。</div>
+  </div>
+
+  <h3>不可用模式</h3>
+  <table>
+    <thead><tr><th>模式</th><th>原因</th><th>模式</th><th>原因</th></tr></thead>
+    <tbody>
+    <tr><td>《》书名号</td><td>像新闻联播</td><td>【】方括号</td><td>低质搬运号特征</td></tr>
+    <tr><td>#话题标签</td><td>放简介不放标题</td><td>「」日式引号</td><td>科技区不合群</td></tr>
+    <tr><td>emoji</td><td>科技区保持严肃</td><td>??? / !!! 堆叠</td><td>低质号特征</td></tr>
+    <tr><td>「中文字幕」「双语」标签</td><td>默认品质不挂标签</td><td>「熟肉」「烤肉」</td><td>字幕组圈子用语，非目标受众看不懂</td></tr>
+    </tbody>
+  </table>
+
+  <h3>标签 & 简介</h3>
+  <div class="grid-2">
+    <div>
+      <h4>标签</h4>
+      <ul>
+        <li>≤10 个，每个 ≤12 字</li>
+        <li>优先级：人物名 > 技术关键词 > 领域 > 来源</li>
+        <li>英文逗号分隔粘贴</li>
+        <li>首 3 个标签权重最高，放最重要的</li>
+      </ul>
+    </div>
+    <div>
+      <h4>简介</h4>
+      <ul>
+        <li>≤2000 字</li>
+        <li>结构：核心论点（3-5 条）+ 嘉宾信息 + 出处 + hashtag</li>
+        <li>分区：知识 > 科技 > 人工智能</li>
+        <li>合集：猫波译站</li>
+        <li>转载出处：原作者、原平台、原链接</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ §7 B站发布 ════════════════ -->
+<section id="s7">
+  <h2><span class="num">07</span>B站发布</h2>
+  <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">完整合规 Checklist 见 <a href="#s0b">§0B.4 投稿合规 Checklist</a>。</p>
+
+  <div class="card">
+    <h3>发布操作步骤</h3>
+    <ol>
+      <li>视频文件命名 = 标题（B站上传时自动识别填入标题框）</li>
+      <li>投稿类型选「<strong>转载</strong>」— 不可选「自制」</li>
+      <li>创作声明勾「<strong>内容为转载</strong>」+「<strong>含有 AI 生成内容</strong>」（2026 新规强制）</li>
+      <li>封面 = cover.jpg（1920×1080，≤ 4.8MB，JPG）</li>
+      <li>合集 = 猫波译站</li>
+      <li>分区 = 知识 > 科技 > 人工智能</li>
+      <li>转载出处：原作者名、原平台（YouTube）、原视频链接</li>
+      <li>标签 ≥ 3 个，英文逗号分隔贴入</li>
+    </ol>
+  </div>
+
+  <div class="hl hl-p"><strong>昵称检查：</strong>WebFetch <code>search.bilibili.com/upuser?keyword=xxx</code>，"用户0" = 该昵称可用（无可识别 UP主）。不可直接调 B站 API（返回反爬 HTML）。</div>
+
+  <h3>发布前自检</h3>
+  <table>
+    <thead><tr><th>#</th><th>检查项</th><th>确认</th></tr></thead>
+    <tbody>
+    <tr><td>1</td><td>B站搜索确认无相同视频（撞车检查）</td><td>□</td></tr>
+    <tr><td>2</td><td>视频编码 H.264+AAC，≤ 1080p</td><td>□</td></tr>
+    <tr><td>3</td><td>封面 1920×1080 JPG ≤ 4.8MB</td><td>□</td></tr>
+    <tr><td>4</td><td>标题 ≤ 80 字，中文为主，无禁止符号</td><td>□</td></tr>
+    <tr><td>5</td><td>投稿类型 = 转载，创作声明已勾</td><td>□</td></tr>
+    <tr><td>6</td><td>转载出处已填写（作者 + 平台 + 链接）</td><td>□</td></tr>
+    <tr><td>7</td><td>标签 3–10 个，英文逗号分隔</td><td>□</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════ §8 选题库管理 ════════════════ -->
+<section id="s8">
+  <h2><span class="num">08</span>选题库管理</h2>
+
+  <p>选题库结构、候选模板、状态流转、发布后/废弃操作 — 全部见 <a href="#s1">§1.6 选题库 & 排期决策</a>。详细操作规范见 <code>选题库/CLAUDE.md</code>。</p>
+</section>
+
+<!-- ════════════════ §9 技能迭代 ════════════════ -->
+<section id="s9">
+  <h2><span class="num">09</span>技能迭代</h2>
+
+  <div class="card">
+    <p><strong>技能入口：</strong><code>~/.claude/skills/猫波信号站/SKILL.md</code></p>
+    <p>SKILL.md「前置读取」表列出生产前必读文件。新增知识文件时同步更新该表 + 本文档。</p>
+
+    <h4>迭代触发 → 更新路径</h4>
+    <table>
+      <thead><tr><th>变更</th><th>更新文件</th></tr></thead>
+      <tbody>
+      <tr><td class="nowrap">封面/标题/字幕参数变</td><td><code>_ref/生产参数.md</code> → 本文档 §§4–6 → <code>gen_cover.py</code> / pipeline</td></tr>
+      <tr><td class="nowrap">新踩坑</td><td><code>_ref/pitfalls.md</code> → 本文档 §11</td></tr>
+      <tr><td class="nowrap">选题标准变</td><td><code>选题方法论.md</code> → 本文档 §1</td></tr>
+      <tr><td class="nowrap">pipeline 功能扩展</td><td><code>CLAUDE.md</code> → 本文档 §2–4</td></tr>
+      <tr><td class="nowrap">目录结构变</td><td><code>CLAUDE.md</code> + <code>SKILL.md</code> → 本文档 §10</td></tr>
+      <tr><td class="nowrap">产出规范变</td><td><code>D:\workspace\_output\猫波信号站\CLAUDE.md</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════ §10 目录结构 ════════════════ -->
+<section id="s10">
+  <h2><span class="num">10</span>目录结构</h2>
+
+  <div class="grid-2">
+    <div>
+      <h3>项目目录</h3>
+      <div class="tree">D:\workspace\lab\2026-06-16-<span class="hl">猫波信号站</span>\
+├── <span class="hl">CLAUDE.md</span>              <span class="dim"># 硬约束 + 管线步骤</span>
+├── <span class="hl">选题方法论.md</span>            <span class="dim"># 评分公式 + 排除</span>
+├── <span class="hl">生产方法论.html</span>          <span class="dim"># 本文档</span>
+├── HANDOFF.md             <span class="dim"># 会话交接</span>
+├── <span class="hl">pipeline.py</span>            <span class="dim"># 核心 CLI</span>
+├── _tools/                <span class="dim"># gen_cover 等</span>
+├── _ref/                  <span class="dim"># 生产参数 + 踩坑日志</span>
+└── _runtime/              <span class="dim"># 按视频分子目录</span></div>
+    </div>
+    <div>
+      <h3>产出目录</h3>
+      <div class="tree">D:\workspace\_output\<span class="hl">猫波信号站</span>\
+├── CLAUDE.md              <span class="dim"># 产出宪法</span>
+├── <span class="hl">选题库/</span>               <span class="dim"># 候选池.csv + 内容源 + 已发布 + 已废弃</span>
+├── 频道资产/               <span class="dim"># 头像/签名/UID</span>
+└── 视频/
+    └── YYYYMMDD_标题/
+        ├── 成片/&lt;标题&gt;.mp4
+        ├── cover.jpg
+        ├── 发布面板.html
+        └── _runtime/       <span class="dim"># 过程归档</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ §11 已知坑 ════════════════ -->
+<section id="s11">
+  <h2><span class="num">11</span>附录：已知坑（速查）</h2>
+
+  <table>
+    <thead><tr><th>#</th><th>坑</th><th>修复</th></tr></thead>
+    <tbody>
+    <tr><td class="nowrap">1</td><td>全角冒号 U+FF1A → shell 编码错误</td><td>Python Path 对象，或替换为 <code>-</code></td></tr>
+    <tr><td class="nowrap">2</td><td>yt-dlp 默认 webm/vp9 → B站不兼容</td><td><code>-f "bestvideo[vcodec^=avc1]..."</code></td></tr>
+    <tr><td class="nowrap">3</td><td>"透明度 80%" = 透过程度 80%</td><td>亮度 0.80（不是 0.20）</td></tr>
+    <tr><td class="nowrap">4</td><td>ASS 双 Dialogue → libass 碰撞检测吞字幕</td><td>用 \N 单事件</td></tr>
+    <tr><td class="nowrap">5</td><td>Windows PIL 只有 SimHei 够粗</td><td>SimHei + 2px 四周填充，不用 NotoSansSC</td></tr>
+    <tr><td class="nowrap">6</td><td>DeepSeek 翻译行数不对齐</td><td>截断多余 / 补齐空行 + 3 次重试</td></tr>
+    <tr><td class="nowrap">7</td><td>无标点长句永不拆分</td><td>max_chars×2 硬切兜底</td></tr>
+    <tr><td class="nowrap">8</td><td>B站 API 直接调用 → 反爬 HTML</td><td>走 WebFetch 浏览器渲染</td></tr>
+    <tr><td class="nowrap">9</td><td>carryover 移了时间戳 → 字幕闪烁</td><td>只裁文本，时间戳锚定句边界</td></tr>
+    <tr><td class="nowrap">10</td><td>封面截图盲抽 → 画面不够精彩</td><td>transcript 金句定位时间戳 + 视觉模型确认（<a href="#s5">§5 截图选帧 v2</a>）</td></tr>
+    <tr><td class="nowrap">11</td><td>赞助商口播段翻译跳过 → 50+ 条 [未翻译]</td><td>增加赞助商检测 + 自动跳过段落 + 非赞助段保证翻译覆盖率</td></tr>
+    <tr><td class="nowrap">12</td><td>B站封面审美不符 → 点击率低</td><td><a href="#s0b">§0B.2</a>：深色底+高对比暖色、人物面部 30-50%、中文大字</td></tr>
+    <tr><td class="nowrap">13</td><td>转载投自制 → 被举报/处罚</td><td>投稿类型必选「转载」，不可心存侥幸</td></tr>
+    <tr><td class="nowrap">14</td><td>封面超 5MB → B站强压缩文字发虚</td><td>JPG 质量控制在 4.8MB 以下</td></tr>
+    </tbody>
+  </table>
+
+  <div class="hl hl-p">完整踩坑记录见 <code>_ref/pitfalls.md</code> — 每条含 现象 → 根因 → 修复 → 预防 四段。</div>
+</section>
+
+<div class="footer">
+  猫波信号站 · 生产方法论 · 持续迭代中 · 最后更新 2026-06-20
+</div>
+
+</main>
+
+<!-- Nav highlight -->
+<script>
+(function(){
+  const nav = document.getElementById('topnav');
+  const links = nav.querySelectorAll('a[href^="#"]');
+  const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  function update(){
+    let current = sections[0];
+    for (const s of sections) {
+      if (s.getBoundingClientRect().top <= 120) current = s;
+    }
+    for (const a of links) {
+      a.classList.toggle('on', a.getAttribute('href') === '#' + current.id);
+    }
+  }
+  window.addEventListener('scroll', update, {passive:true});
+  update();
+})();
+</script>
+
+</body>
+</html>
