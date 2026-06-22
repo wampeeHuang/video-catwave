@@ -7,7 +7,7 @@
 设计参数（可命令行覆盖）:
   --brightness 0.80   底图亮度（黑色透明度）
   --color #FFC82D     主色（暖黄）
-  --font SimHei        中文字体名
+  --font msyhbd.ttc    中文字体名（覆盖粗体） --font-regular 覆盖常规字重
 """
 
 import argparse
@@ -24,46 +24,41 @@ except ImportError:
 CANVAS = (1920, 1080)
 YELLOW = (255, 200, 45)       # #FFC82D
 WHITE = (252, 250, 245)       # #FCFAF5
-DARK_OVERLAY = (0, 0, 0)      # 填充描边用纯黑
-FONT_BOLD = "simhei.ttf"      # Windows Fonts 目录下自动查找
-FONT_THIN = "seguiemj.ttf"    # Segoe UI Emoji（底部信息条）
+FONT_BOLD = "msyhbd.ttc"      # 微软雅黑 Bold — 粗体标题
+FONT_REGULAR = "msyh.ttc"     # 微软雅黑 Regular — 副标题、底部信息条
+FONT_LIGHT = "msyhl.ttc"      # 微软雅黑 Light — 更轻字重
+FONT_FALLBACK = "simhei.ttf"  # 黑体最后回退
 BRIGHTNESS = 0.80
-PERIMETER_FILL = 2            # 四周填充 px（模拟超粗）
 
 
-def _find_font(name: str) -> str:
-    candidates = [
-        Path(f"C:/Windows/Fonts/{name}"),
-        Path(f"C:/Windows/Fonts/{name.title()}"),
-    ]
-    for p in candidates:
-        if p.exists():
-            return str(p)
-    # Fallback: search Fonts dir
+def _find_font(name: str) -> str | None:
     fonts_dir = Path("C:/Windows/Fonts")
-    for f in fonts_dir.glob("*.ttf"):
-        if name.lower() in f.name.lower():
-            return str(f)
-    return name
+    direct = fonts_dir / name
+    if direct.exists():
+        return str(direct)
+    stem = name.rsplit(".", 1)[0].lower()
+    for pat in [f"{stem}.*", f"{stem.title()}.*", f"{stem.upper()}.*"]:
+        hits = list(fonts_dir.glob(pat))
+        if hits:
+            return str(hits[0])
+    return None
 
 
-def _draw_bold_text(
-    draw: ImageDraw.ImageDraw,
-    xy: tuple[int, int],
-    text: str,
-    font: ImageFont.FreeTypeFont,
-    fill: tuple[int, int, int],
-    anchor: str = "ma",
-):
-    """Draw text with perimeter fill for simulated extra bold weight."""
-    x, y = xy
-    for dx, dy in [
-        (-2, -2), (-2, 0), (-2, 2),
-        (0, -2), (0, 2),
-        (2, -2), (2, 0), (2, 2),
-    ]:
-        draw.text((x + dx, y + dy), text, font=font, fill=DARK_OVERLAY, anchor=anchor)
-    draw.text(xy, text, font=font, fill=fill, anchor=anchor)
+def _load_font(size: int, weight: str = "bold") -> ImageFont.FreeTypeFont:
+    """Load Chinese-capable font by weight: bold > regular > light."""
+    chains = {
+        "bold":    [FONT_BOLD, FONT_REGULAR, FONT_FALLBACK],
+        "regular": [FONT_REGULAR, FONT_LIGHT, FONT_FALLBACK, FONT_BOLD],
+        "light":   [FONT_LIGHT, FONT_REGULAR, FONT_FALLBACK],
+    }
+    for name in chains.get(weight, chains["bold"]):
+        path = _find_font(name)
+        if path:
+            try:
+                return ImageFont.truetype(path, size)
+            except Exception:
+                continue
+    return ImageFont.load_default()
 
 
 def generate_cover(
@@ -74,122 +69,139 @@ def generate_cover(
     source_line: str = "",
     brightness: float = BRIGHTNESS,
     accent_color: tuple[int, int, int] = YELLOW,
+    layout: str = "C",
+    person_side: str = "left",
 ):
     img = Image.open(frame_path).convert("RGB")
     img = img.resize(CANVAS, Image.LANCZOS)
 
-    # Apply brightness (simulates dark overlay transparency)
-    enhancer = ImageEnhance.Brightness(img)
-    img = enhancer.enhance(brightness)
-
     draw = ImageDraw.Draw(img)
 
-    font_bold_path = _find_font(FONT_BOLD)
-    font_thin_path = _find_font(FONT_THIN)
-
-    # Build layout from bottom up
+    # Text block: subtitle → accent bar → title (source_line is bottom bar only)
     lines = []
     if subtitle:
-        lines.append(("sub", subtitle, 62, accent_color))
+        lines.append(("sub", subtitle, 62, accent_color, "bold"))
     if title:
-        lines.append(("title", title, 165, accent_color if not subtitle else WHITE))
-    if source_line:
-        lines.append(("source", source_line, 28, WHITE))
+        lines.append(("title", title, 165, accent_color if not subtitle else WHITE, "bold"))
 
-    # Calculate total height
-    total_h = 0
-    spacings = []
-    for i, (kind, text, size, color) in enumerate(lines):
-        try:
-            f = ImageFont.truetype(font_bold_path, size)
-        except Exception:
-            f = ImageFont.load_default()
-        bbox = draw.textbbox((0, 0), text, font=f)
-        h = bbox[3] - bbox[1]
-        total_h += h
-        if i < len(lines) - 1:
-            gap = 40 if kind == "title" else 30
-            total_h += gap
-            spacings.append(gap)
-        spacings.append(h)
-
-    # Accent line (between title and subtitle)
-    if title and subtitle:
-        total_h += 12  # line height
-        total_h += 20  # gap
-
-    # Bottom bar
-    bar_h = 60
-    total_h += bar_h + 20
-
-    # Start Y (centered)
-    y_center = CANVAS[1] // 2
-    y = y_center - total_h // 2 + 60  # slight upward bias
-
-    font_bold_large = None
-    try:
-        font_bold_large = ImageFont.truetype(font_bold_path, 165)
-    except Exception:
-        font_bold_large = ImageFont.load_default()
-
-    # Draw accent line if both title and subtitle present
-    if title and subtitle:
-        line_y = y + 80
-        line_w = 120
-        draw.rectangle(
-            [CANVAS[0] // 2 - line_w // 2, line_y, CANVAS[0] // 2 + line_w // 2, line_y + 4],
-            fill=accent_color,
-        )
-        y = line_y + 30
-
-    # Draw text lines
-    for kind, text, size, color in lines:
-        try:
-            font = ImageFont.truetype(font_bold_path, size)
-        except Exception:
-            font = ImageFont.load_default()
-
+    # Calculate text block height
+    text_block_h = 0
+    for i, (kind, text, size, color, weight) in enumerate(lines):
+        font = _load_font(size, weight)
         bbox = draw.textbbox((0, 0), text, font=font)
-        text_h = bbox[3] - bbox[1]
-        x = CANVAS[0] // 2
-
-        if kind in ("title", "sub"):
-            _draw_bold_text(draw, (x, y + text_h // 2), text, font, color, anchor="mm")
-        else:
-            draw.text((x, y + text_h // 2), text, font=font, fill=color, anchor="mm")
-
-        y += text_h + (40 if kind == "title" else 30)
-
-    # Bottom info bar
-    bar_y = CANVAS[1] - bar_h - 30
-    try:
-        font_thin = ImageFont.truetype(font_thin_path, 22)
-    except Exception:
-        font_thin = ImageFont.load_default()
-
-    info_text = "YouTube · Sequoia Capital  |  猫波译站"
-    bbox = draw.textbbox((0, 0), info_text, font=font_thin)
-    draw.text(
-        (CANVAS[0] // 2, bar_y),
-        info_text,
-        font=font_thin,
-        fill=(200, 200, 200),
-        anchor="ma",
-    )
+        text_block_h += bbox[3] - bbox[1]
+        if i < len(lines) - 1:
+            text_block_h += 40 if kind == "title" else 30
+    # ── Layout dispatch ──────────────────────────────────────────────────
+    if layout == "A":
+        _draw_layout_a(img, draw, lines, text_block_h, accent_color, person_side)
+    elif layout == "B":
+        _draw_layout_b(img, draw, lines, text_block_h, accent_color, brightness)
+    elif layout == "D":
+        _draw_layout_d(img, draw, lines, text_block_h, accent_color)
+    else:  # C (default): centered symmetric
+        _draw_layout_c(img, draw, lines, text_block_h, accent_color, brightness)
 
     # Save
     output_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(str(output_path), "JPEG", quality=92, optimize=True)
 
+    # Validate lengths
+    if len(title) > 8:
+        print(f"WARNING: Title is {len(title)} chars — methodology recommends 4-8 chars for cover大字")
+    if subtitle and len(subtitle) > 16:
+        print(f"WARNING: Subtitle is {len(subtitle)} chars — methodology recommends 10-16 chars for L2")
+
     # Check file size
     size_mb = output_path.stat().st_size / (1024 * 1024)
     print(f"Cover saved: {output_path} ({size_mb:.1f} MB)")
 
-    if size_mb > 5:
-        # Re-encode with lower quality
+    if size_mb > 4.8:
         img.save(str(output_path), "JPEG", quality=75, optimize=True)
         size_mb = output_path.stat().st_size / (1024 * 1024)
-        print(f"  Re-compressed to {size_mb:.1f} MB to fit B站 5MB limit")
+        print(f"  Re-compressed to {size_mb:.1f} MB to fit B站 4.8MB limit")
+
+
+# ── Layout implementations ─────────────────────────────────────────────────
+
+def _draw_layout_a(img, draw, lines, text_block_h, accent_color, person_side):
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(BRIGHTNESS)
+
+    if person_side == "left":
+        text_cx = int(CANVAS[0] * 0.72)
+        accent_x = int(CANVAS[0] * 0.72)
+    else:
+        text_cx = int(CANVAS[0] * 0.28)
+        accent_x = int(CANVAS[0] * 0.28)
+
+    y = (CANVAS[1] - text_block_h) // 2
+
+    for kind, text, size, color, weight in lines:
+        font = _load_font(size, weight)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_h = bbox[3] - bbox[1]
+        draw.text((text_cx, y + text_h // 2), text, font=font, fill=color, anchor="mm")
+        y += text_h + (40 if kind == "title" else 30)
+
+
+def _draw_layout_b(img, draw, lines, text_block_h, accent_color, brightness):
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(brightness)
+
+    pad_x, pad_y = 60, 40
+    box_w = CANVAS[0] - pad_x * 2
+    box_h = text_block_h + pad_y * 2
+    box_x, box_y = pad_x, (CANVAS[1] - box_h) // 2 - 30
+
+    overlay = Image.new("RGBA", (box_w, box_h), (0, 0, 0, 128))
+    img.paste(overlay, (box_x, box_y), overlay)
+
+    draw_on = ImageDraw.Draw(img)
+    y = box_y + pad_y + 10
+
+    for kind, text, size, color, weight in lines:
+        font = _load_font(size, weight)
+        bbox = draw_on.textbbox((0, 0), text, font=font)
+        text_h = bbox[3] - bbox[1]
+        draw_on.text((CANVAS[0] // 2, y + text_h // 2), text, font=font, fill=color, anchor="mm")
+        y += text_h + (40 if kind == "title" else 30)
+
+
+def _draw_layout_c(img, draw, lines, text_block_h, accent_color, brightness):
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(brightness)
+
+    y = (CANVAS[1] - text_block_h) // 2 - 40
+
+    for kind, text, size, color, weight in lines:
+        font = _load_font(size, weight)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_h = bbox[3] - bbox[1]
+        draw.text((CANVAS[0] // 2, y + text_h // 2), text, font=font, fill=color, anchor="mm")
+        y += text_h + (40 if kind == "title" else 30)
+
+
+def _draw_layout_d(img, draw, lines, text_block_h, accent_color):
+    bar_h = int(CANVAS[1] * 0.35)
+    canvas = Image.new("RGB", CANVAS, (20, 20, 20))
+
+    img_cropped = img.resize((CANVAS[0], CANVAS[1] - bar_h), Image.LANCZOS)
+    canvas.paste(img_cropped, (0, bar_h))
+
+    draw_on = ImageDraw.Draw(canvas)
+
+    y = (bar_h - text_block_h) // 2
+    text_cx = CANVAS[0] // 2
+
+    for kind, text, size, color, weight in lines:
+        font = _load_font(size, weight)
+        bbox = draw_on.textbbox((0, 0), text, font=font)
+        text_h = bbox[3] - bbox[1]
+        draw_on.text((text_cx, y + text_h // 2), text, font=font, fill=color, anchor="mm")
+        y += text_h + (40 if kind == "title" else 30)
+
+    img.paste(canvas)
 
 
 def main():
@@ -201,6 +213,10 @@ def main():
     parser.add_argument("--source", default="", help="Source attribution line")
     parser.add_argument("--brightness", type=float, default=BRIGHTNESS)
     parser.add_argument("--color", default="#FFC82D", help="Accent color hex")
+    parser.add_argument("--layout", default="C", choices=["A", "B", "C", "D"],
+                        help="Layout: A=person+text split, B=overlay box, C=centered, D=top/bottom split")
+    parser.add_argument("--person-side", default="left", choices=["left", "right"],
+                        help="Person position for layout A (default: left)")
     args = parser.parse_args()
 
     color = tuple(int(args.color.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
@@ -213,6 +229,8 @@ def main():
         source_line=args.source,
         brightness=args.brightness,
         accent_color=color,
+        layout=args.layout,
+        person_side=args.person_side,
     )
 
 

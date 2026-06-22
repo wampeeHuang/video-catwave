@@ -245,6 +245,8 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <a href="#s3">管线</a>
   <a href="#s4">发布</a>
   <a href="#s5">附录</a>
+  <span class="sep"></span>
+  <a href="#s5a">改期</a>
 </nav>
 
 <div class="hero" id="hero">
@@ -287,22 +289,21 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 0.3 管线全流程（需求层级） -->
   <div class="card">
   <h3>0.3 管线全流程（需求层级）</h3>
-  <p>管线是<strong>满足任务书的手段</strong>——任务书回答"要什么"，管线回答"怎么做"。完整实现见 <a href="#s3">§03</a>。</p>
+  <p>管线是<strong>满足任务书的手段</strong>——任务书回答"要什么"，管线回答"怎么做"。分两段：<strong style="color:#10B981;">机械段</strong>（②-⑦ pipeline.py 一键跑完）+ <strong style="color:#8B5CF6;">AI 段</strong>（⑧-⑬ 每步需 Claude 判断）。完整实现见 <a href="#s3">§03</a>。</p>
   <div class="pipe">
     <span>① 选题</span><span class="arr">→</span>
-    <span>② 下载</span><span class="arr">→</span>
-    <span>③ 断句</span><span class="arr">→</span>
-    <span>④ 翻译</span><span class="arr">→</span>
-    <span>⑤ 判定</span><span class="arr">→</span>
-    <span>⑥ ASS</span><span class="arr">→</span>
-    <span>⑦ 渲染</span><span class="arr">→</span>
-    <span>⑧ 金句提取</span><span class="arr">→</span>
-    <span>⑨ 封面</span><span class="arr">→</span>
-    <span>⑩ 标题</span><span class="arr">→</span>
-    <span>⑪ 元数据</span><span class="arr">→</span>
-    <span>⑫ 专栏</span><span class="arr">→</span>
-    <span>⑬ 发布</span>
-  </div>
+    <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">③ 断句</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">④ 翻译</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑤ 判定</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑥ ASS</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑦ 渲染</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑧ 金句提取</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑨ 封面</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑩ 标题</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑪ 元数据</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 专栏</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 发布</span>
   <p style="font-size:13px; color:var(--muted);">关键关口：<strong>④ 翻译</strong>是素材质量判定点——翻译完成后才能判断内容价值，决定继续或排除（见 <a href="#s1">§01</a> 影视飓风差异）。<strong>⑤ 判定</strong>是 Go/No-Go 决策点。<strong>⑧ 金句提取</strong>决定封面和标题的钩子质量。</p>
   </div>
 
@@ -312,7 +313,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <table>
     <thead><tr><th>#</th><th>观众期待</th><th>我们的对应</th></tr></thead>
     <tbody>
-    <tr><td>1</td><td>翻译准确、自然，不是机翻味</td><td>AI 精翻 + 人工抽检，赞助商口播等低价值段落排除</td></tr>
+    <tr><td>1</td><td>翻译准确、自然，不是机翻味</td><td>AI 精翻 + 人工抽检，赞助商口播等低价值段落检测后直接剪切（D-02），不走翻译</td></tr>
     <tr><td>2</td><td>字幕不遮挡、不闪烁、中英同步</td><td>中英双语同屏同步显示，阅读节奏舒适</td></tr>
     <tr><td>3</td><td>封面一眼看出嘉宾和核心观点</td><td>嘉宾正脸 + 核心金句，AI 多方案择优，信息流中可辨识</td></tr>
     <tr><td>4</td><td>标题不标题党，忠实传达内容</td><td>嘉宾身份+核心论断格式，禁用【】/emoji</td></tr>
@@ -581,7 +582,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <thead><tr><th>维度</th><th>做了什么</th><th>暴露的问题</th><th>改进方向</th></tr></thead>
     <tbody>
     <tr><td><strong>选题</strong></td><td>Lenny's Podcast · Kevin Weil，五维评分 29/33，B站零中字</td><td>—</td><td>评分公式验证有效</td></tr>
-    <tr><td><strong>翻译</strong></td><td>DeepSeek Chat，245 条翻译</td><td><span class="tag tag-no">50+ 条未翻译</span> — 赞助商口播 + 语速过快段落</td><td>赞助商检测 + 自动跳过 + 非赞助段保证覆盖率</td></tr>
+    <tr><td><strong>翻译</strong></td><td>DeepSeek Chat，245 条翻译</td><td><span class="tag tag-no">167 条未翻译 (68%)</span> — 赞助商口播 + 语速过快段落，DeepSeek 遇 ASR 质量差的英文直接跳过</td><td>赞助商检测 + 自动跳过 + 非赞助段保证覆盖率</td></tr>
     <tr><td><strong>封面</strong></td><td>SimHei + 暖黄 #FFC82D，布局A（人物左+文字右）</td><td><span class="tag tag-warn">截图盲抽</span> — 均匀抽 5 帧人眼挑，挑到的帧不理想</td><td>transcript 金句定位时间戳 + 视觉模型评分确认</td></tr>
     <tr><td><strong>标题</strong></td><td>"OpenAI CPO Kevin Weil：你现在用的AI是你余生最差的——AI每两个月就颠覆一次"</td><td>—</td><td>壳理论验证有效。标题 = 壳，内容 = 核</td></tr>
     <tr><td><strong>字幕</strong></td><td>ASS 单事件 \N 双语，SimHei 42px + Segoe UI 32px</td><td>无全局偏移修正</td><td>增加整体同步校准</td></tr>
@@ -607,12 +608,12 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <table>
     <thead><tr><th>层级</th><th>字体</th><th>字号</th><th>颜色</th><th>字数</th><th>功能</th></tr></thead>
     <tbody>
-    <tr><td><strong>L1 · 封面大字</strong></td><td>SimHei + 2px 黑填充</td><td>140–180px</td><td>暖黄 #FFC82D</td><td><strong>4–8 字</strong></td><td>钩子，一眼可读</td></tr>
-    <tr><td><strong>L2 · 副标题</strong></td><td>SimHei</td><td>60–80px</td><td>暖白 #FCFAF5</td><td>10–16 字</td><td>补充上下文</td></tr>
-    <tr><td><strong>L3 · 出处行</strong></td><td>SimHei</td><td>24–28px</td><td>灰 #8C8275</td><td>不限</td><td>底部署名</td></tr>
+    <tr><td><strong>L1 · 封面大字</strong></td><td>msyhbd.ttc（微软雅黑 Bold）纯色</td><td>140–180px</td><td>暖黄 #FFC82D</td><td><strong>4–8 字</strong></td><td>钩子，一眼可读</td></tr>
+    <tr><td><strong>L2 · 副标题</strong></td><td>msyhbd.ttc / simhei.ttf</td><td>60–80px</td><td>暖白 #FCFAF5</td><td>10–16 字</td><td>补充上下文</td></tr>
+    <tr><td><strong>L3 · 出处行</strong></td><td>Segoe UI Emoji</td><td>24–28px</td><td>灰 #8C8275</td><td>不限</td><td>底部署名</td></tr>
     </tbody>
   </table>
-  <div class="hl hl-p">Windows PIL 只有 SimHei 够粗。2px 四周黑填充模拟 Bold→Heavy 加粗效果。</div>
+  <div class="hl hl-y">msyhbd.ttc（微软雅黑 Bold）天然粗体，无需 perimeter fill 模拟。不可用时回退 simhei.ttf。</div>
 
   <h4>四种布局</h4>
   <div class="grid-2">
@@ -671,9 +672,9 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tbody>
     <tr><td>画布</td><td>1920×1080，安全区 1280×720 居中</td></tr>
     <tr><td>底图亮度</td><td><strong>0.80</strong>（PIL ImageEnhance.Brightness）</td></tr>
-    <tr><td>主字体</td><td>SimHei (C:\Windows\Fonts\simhei.ttf)</td></tr>
+    <tr><td>主字体</td><td>msyhbd.ttc (C:\Windows\Fonts\msyhbd.ttc)，备选 simhei.ttf</td></tr>
     <tr><td>主色</td><td>暖黄 <strong style="color:#E6A800;">#FFC82D</strong>，辅色暖白 #FCFAF5</td></tr>
-    <tr><td>描边</td><td>纯黑 2px 四周 8 方向填充</td></tr>
+    <tr><td>描边</td><td><strong>无</strong>（纯色绘制，不描边不投影）</td></tr>
     <tr><td>衬底</td><td>rgba(0,0,0,0.5) 全宽横条（布局 B/C 必备）</td></tr>
     <tr><td>JPG 质量</td><td>92（超 4.8MB 降至 75）</td></tr>
     </tbody>
@@ -766,40 +767,48 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 
   <div class="card">
   <h3>3.1 管线总览</h3>
+  <p style="font-size:13px;margin-bottom:12px;">管线分两段：<strong style="color:#10B981;">第一阶段 ②-⑧ = pipeline.py（确定性机械管线）</strong>，零 AI 判断。全部走脚本，可以无人值守跑完。<strong style="color:#8B5CF6;">第二阶段 ⑨-⑭ = AI 技能（AI 决策 + 脚本渲染）</strong>，每步需要 Claude 读 transcript 做判断再调工具。选题① 是独立的评分管线。</p>
   <div class="pipe">
-    <span>① 选题</span><span class="arr">→</span>
-    <span>② 下载</span><span class="arr">→</span>
-    <span>③ 断句</span><span class="arr">→</span>
-    <span>④ 翻译</span><span class="arr">→</span>
-    <span>⑤ 判定</span><span class="arr">→</span>
-    <span>⑥ ASS</span><span class="arr">→</span>
-    <span>⑦ 渲染</span><span class="arr">→</span>
-    <span>⑧ 金句提取</span><span class="arr">→</span>
-    <span>⑨ 封面</span><span class="arr">→</span>
-    <span>⑩ 标题</span><span class="arr">→</span>
-    <span>⑪ 元数据</span><span class="arr">→</span>
-    <span>⑫ 专栏</span><span class="arr">→</span>
-    <span>⑬ 发布</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">① 选题</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">③ 断句</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">④ 赞助检测</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑤ 翻译</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑥ 判定</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑦ ASS</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑧ 渲染</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑨ 金句提取</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑩ 封面</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑪ 标题</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 元数据</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 专栏</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑭ 发布</span>
   </div>
+  <p style="font-size:11px;color:var(--muted);margin-top:6px;">
+    <span style="display:inline-block;width:10px;height:10px;background:#ECFDF5;border:1px solid #10B981;border-radius:2px;vertical-align:middle;"></span> = pipeline.py 确定性别本 &nbsp;&nbsp;
+    <span style="display:inline-block;width:10px;height:10px;background:#F5F3FF;border:1px solid #8B5CF6;border-radius:2px;vertical-align:middle;"></span> = AI 技能（Claude 决策 + 调脚本）
+  </p>
 
   <table>
-    <thead><tr><th>步骤</th><th>工具</th><th>输入 → 输出</th><th>耗时</th></tr></thead>
+    <thead><tr><th>步骤</th><th>类型</th><th>工具</th><th>输入 → 输出</th><th>耗时</th></tr></thead>
     <tbody>
-    <tr><td class="nowrap">选题</td><td>WebFetch + 人工</td><td>URL → 评分</td><td>~5m</td></tr>
-    <tr><td class="nowrap">下载</td><td><code>yt-dlp</code></td><td>URL → mp4 + srt</td><td>~3m</td></tr>
-    <tr><td class="nowrap">断句</td><td><code>pipeline.py</code></td><td>01_raw.srt → 02_seg.srt</td><td>&lt;1s</td></tr>
-    <tr><td class="nowrap">翻译</td><td>DeepSeek API</td><td>02_seg.srt → 03_zh.srt</td><td>~1m</td></tr>
-    <tr><td class="nowrap"><strong>判定</strong></td><td><strong>人工</strong></td><td>翻译结果 → Go/No-Go</td><td>~5m</td></tr>
-    <tr><td class="nowrap">ASS</td><td><code>pipeline.py</code></td><td>04_split.srt → 05.ass</td><td>&lt;1s</td></tr>
-    <tr><td class="nowrap">渲染</td><td><code>ffmpeg</code></td><td>mp4 + ass → mp4</td><td>~5m</td></tr>
-    <tr><td class="nowrap">金句提取</td><td>AI 辅助 + 人工确认</td><td>transcript → 封面大字 + 标题候选</td><td>~5m</td></tr>
-    <tr><td class="nowrap">封面</td><td><code>gen_cover.py</code></td><td>截图 + 金句 → cover.jpg</td><td>~2m</td></tr>
-    <tr><td class="nowrap">标题</td><td>人工</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
-    <tr><td class="nowrap">元数据</td><td>人工 + 发布面板</td><td>transcript → 标签/简介/章节节点</td><td>~10m</td></tr>
-    <tr><td class="nowrap">专栏文章</td><td>人工</td><td>transcript → B站专栏 markdown</td><td>~15m</td></tr>
+    <tr><td class="nowrap">① 选题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>飞书 API + Claude 评分</td><td>候选池 → URL + slug</td><td>~5m</td></tr>
+    <tr><td class="nowrap">② 下载</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>yt-dlp</code></td><td>URL → mp4 + srt</td><td>~3m</td></tr>
+    <tr><td class="nowrap">③ 断句</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>pipeline.py</code></td><td>01_raw.srt → 02_seg.srt</td><td>&lt;1s</td></tr>
+    <tr><td class="nowrap">④ 赞助检测</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td>DeepSeek API（pipeline.py 内调用）</td><td>02_seg.srt → sponsor 标记 + 02_seg_clean.srt</td><td>~30s</td></tr>
+    <tr><td class="nowrap">⑤ 翻译</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td>DeepSeek API（pipeline.py 内调用）</td><td>02_seg_clean.srt → 03_zh.srt</td><td>~1m</td></tr>
+    <tr><td class="nowrap">⑥ 判定</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human</span></td><td>Go/No-Go Checklist</td><td>翻译结果 → Go/No-Go</td><td>~5m</td></tr>
+    <tr><td class="nowrap">⑦ ASS</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>pipeline.py</code></td><td>04_split.srt → 05.ass</td><td>&lt;1s</td></tr>
+    <tr><td class="nowrap">⑧ 渲染</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>ffmpeg</code></td><td>mp4 + ass → mp4</td><td>~5m</td></tr>
+    <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑨ 金句提取</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → 评分金句</td><td>transcript → 封面大字 + 标题候选</td><td>~5m</td></tr>
+    <tr><td class="nowrap">⑩ 封面</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td><strong>猫波信号站</strong> skill → <code>gen_cover.py</code></td><td>帧 + 金句 → cover.jpg</td><td>~2m</td></tr>
+    <tr><td class="nowrap">⑪ 标题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 生成 3-5 候选 → 飞书存档</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
+    <tr><td class="nowrap">⑫ 元数据</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>发布面板 HTML（Claude 生成）</td><td>transcript → 标签/简介/章节节点</td><td>~10m</td></tr>
+    <tr><td class="nowrap">⑬ 专栏文章</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → draft.md</td><td>transcript → B站专栏 markdown</td><td>~15m</td></tr>
+    <tr><td class="nowrap">⑭ 发布</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human</span></td><td>B站创作者中心</td><td>成品文件 → 审核中/已发布</td><td>~10m</td></tr>
     </tbody>
   </table>
-  <div class="hl hl-y"><strong>一键命令（<code>--work-dir</code> 待实现）：</strong><code>python pipeline.py all &lt;url&gt; --slug &lt;name&gt; --output-title "标题"</code></div>
+  <div class="hl hl-y"><strong>pipeline.py 覆盖 ②-⑦：</strong><code>python pipeline.py all &lt;url&gt; --slug &lt;name&gt; --output-title "标题"</code> → 产出 ASS + 成片 mp4。⑧-⑭ 由 Claude skills 接管（gen-bilibili-cover 等），每步 AI 决策 + 脚本渲染。</div>
   <p style="font-size:12px;color:var(--muted);">⑤ 判定 = 翻译完成后的人工 Go/No-Go 关口。⑧ 金句提取 = 从 transcript 中选最有力的钩子。</p><h4>⑤ 判定 Go/No-Go Checklist</h4><p style="font-size:13px;">翻译完成后逐项打钩。任一 <span class="tag tag-no">No-Go</span> = 排除，全部 <span class="tag tag-go">Go</span> = 继续。不是感觉，是打钩。</p><table><thead><tr><th>#</th><th>检查项</th><th>Go 标准</th><th>No-Go 标准</th></tr></thead><tbody><tr><td>G1</td><td><strong>信息密度</strong></td><td>观点密度 &ge; 2/分，实操占比 &ge; 30%</td><td>观点密度 &lt; 0.5/分，或实操占比 &lt; 10%</td></tr><tr><td>G2</td><td><strong>翻译覆盖率</strong></td><td>非赞助段 &ge; 95% 有翻译</td><td>&lt; 80% 非赞助段翻译（赞助段不计）</td></tr><tr><td>G3</td><td><strong>金句可提取性</strong></td><td>至少 2 个满足 &ge;3 维度的可提取金句</td><td>无满足 &ge;2 维度的金句候选</td></tr><tr><td>G4</td><td><strong>嘉宾视觉可用性</strong></td><td>至少 1 帧正脸清晰（光照好、表情自然）</td><td>所有帧模糊/侧脸/表情崩坏</td></tr><tr><td>G5</td><td><strong>B站独占性复核</strong></td><td>翻译后重新 B站搜索，仍零中字</td><td>发现新增中字或同类内容已上传</td></tr><tr><td>G6</td><td><strong>时效敏感度</strong></td><td>时效敏感度 = 低或中（&ge; 6 个月有效）</td><td>时效敏感度 = 高（&lt; 1 个月失效）</td></tr></tbody></table><div class="hl hl-y"><strong>判定流程：</strong>翻译完成 → 跑 checklist → 6/6 Go → 继续管线。任一 No-Go → 记录原因 → 移至已废弃/。</div>
   </div>
 
@@ -827,21 +836,64 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <h4>翻译 Prompt</h4>
   <pre>System: You are a professional EN→ZH subtitle translator.
 Output ONLY the Chinese translation for each line, one per line. No explanations.
+CRITICAL: Translate EVERY line — never skip, never omit, never merge.
+Even if the English is garbled, has repetition artifacts, or sounds like a fast
+sponsor read — still output your best Chinese translation for that line.
+Each output line count must exactly match the input line count.
 
 User: Translate these English subtitles to Chinese (Simplified).
 Keep it concise and natural. Preserve technical terms where appropriate.</pre>
+  <div class="hl hl-r"><strong>2026-06-20 更新：</strong>原 prompt 缺少"绝不跳过"指令 → Kevin Weil 167 条未翻译 (68%)。已增强 system prompt，但赞助商口播 ASR 太差时翻译质量仍不可控。D-02 判定：赞助商段直接剪切，不走翻译。</div>
 
   <div class="hl hl-p"><strong>ASS 为什么必须单事件 \N：</strong>libass 碰撞检测 — 两条相邻 Dialogue 时间重叠时自动隐藏一条。中英文随机消失。</div>
   <div class="hl hl-y"><strong>函数签名：</strong><code>enforce_max_chars(srt_path, max_chars=28)</code> — 不是 <code>(srt_path, output_path)</code></div>
+
+  <h4>赞助商检测（Karpathy 方案 · 2026-06-20）</h4>
+  <div class="hl hl-r"><strong>背景：</strong>Kevin Weil 期 167/247 条 (68%) 翻译失败。根因不在翻译 prompt——是把"判定是否值得翻"和"翻译"混在了同一个步骤里。DeepSeek 遇到 ASR 质量差的英文直接跳过整行。D-02 已判：赞助商段直接剪切，不走翻译。</div>
+  <p style="margin-top:12px;"><strong>核心思路：</strong>赞助商检测是一个 LLM 擅长的二分类问题（文本模式匹配），不需要训练专门模型。</p>
+
+  <table>
+    <thead><tr><th>环节</th><th>内容</th></tr></thead>
+    <tbody>
+    <tr><td><strong>触发时机</strong></td><td>断句 (③) 之后、翻译 (⑤) 之前</td></tr>
+    <tr><td><strong>输入</strong></td><td><code>02_seg.srt</code></td></tr>
+    <tr><td><strong>输出</strong></td><td><code>02_seg_clean.srt</code> (去赞助商) + <code>_sponsor_cuts.json</code> (ffmpeg 剪切点)</td></tr>
+    <tr><td><strong>工具</strong></td><td>DeepSeek API, temp=0, batch=20, 并发=5</td></tr>
+    <tr><td><strong>耗时</strong></td><td>~30s (247 条 → 13 批)</td></tr>
+    <tr><td><strong>人工复核</strong></td><td>扫一眼标记结果 (~5m)，防 false positive 误杀</td></tr>
+    </tbody>
+  </table>
+
+  <h4>检测 Prompt</h4>
+  <pre>System: You are a content classifier. For each subtitle segment below,
+  answer ONLY "yes" or "no" — is this segment part of a sponsor/ad read?
+  Sponsor indicators: brand names repeated, discount codes, "thanks to our
+  sponsors", "check out", "use code", fast speech artifacts (word repetition
+  in ASR). Answer one word per line, exactly matching the input line count.
+
+  User: [N 条 SRT 文本，每行一条]</pre>
+
+  <h4>检测后处理</h4>
+  <ol>
+    <li>标记为 "yes" 的段落 → 从字幕中移除</li>
+    <li>相邻被切段落的时间间隙 &gt; 0.5s → 写入 <code>_sponsor_cuts.json</code></li>
+    <li>翻译用 clean SRT（无赞助商段），保证 100% 翻译覆盖率</li>
+    <li>渲染时 ffmpeg 按 <code>_sponsor_cuts.json</code> 剪切视频</li>
+    <li>人工复核：确认无 false positive（非赞助内容被误标）</li>
+  </ol>
+
+  <div class="hl hl-p"><strong>March of Nines 警告：</strong>唯一不能接受的是 false positive——把嘉宾正片当赞助商切掉。这是不可逆的信息损失。所以 temp=0（不创造），人工确认切点（Iron Man suit，不是 Iron Man robot）。false negative（漏切赞助商）只是多几秒广告，不影响内容质量。</div>
+  <div class="hl hl-y"><strong>代码量目标：</strong>~60 行 Python。一个函数读 SRT → 分批送 API → 返回标记列表 → 写两份输出。Don't be a hero.</div>
   </div>
 
   <div class="card">
   <h3>3.4 金句提取（可复现流程）</h3><p style="font-size:13px;">金句提取不是"凭感觉挑"。步骤如下：</p><ol><li>将翻译后的 transcript（03_zh.srt 纯文本）传入以下 prompt</li><li>取 AI 输出的 Top 5 候选</li><li>人工从中选最优 1-2 句，确认符合 &ge;3 维度</li></ol><pre>从以下访谈 transcript 中提取 5 句最有冲击力的金句。每条金句要求：<br>1. 一句话能读懂（不依赖上下文）<br>2. 反直觉或带数字<br>3. 长度 15-40 个中文字<br>4. 来自嘉宾本人（不是主持人）<br><br>输出格式（每行一条）：<br>【时间戳】金句内容 | 反直觉/可量化/独特性/情感/行动（标注满足哪几个维度）<br><br>Transcript:<br>---<br>[粘贴 03_zh.srt 纯文本]<br>---</pre><p style="font-size:12px;color:var(--muted);">AI 模型建议：DeepSeek Chat, temp=0.3。验证标准：5 条候选中至少 3 条经人工确认满足 &ge;3 维度。不达标 → 换 prompt 温度或扩大候选到 10 条。</p><h3>3.5 已知改进项</h3>
   <ul>
-    <li><strong>赞助商检测：</strong>Kevin Weil 期 50+ 条未翻译来自赞助商口播。需增加检测 + 自动跳过</li>
+    <li><strong>赞助商检测：</strong>已实现（2026-06-20，§3.3 赞助商检测），见 <code>pipeline.py detect_sponsors()</code>。D-02 判：剪掉而非保留翻译</li>
     <li><strong>全局偏移修正：</strong>字幕同步未做整体校准</li>
     <li><strong>pipeline.py --work-dir：</strong>需支持目标目录参数</li>
-    <li><strong>AI 封面多方案：</strong>当前 gen_cover.py 单张输出 → 改为批量生成 + 评分择优</li>
+    <li><strong>全流程 skill（已创建 2026-06-20）：</strong><code>.claude/skills/猫波信号站/SKILL.md</code>，封装全流程 ①-⑭。pipeline.py 跑机械段 ②-⑧，Claude 跑 AI 决策段 ⑨-⑭（金句→封面→标题→元数据→专栏→发布）。触发词：做下一期、做视频、做 &lt;嘉宾&gt; 那期</li>
+    <li><strong>AI 封面多方案：</strong>当前 gen_cover.py 单张输出 → 未来改为批量生成 + 评分择优</li>
         <li><strong>英文字幕两种路线对比：</strong>视频自带英文字幕时，A) 保留原字幕位置 + 叠加中文（需协调时间轴/位置/样式避免冲突）vs B) 删除原有字幕 + 重新生成干净双语 ASS（当前做法）。两种路线在制作效率、字幕可读性、最终效果上的差异待实测对比。</li>
   </ul>
   </div>
@@ -1009,7 +1061,7 @@ Keep it concise and natural. Preserve technical terms where appropriate.</pre>
     <tr><td>8</td><td>B站 API 直接调用 → 反爬 HTML</td><td>走 WebFetch 浏览器渲染</td></tr>
     <tr><td>9</td><td>carryover 移了时间戳 → 字幕闪烁</td><td>只裁文本，时间戳锚定句边界</td></tr>
     <tr><td>10</td><td>封面截图盲抽 → 画面不理想</td><td>transcript 金句定位 + 视觉模型确认</td></tr>
-    <tr><td>11</td><td>赞助商口播段翻译跳过 → 50+ 条未翻译</td><td>赞助商检测 + 自动跳过</td></tr>
+    <tr><td>11</td><td>赞助商口播段翻译跳过 → 167 条未翻译 (68%)</td><td>赞助商检测 + 自动剪切</td></tr>
     <tr><td>12</td><td>飞书 API 更新用 field_id → 1254045</td><td>PUT records 用中文字段名</td></tr>
     <tr><td>13</td><td>ffmpeg Windows 路径有 <code>:</code> → filter parser 报错</td><td>用相对路径绕开</td></tr>
     </tbody>
@@ -1119,6 +1171,190 @@ Keep it concise and natural. Preserve technical terms where appropriate.</pre>
   </div>
 </section>
 
+<!-- ════════════════ §5.5 改期问题处理 ════════════════ -->
+<section id="s5a">
+  <h2><span class="num">5.5</span>改期问题处理 <span style="font-weight:400;font-size:0.55em;color:var(--muted);margin-left:12px;">· Karpathy</span></h2>
+  <p style="margin-bottom:24px;">首版产出不可能完美。改期中高频出现的问题集中在三类：<strong>字幕样式、翻译专有名词、封面设计</strong>。本章记录每类的现象、根因、标准修复方案，以及改期标准流程。</p>
+
+  <!-- ── 问题一：字幕样式 ── -->
+  <div class="card">
+  <h3>问题一：字幕样式异常</h3>
+
+  <h4>症状分类</h4>
+  <table>
+    <thead><tr><th>症状</th><th>用户会看到</th><th>影响</th></tr></thead>
+    <tbody>
+    <tr><td><strong>A. 字幕带黑色描边</strong></td><td>白字外圈有黑线，像电视新闻字幕</td><td>视觉粗糙，不像 YouTube 搬运风格</td></tr>
+    <tr><td><strong>B. 英文/中文出界</strong></td><td>长句超出屏幕左右边缘，部分文字被裁切</td><td>阅读体验差，信息丢失</td></tr>
+    <tr><td><strong>C. 字幕跳位置</strong></td><td>同一时间段出现两段字幕，或字幕位置忽上忽下</td><td>观感混乱，无法正常阅读</td></tr>
+    </tbody>
+  </table>
+
+  <h4>根因分析</h4>
+  <table>
+    <thead><tr><th>症状</th><th>直接原因</th><th>ASS 参数</th></tr></thead>
+    <tbody>
+    <tr><td>A. 黑边</td><td><code>Outline=2</code> 产生可见描边 + <code>OutlineColour=&amp;H00000000&amp;</code>（黑色）</td><td><code>BorderStyle=1, Outline=2, OutlineColour=&amp;H00<strong>000000</strong>&amp;</code></td></tr>
+    <tr><td>B. 出界</td><td><code>MarginL=MarginR=10</code> 左右边距过窄，长英文句子超出 1920 画布</td><td><code>MarginL=10, MarginR=10</code></td></tr>
+    <tr><td>C. 跳位/重叠</td><td>上游断句产生的相邻条目时间戳重叠（end > next.start），两段字幕同时渲染</td><td>无裁剪逻辑，原始时间戳直接写入 ASS</td></tr>
+    </tbody>
+  </table>
+
+  <h4>标准修复</h4>
+  <table>
+    <thead><tr><th>参数</th><th>旧值</th><th>新值</th><th>效果</th></tr></thead>
+    <tbody>
+    <tr><td><code>Outline</code></td><td>2</td><td><strong>0</strong></td><td>无描边，文字纯色边缘清爽</td></tr>
+    <tr><td><code>OutlineColour</code></td><td><code>&amp;H00000000&amp;</code></td><td><strong><code>&amp;H00FFFFFF&amp;</code></strong></td><td>即使 Outline>0 也是白色描边，不可见</td></tr>
+    <tr><td><code>Shadow</code></td><td>未设置（默认值）</td><td><strong>0</strong></td><td>关闭阴影，避免额外视觉噪点</td></tr>
+    <tr><td><code>MarginL / MarginR</code></td><td>10</td><td><strong>200</strong></td><td>1920 画布上留足安全区，长英文不溢出</td></tr>
+    <tr><td>重叠裁剪</td><td>无</td><td><strong>逐条检测 + 裁剪</strong></td><td>相邻条目保持 ≥20ms 间隔，最小持续 500ms</td></tr>
+    </tbody>
+  </table>
+
+  <h4>重叠裁剪逻辑</h4>
+  <pre>for i, e in enumerate(entries):
+    end_ms = time_to_ms(e.end)
+    if i + 1 &lt; len(entries):
+        next_start_ms = time_to_ms(entries[i + 1].start)
+        if end_ms &gt; next_start_ms:
+            end_ms = max(next_start_ms - <span class="arg">20</span>, time_to_ms(e.start) + <span class="arg">500</span>)
+    e_fixed = SubEntry(e.index, e.start, ms_to_time(end_ms), e.text)</pre>
+  <p style="font-size:12px;color:var(--muted);">裁剪保证：两段字幕不重叠（≥20ms 间隔）、每段至少显示 500ms、不修改 start 时间。</p>
+
+  <h4>完整 ASS Style 行</h4>
+  <pre>Style: Default,SimHei,42,&amp;H00FFFFFF&amp;,&amp;H00000000&amp;,&amp;H00FFFFFF&amp;,&amp;H00000000&amp;,<span class="arg">0,0,0,0</span>,100,100,0,0,1,0,0,2,<span class="arg">200,200</span>,45,1</pre>
+  <p style="font-size:12px;color:var(--muted);">关键字段：Outline=0, Shadow=0, MarginL=200, MarginR=200, Alignment=2（底部居中）</p>
+  </div>
+
+  <!-- ── 问题二：翻译专有名词 ── -->
+  <div class="card">
+  <h3>问题二：专有名词被误译</h3>
+
+  <h4>症状</h4>
+  <p>科技/品牌/产品专有名词被翻译成中文，观众反而不知道在说什么：</p>
+  <table>
+    <thead><tr><th>原文</th><th>误译</th><th>正确做法</th></tr></thead>
+    <tbody>
+    <tr><td>Cursor</td><td>光标</td><td><strong>Cursor</strong>（留英文）</td></tr>
+    <tr><td>Claude</td><td>克劳德</td><td><strong>Claude</strong>（留英文）</td></tr>
+    <tr><td>Copilot</td><td>副驾驶</td><td><strong>Copilot</strong>（留英文）</td></tr>
+    <tr><td>VS Code</td><td>可视化工作室代码</td><td><strong>VS Code</strong>（留英文）</td></tr>
+    </tbody>
+  </table>
+
+  <h4>根因</h4>
+  <p>翻译 API 的系统提示词中<strong>未包含专有名词保留指令</strong>。LLM 默认会翻译所有英文，无法自行判断哪些词是"观众更熟悉英文原名"的专有名词。</p>
+
+  <h4>标准修复</h4>
+  <p>在 DeepSeek 翻译的系统提示词中，追加 ~50 词的白名单，明确要求保留英文。白名单按语义分组维护，新增名词直接追加：</p>
+
+  <pre>IMPORTANT — keep these names UNTRANSLATED (留英文):
+<span class="arg">AI 产品:</span> Cursor, Copilot, GitHub Copilot, Claude, Sonnet, GPT, GPT-4,
+      OpenAI, Anthropic, ChatGPT, o1, DeepSeek, Llama, Gemini
+<span class="arg">编辑器/IDE:</span> VS Code, Visual Studio Code, Vim, Neovim, JetBrains, IntelliJ
+<span class="arg">操作系统:</span> macOS, Windows, Linux
+<span class="arg">云平台:</span> AWS, GCP, Azure
+<span class="arg">编程语言:</span> JavaScript, TypeScript, Python, Rust, Go, React, Node.js
+<span class="arg">技术术语:</span> API, GPU, CPU, SSD, CUDA, PyTorch, TensorFlow
+<span class="arg">公司/产品:</span> Stripe, Slack, Discord, Zoom, Google, Microsoft, Apple, Meta
+<span class="arg">知名人物:</span> Lex Fridman, Elon Musk, Sam Altman</pre>
+
+  <h4>白名单维护规则</h4>
+  <ul>
+    <li><strong>触发条件：</strong>翻译抽查时发现新专有名词被误译 → 立即追加到白名单</li>
+    <li><strong>分类放入：</strong>按语义分组，不创建单一名词孤行</li>
+    <li><strong>位置：</strong>pipeline.py <code>_translate_batch()</code> 的 <code>system_prompt</code> 变量内</li>
+    <li><strong>不影响旧期：</strong>已翻译字幕不回溯重译（成本 > 收益），白名单只影响新期</li>
+  </ul>
+  </div>
+
+  <!-- ── 问题三：封面设计 ── -->
+  <div class="card">
+  <h3>问题三：封面视觉效果不足</h3>
+
+  <h4>症状分类</h4>
+  <table>
+    <thead><tr><th>症状</th><th>用户会看到</th><th>影响</th></tr></thead>
+    <tbody>
+    <tr><td><strong>A. 字体太瘦 + 有黑边</strong></td><td>标题文字纤细，外圈有黑线，像 Word 艺术字</td><td>不够醒目，不像科技区封面</td></tr>
+    <tr><td><strong>B. 底图无吸引力</strong></td><td>背景是纯代码/文档截图，没有人物、没有光影</td><td>点击率低于预期，没有"想点进去看"的冲动</td></tr>
+    </tbody>
+  </table>
+
+  <h4>根因分析</h4>
+  <table>
+    <thead><tr><th>症状</th><th>直接原因</th><th>技术细节</th></tr></thead>
+    <tbody>
+    <tr><td>A. 字体瘦+黑边</td><td>SimHei（黑体）本身非粗体 + <code>_draw_bold_text()</code> 使用黑色 perimeter fill 模拟粗体</td><td>perimeter fill = 在文字周围画 N 层半透明黑色 → 视觉上字体瘦且带黑晕</td></tr>
+    <tr><td>B. 底图差</td><td>帧选择无视觉标准，默认取中间帧，落到哪帧算哪帧</td><td>没有"是否有人脸""是否有代码"的判断，帧选择 = 随机</td></tr>
+    </tbody>
+  </table>
+
+  <h4>标准修复</h4>
+  <table>
+    <thead><tr><th>问题</th><th>修复</th><th>效果</th></tr></thead>
+    <tbody>
+    <tr><td>A. 字体</td><td>改用 <strong>msyhbd.ttc</strong>（微软雅黑 Bold），<code>draw.text()</code> 直接纯色绘制，无 perimeter fill</td><td>字体粗壮有力，纯色边缘清爽，科技感强</td></tr>
+    <tr><td>A. 字体（备选）</td><td>msyhbd.ttc 不可用时回退 simhei.ttf</td><td>不因字体缺失导致封面生成失败</td></tr>
+    <tr><td>B. 底图</td><td>帧选择增加视觉判断标准（待定案）</td><td>提高封面底图质量，进而提高点击率</td></tr>
+    </tbody>
+  </table>
+
+  <h4>字体加载实现</h4>
+  <pre>FONT_BOLD = "msyhbd.ttc"      # 微软雅黑 Bold — 粗体无描边
+FONT_FALLBACK = "simhei.ttf"  # 备选黑体
+
+def _load_font(size: int, bold: bool = True) -&gt; ImageFont.FreeTypeFont:
+    candidates = [FONT_BOLD, FONT_FALLBACK] if bold else [FONT_THIN]
+    for name in candidates:
+        path = _find_font(name)
+        if path:
+            try:
+                return ImageFont.truetype(path, size)
+            except Exception:
+                continue
+    return ImageFont.load_default()</pre>
+  <p style="font-size:12px;color:var(--muted);">关键改动：移除 <code>_draw_bold_text()</code> 和 <code>DARK_OVERLAY</code> 常量，改为 <code>_load_font()</code> + 直接 <code>draw.text()</code> 纯色绘制。</p>
+
+  <h4>底图帧选择（方向已定，方案待定案）</h4>
+  <div class="hl hl-y">
+    <strong>已知问题：</strong>当前帧选择无标准，依赖默认中间帧。代码页/文档页截图作为封面背景，视觉吸引力低。<br>
+    <strong>解决方向：</strong>引入帧选择启发式——优先选有人脸特写、有手势动作、景深/光影丰富的帧。<br>
+    <strong>状态：</strong>已在 Cursor Team 期识别为问题，具体算法方案待定案后更新本节。
+  </div>
+  </div>
+
+  <!-- ── 改期标准流程 ── -->
+  <div class="card">
+  <h3>改期标准流程</h3>
+  <p>首版完成后，以下检查<strong>自动触发</strong>（不等人发现才改）：</p>
+
+  <table>
+    <thead><tr><th>#</th><th>检查项</th><th>方法</th><th>通过标准</th></tr></thead>
+    <tbody>
+    <tr><td>1</td><td>字幕样式</td><td>打开 ASS 文件 → 检查 Style 行 → Outline=0, MarginL/R=200</td><td>参数完全匹配标准值</td></tr>
+    <tr><td>2</td><td>字幕重叠</td><td>渲染后拖拽进度条，检查是否有两段字幕同时显示</td><td>全程无重叠</td></tr>
+    <tr><td>3</td><td>专有名词</td><td>从翻译结果随机抽 10 条，人工检查专有名词是否保留英文</td><td>10/10 正确</td></tr>
+    <tr><td>4</td><td>封面字体</td><td>打开 cover.jpg → 检查字体粗细和边缘 → 应为纯色粗体，无黑边</td><td>视觉通过</td></tr>
+    <tr><td>5</td><td>封面底图</td><td>检查底图是否有视觉吸引力（有人脸/非纯代码页）</td><td>视觉通过</td></tr>
+    </tbody>
+  </table>
+
+  <h4>发现问题后的处理路径</h4>
+  <table>
+    <thead><tr><th>问题性质</th><th>处理方式</th><th>示例</th></tr></thead>
+    <tbody>
+    <tr><td><strong>系统性问题</strong>（多期会复现）</td><td>修复 pipeline.py / gen_cover.py → 更新本文档 → 重跑当前期 → 记录到决策纪要</td><td>ASS Outline 参数、翻译白名单、封面字体方案</td></tr>
+    <tr><td><strong>本期个案</strong>（不太可能复现）</td><td>手动修复 → 记录到 <code>_runtime/pitfalls.md</code></td><td>某期翻译中某个特殊术语误译</td></tr>
+    <tr><td><strong>方向性问题</strong>（需要新方案）</td><td>标注为待定案 → 本文档标记状态 → 下一期迭代</td><td>封面底图帧选择算法</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:12px;color:var(--muted);margin-top:12px;">原则：修根因不修症状。治本（改 pipeline）优先于治标（手动修当前期）。但如果修复成本 > 重做成本（如已翻译的 850 条字幕），则只影响新期，不回溯。</p>
+  </div>
+</section>
+
 <!-- ════════════════ §6 决策纪要 ════════════════ -->
 <section id="s6">
   <h2><span class="num">06</span>决策纪要</h2>
@@ -1154,7 +1390,7 @@ Keep it concise and natural. Preserve technical terms where appropriate.</pre>
 </section>
 
 <div class="footer">
-  猫波信号站 · 生产方法论 · v3 · 最后更新 2026-06-20
+  猫波信号站 · 生产方法论 · v3.2 · 最后更新 2026-06-21
 </div>
 
 </main>
