@@ -22,6 +22,8 @@ except ImportError:
 
 # ── 设计参数 ──────────────────────────────────────────────────────────────
 CANVAS = (1920, 1080)
+SAFE_W = 1440   # B站首页推荐 4:3 裁剪区宽度（左右各裁 240px）
+SAFE_PAD = 60   # 4:3 安全区内边距
 YELLOW = (255, 200, 45)       # #FFC82D
 WHITE = (252, 250, 245)       # #FCFAF5
 FONT_BOLD = "msyhbd.ttc"      # 微软雅黑 Bold — 粗体标题
@@ -77,10 +79,20 @@ def generate_cover(
 
     draw = ImageDraw.Draw(img)
 
+    # Fit title font size to 4:3 safe area
+    title_size = 165
+    title_font = _load_font(title_size, "bold")
+    tw = draw.textbbox((0, 0), title, font=title_font)[2]
+    safe_max = SAFE_W - SAFE_PAD * 2  # 1320px
+    if tw > safe_max:
+        title_size = int(165 * safe_max / tw)
+        print(f"  Title shrunk {165}→{title_size}px to fit 4:3 safe area "
+              f"({tw}→{safe_max}px)")
+
     # Text block: subtitle → accent bar → title (source_line is bottom bar only)
     lines = []
     if title:
-        lines.append(("title", title, 165, accent_color, "bold"))
+        lines.append(("title", title, title_size, accent_color, "bold"))
     if subtitle:
         lines.append(("sub", subtitle, 62, WHITE, "bold"))
 
