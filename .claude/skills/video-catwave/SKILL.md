@@ -42,7 +42,8 @@ Output（产出物）: D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slu
   _runtime/测试片/                 ← 测试片
   _runtime/发布面板过程/           ← 发布面板旧版归档
   成片/<标题>.mp4
-  电子书/<标题>.epub              ← 双语EPUB，GitHub Releases分发，B站私信拿链接
+  电子书/<标题>.epub              ← 双语EPUB，百度云盘分发，B站评论区置顶链接
+  电子书/百度云盘位置.txt         ← 分享链接+提取码
   cover.jpg
 ```
 
@@ -128,19 +129,26 @@ cd D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>
 - 从 ⑨ 金句取最优 3 句 → 在 transcript 中定位时间戳 → ffmpeg 截图 → 肉眼评分
 - `python D:\workspace\lab\2026-06-16-猫波信号站\.claude\skills\video-catwave\tools\gen_cover.py <frame.jpg> cover.jpg --title "<金句>" --sub "<嘉宾·来源>" --source "YouTube · <频道>" --brightness 0.80 --color "#FFC82D"`
 - 约束：msyhbd.ttc 纯色无描边、#FFC82D、0.80 亮度、≤4.8MB、1920×1080
+- **4:3 安全区**：B站首页推荐裁剪 16:9→4:3（1440×1080），左右各裁 240px。标题超过 1320px（SAFE_W 1440 - SAFE_PAD 60×2）自动缩字。gen_cover.py 已内置 auto-shrink 逻辑
 
 ### ⑪ 标题
 - 格式：`嘉宾身份 + 嘉宾名：核心论断`
 - ≤80 字，生成 3-5 候选
 
 ### ⑫ 元数据
-- 标签 ≤10 个、简介 ≤2000 字、章节 ≥10 个（mm:ss 格式）
+- 标签 ≤10 个、每个 ≤12 字、简介 ≤2000 字
+- 章节 ≥2 个且 ≤10 个（B站硬上限），格式 `HH:MM:SS 章节标题`（必须带小时位）
+- 章节间隔 ≥5 秒，时间戳不重叠，按时间递增
+- 生成 `_runtime/metadata.json`（chapters/tags/description）和 `_runtime/chapters_bilibili.json`（B站导入格式：`start_time` 秒 + `title`）
 
 ### ⑬ 专栏
 - 写 `_runtime/draft.md`：引言 → 10 节核心论点 → 结尾
 
 ### ⑭ 发布面板
-- 生成 `发布面板.html`（标题/标签/简介/封面/分区/合集/章节/金句）
+- 生成 `发布面板.html`（标题/标签/简介/封面/分区/合集/章节/金句），落盘到视频根目录和 `_runtime/发布面板过程/`
+- 每个标签旁带独立「复制」按钮（B站标签只能逐个输入，不能批量粘贴）
+- 章节用 `HH:MM:SS 章节标题` 格式，全量复制后一键贴入 B站章节文本编辑器
+- B站章节入口：创作中心 → 稿件管理 → 视频右侧「···」→ 个性化配置 → 分段章节
 - 人工去 B站创作者中心逐项复制发布
 
 ## 首版质量检查（自动触发）
@@ -160,9 +168,21 @@ cd D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>
 - DEEPSEEK_API_KEY 用于 ③④⑤ 三个阶段
 - ffmpeg 渲染 ASS 用相对路径（Windows 盘符冒号被当 filter 分隔符）
 - 文件名禁止全角冒号 U+FF1A
+- EPUB 通过百度云盘分发（链接 + 提取码写入 `电子书/百度云盘位置.txt`），B站评论区置顶回复
 - 视频文件名 = B站标题，标题 ≤80 字
 - 封面：msyhbd.ttc 纯色无描边，亮度 0.80，#FFC82D，≤4.8MB
 - ASS：SimHei 42px + Microsoft YaHei 底栏，纯白无描边
+- B站发布格式清单：
+
+| 字段 | 格式 | 限制 |
+|------|------|------|
+| 标题 | 纯文本 | ≤80 字 |
+| 标签 | 逐个输入 | ≤10 个，每个 ≤12 字 |
+| 章节 | `HH:MM:SS 标题` | ≤10 段，间隔 ≥5s，必须带小时位 |
+| 简介 | 纯文本 | ≤2000 字 |
+| 封面 | 16:9 JPG | ≤4.8MB，首页推荐裁为 4:3 |
+| 分区 | 知识 → 科技 → 人工智能 | — |
+| 合集 | 猫波译站 | — |
 
 ## 文件指针
 
