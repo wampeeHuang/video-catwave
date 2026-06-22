@@ -9,7 +9,7 @@
 - 赞助段已翻译（未裁），无背景框，纯白双语字幕。`_sponsor_cuts.json` = `[]`
 - 背景框代码在 stage_07_ass.py 中默认关闭（--bg-opacity 0），色块与文字相对位置不对，暂时搁置
 - stage_04 已加 `--min-sponsor-duration` 参数（默认 10s）
-- 技能已迁移至 C 盘 `C:\Users\Administrator\.claude\skills\video-catwave\`（全局可用），D 盘副本已归档至 `_archive/`
+- 技能位于 C 盘 `C:\Users\Administrator\.claude\skills\video-catwave\`（全局可用），D 盘不保留副本，仅指针
 - ⑫⑬⑭ 全部完成，pitfalls #9-#11 写入 _ref/pitfalls.md，CLAUDE.md 已知坑改为索引表
 
 ## 管道进度
@@ -61,7 +61,7 @@ D:\workspace\lab\2026-06-16-猫波信号站\                   ← Lab 根目录
 ├── _ref/                               ← 参考素材 + 生产参数 + 踩坑日志
 │   ├── pitfalls.md                     ← 踩坑日志（唯一真相源，生产前必读）
 │   └── 生产参数.md                     ← 封面/标题/字幕工程参数
-├── _archive/                           ← 历史归档（含旧 skills-video-catwave D 盘副本）
+├── _archive/                           ← 历史归档（过程文件，不含技能副本）
 ├── CLAUDE.md                           ← 项目硬约束 + 已知坑索引
 └── HANDOFF.md                          ← 本文档（会话交接）
 
