@@ -79,10 +79,10 @@ def generate_cover(
 
     # Text block: subtitle → accent bar → title (source_line is bottom bar only)
     lines = []
-    if subtitle:
-        lines.append(("sub", subtitle, 62, accent_color, "bold"))
     if title:
-        lines.append(("title", title, 165, accent_color if not subtitle else WHITE, "bold"))
+        lines.append(("title", title, 165, accent_color, "bold"))
+    if subtitle:
+        lines.append(("sub", subtitle, 62, WHITE, "bold"))
 
     # Calculate text block height
     text_block_h = 0
