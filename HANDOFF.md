@@ -4,104 +4,61 @@
 
 ## 当前状态
 
-**2026-06-23**：
-- EPUB 已改为全中文：`Cursor创始团队-AI编程的快就是乐趣.epub`（241KB，30章），旧双语版（379KB）保留
-- 背景框修复搁置，难度高暂不处理
+**2026-06-23 重构**：
+- 项目从 skill 模式重构为完整项目结构（参照 OpenMontage）
+- 所有工具脚本迁入 `tools/`，skill 改为薄指针
+- CLAUDE.md(短) → AGENT_GUIDE.md(全部指令) → PROJECT_CONTEXT.md(架构)
+- Cursor 期已完成（待发布），Kevin Weil 期进行中
 
-**2026-06-22 终态**：
-- 全片已渲染：`Cursor创始人团队：AI编程的未来.mp4` (1311MB, 2:29:04, H.264+AAC)
-- 赞助段已翻译（未裁），无背景框，纯白双语字幕。`_sponsor_cuts.json` = `[]`
-- 背景框代码在 stage_07_ass.py 中默认关闭（--bg-opacity 0），色块与文字相对位置不对，暂时搁置
-- stage_04 已加 `--min-sponsor-duration` 参数（默认 10s）
-- 技能位于 C 盘 `C:\Users\Administrator\.claude\skills\video-catwave\`（全局可用），D 盘不保留副本，仅指针
-- ⑫⑬⑭ 全部完成，pitfalls #9-#11 写入 _ref/pitfalls.md，CLAUDE.md 已知坑改为索引表
-
-## 管道进度
+## Cursor 期进度
 
 | # | 阶段 | 状态 | 产出 |
 |---|------|------|------|
-| ② | 下载 | ✅ | source.mp4 + 01_raw.srt |
-| ③ | 去重叠+标点 | ✅ | 3917碎片→2014短句 |
-| ④ | 赞助检测 | ✅ | 0条赞助 cut（唯一赞助段 49.6-54.1s < 10s，已保留翻译） |
-| ⑤ | 翻译 | ✅ | 2014条双语字幕 |
-| ⑥ | 字宽拆分 | ✅ | 2014→2356行 |
-| ⑦ | ASS | ✅ | SimHei 42px + YaHei，Outline=0，MarginL/R=200 |
-| ⑧ | 测试片 | ✅ | test_95s.mp4 (95s) |
-| ⑧ | 全片 | ✅ | Cursor创始人团队：AI编程的未来.mp4 (1311MB, 2:29:04, H.264+AAC) |
-| ⑨ | 金句 | ✅ | "快就是乐趣" + "人类掌控方向盘" |
-| ⑩ | 封面 | ✅ | cover.jpg（标题黄上白下，#FFC82D） |
-| ⑪ | 标题 | ✅ | Cursor创始团队·LexFridman AI编程：快就是好玩 |
-| EPUB | 电子书 | ✅ | 30章全中文EPUB (241KB)，百度云盘分发 |
-| ⑫ | 元数据 | ✅ | metadata.json（10章节/10标签/554字简介，含百度云盘链接） |
-| ⑬ | 专栏 | ✅ | draft.md（引言+10节核心论点+结尾） |
-| ⑭ | 发布面板 | ✅ | 发布面板.html（含标题/标签/简介/封面/章节/金句） |
+| ②-⑧ | 机械段 | ✅ | 全片 Cursor创始人团队：AI编程的未来.mp4 |
+| ⑨-⑭ | AI段 | ✅ | 封面/标题/电子书/元数据/专栏/发布面板 |
+| ⑯ | 发布 | ❌ | 待发布 |
 
-## 踩坑日志（_ref/pitfalls.md）
+## Kevin Weil 期进度
 
-已收录 11 条，最近 3 条（2026-06-22）：
-- #9 B站章节上限 10 段 + HH:MM:SS 格式
-- #10 B站标签只能逐个输入
-- #11 B站封面 4:3 裁剪安全区
-
-`CLAUDE.md` 已知坑已改为索引表 + 踩坑日志写入标准。
-
-## 已知问题
-
-1. **背景框位置偏差**：色块与文字相对位置不对。代码保留在 stage_07_ass.py（`--bg-opacity` 参数），默认关闭。搁置，难度高暂不处理。
+| # | 阶段 | 状态 | 文件 |
+|---|------|------|------|
+| ②-⑦ | 机械段 | ✅ | _runtime/字幕/05.ass（3250条） |
+| ⑧ | 测试片 | ✅ | KevinWeil_test90s_v2.mp4（90s） |
+| ⑧ | 全片 | ❌ | 未渲染 |
+| ⑨ | 金句 | ❌ | |
+| ⑩ | 封面 | ⚠️ | cover.jpg 已生成，待人工审核 |
+| ⑮ | 发布面板 | ⚠️ | 缺少标签逐个复制/章节/金句字段 |
 
 ## 待做
 
-- [ ] 发布到 B站（打开发布面板.html → 逐项复制到创作者中心）
+- [ ] Kevin Weil 发布面板对齐 Cursor 标准（标签逐个复制 + 章节 ≤10 + 金句候选）
+- [ ] 封面人工审核
+- [ ] Kevin Weil 全片渲染
+- [ ] Cursor 期发布到 B站
+- [ ] Kevin Weil 期发布到 B站
 
 ## 架构
 
 ```
-D:\workspace\lab\2026-06-16-猫波信号站\                   ← Lab 根目录（管线 SDK 开发）
-│
-├── _tools/                             ← 辅助脚本（封面/头像生成等）
-├── _ref/                               ← 参考素材 + 生产参数 + 踩坑日志
-│   ├── pitfalls.md                     ← 踩坑日志（唯一真相源，生产前必读）
-│   └── 生产参数.md                     ← 封面/标题/字幕工程参数
-├── _archive/                           ← 历史归档（过程文件，不含技能副本）
-├── CLAUDE.md                           ← 项目硬约束 + 已知坑索引
-└── HANDOFF.md                          ← 本文档（会话交接）
+D:\workspace\lab\2026-06-16-猫波信号站\    ← 项目根目录（唯一真相源）
+├── CLAUDE.md              ← 入口 → AGENT_GUIDE.md
+├── AGENT_GUIDE.md         ← 全部操作指令
+├── PROJECT_CONTEXT.md     ← 架构总览
+├── HANDOFF.md             ← 会话交接
+├── tools/                 ← 所有阶段脚本 + gen_cover + gen_epub
+├── _ref/
+│   ├── 生产参数.md         ← 工程参数
+│   └── pitfalls.md        ← 11条踩坑记录
+└── _runtime/              ← 开发测试临时文件
 
-技能唯一真相源（C 盘，全局可用）：
-C:\Users\Administrator\.claude\skills\video-catwave\
-├── SKILL.md                            ← 全流程 14 站定义 + 门禁 + 调用方式
-└── tools/
-    ├── _lib.py                         ← 共享库
-    ├── stage_02_download.py            ← ② 下载
-    ├── stage_03_segment.py             ← ③ 去重叠+LLM标点
-    ├── stage_04_sponsor.py             ← ④ 赞助检测
-    ├── stage_05_translate.py           ← ⑤ 翻译+专名修复
-    ├── stage_06_split.py               ← ⑥ 字宽拆分
-    ├── stage_07_ass.py                 ← ⑦ ASS+transcript
-    ├── stage_08_render.py              ← ⑧ 渲染
-    └── gen_cover.py                    ← ⑩ 封面合成
-
-D:\workspace\_output\猫波信号站\视频\20260620_cursor-team-lex-fridman\
-│   _runtime/字幕/  ← 01_raw → 02_seg → 02_seg_clean → 03_zh → 04_split → 05.ass
-│   _runtime/_sponsor_cuts.json  ← 赞助时间戳
-│   _runtime/测试片/  ← test_95s.mp4
-│   _runtime/发布面板过程/  ← 发布面板_v1.html（旧版）+ 发布面板.html（新版）
-│   _runtime/metadata.json  ← ⑫ B站元数据
-│   _runtime/draft.md       ← ⑬ 专栏文章
-│   成片/           ← Cursor创始人团队：AI编程的未来.mp4
-│   电子书/         ← Cursor创始团队：AI编程的快就是乐趣.epub
-│   cover.jpg
-│   发布面板.html   ← ⑭ 发布面板（根目录快捷访问）
+产出目录：D:\workspace\_output\猫波信号站\
 ```
 
 ## 关键约束
 
-- yt-dlp 必须 H.264+AAC
-- YouTube 需代理 VORTEX_PROXY 127.0.0.1:7897
-- DEEPSEEK_API_KEY 用于 ③④⑤
-- ffmpeg 渲染 ASS：必须 chdir 到字幕目录用相对路径
-- 文件名禁止全角冒号 U+FF1A
-- 封面：msyhbd.ttc 纯色无描边，亮度 0.80，#FFC82D，≤4.8MB
-- 视频文件名 = B站标题，标题 ≤80 字
-- 成片只保留最终交付物，测试片放 _runtime/测试片/
-- EPUB 通过百度云盘分发（pan.baidu.com/s/1huGTuQdCWXS0JFERhEf-8g?pwd=1234），B站评论区置顶回复链接
-- 所有产物统一落在当期视频输出目录（`视频/YYYYMMDD_slug/`），含电子书/
+- 工作目录：`cd D:\workspace\lab\2026-06-16-猫波信号站`
+- 封面字体 SimHei（不是 msyhbd），2px 黑边填充
+- ASS：Outline=0，MarginL/R=200
+- 视频文件名 = B站标题，≤80 字
+- 标签逐个复制，章节 ≤10 段 HH:MM:SS
+- EPUB 全中文，百度云盘分发
