@@ -29,6 +29,18 @@
 - **`stage_09_baidu_upload.py`**：修复 GBK 编码 print 崩溃
 - **`stage_16_cdp_upload.py`**：添加 `sys.stdout.reconfigure(encoding='utf-8')` 修复 GBK 控制台输出
 
+### 项目清理
+
+- 删除 `_runtime/cdp/` (27 个 CDP 调试脚本，已由 `stage_16_cdp_upload.py` 替代)
+- 删除错位的旧流程目录 (`cursor-team-lex-fridman`, `dan-shipper-ai-native-lenny`)
+- 删除根目录垃圾文件、cookies.json、临时截图和调试脚本
+- 保留 `_runtime/avatars/`, `_runtime/screenshots/`, `_runtime/review-screenshots/`
+
+### Git
+
+- **commit `2de2db2`**: 14 files, +216/-135
+- 尚未 push
+
 ## 待办
 
 1. **Fiona Fung CDP 后手动步骤** — 见桌面操作清单
