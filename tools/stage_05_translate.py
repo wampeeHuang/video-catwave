@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _lib import SubEntry, read_srt, srt_path, write_srt
+from _lib import SubEntry, clean_srt_text, read_srt, srt_path, write_srt
 
 
 # Proper noun whitelist: patterns in Chinese → correct English
@@ -56,14 +56,14 @@ def run(slug: str, *, api_key: str | None = None, batch_size: int = 10):
                         en_text = entries[idx].text.strip()
                         translated[idx] = SubEntry(
                             entries[idx].index, entries[idx].start, entries[idx].end,
-                            f"{zh_text}\\N{en_text}",
+                            f"{clean_srt_text(zh_text)}\\N{clean_srt_text(en_text)}",
                         )
             except Exception as exc:
                 print(f"  Batch at offset {offset} failed: {exc}")
 
     for i, e in enumerate(entries):
         if translated[i] is None:
-            translated[i] = SubEntry(e.index, e.start, e.end, f"[未翻译]\\N{e.text.strip()}")
+            translated[i] = SubEntry(e.index, e.start, e.end, f"[未翻译]\\N{clean_srt_text(e.text.strip())}")
 
     zh_path = srt_path(slug, "03_zh.srt")
     write_srt(translated, zh_path)

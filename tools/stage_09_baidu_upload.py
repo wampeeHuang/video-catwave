@@ -52,13 +52,20 @@ def upload_epub(epub_path: Path) -> bool:
 
     if result.stdout:
         for line in result.stdout.splitlines():
-            if line.strip():
-                print(f"  {line.strip()}")
+            s = line.strip()
+            if s:
+                try:
+                    print(f"  {s}")
+                except UnicodeEncodeError:
+                    print(f"  {s.encode('ascii', errors='replace').decode('ascii')}")
     if result.stderr:
         for line in result.stderr.splitlines():
             s = line.strip()
             if s and not s.startswith("<W>"):
-                print(f"  [stderr] {s}", file=sys.stderr)
+                try:
+                    print(f"  [stderr] {s}", file=sys.stderr)
+                except UnicodeEncodeError:
+                    pass
 
     if result.returncode != 0:
         print(f"ERROR: bypy exited with code {result.returncode}")

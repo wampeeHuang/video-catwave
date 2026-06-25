@@ -14,7 +14,16 @@ import dataclasses
 import re
 import shutil
 import subprocess
+from datetime import datetime
 from pathlib import Path
+
+
+def clean_srt_text(text: str) -> str:
+    """Strip [音乐]/[music]/[掌声]/[Applause]/>> markers and normalize whitespace."""
+    text = re.sub(r"\[(?:音乐|music|掌声|Applause|笑声|Laughter)\]", "", text)
+    text = re.sub(r">>\s*", "", text)
+    text = re.sub(r"  +", " ", text)
+    return text.strip()
 
 # ── Path roots ───────────────────────────────────────────────────────────────
 
@@ -68,7 +77,7 @@ def parse_srt(text: str) -> list[SubEntry]:
         if len(lines) < 3:
             continue
         try:
-            idx = int(lines[0].strip())
+            idx = int(lines[0].strip().lstrip("﻿"))
         except ValueError:
             continue
         timing = lines[1].strip()
@@ -131,14 +140,23 @@ def ms_to_time(ms: int) -> str:
 # ── Path resolution ──────────────────────────────────────────────────────────
 
 
+def _normalize_slug(slug: str) -> str:
+    """Ensure slug has YYYYMMDD_ prefix. Uses today's date if missing."""
+    if re.match(r"^\d{8}_", slug):
+        return slug
+    today = datetime.now().strftime("%Y%m%d")
+    return f"{today}_{slug}"
+
+
 def extract_slug(url: str) -> str:
-    """Derive video slug from YouTube URL."""
+    """Derive video slug from YouTube URL. Returns YYYYMMDD_videoid format."""
     m = re.search(r"(?:v=|youtu\.be/)([a-zA-Z0-9_-]+)", url)
-    return m.group(1)[:20] if m else "video"
+    return _normalize_slug(m.group(1)[:20] if m else "video")
 
 
 def slug_dir(slug: str) -> Path:
-    """Resolve slug to output directory. Supports YYYYMMDD_slug prefix match."""
+    """Resolve slug to output directory. Auto-prepends today's date if missing."""
+    slug = _normalize_slug(slug)
     d = RUNTIME / slug
     if d.exists():
         return d

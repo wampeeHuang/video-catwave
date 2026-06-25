@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _lib import SubEntry, ms_to_time, read_srt, srt_path, time_to_ms, write_srt
+from _lib import SubEntry, clean_srt_text, ms_to_time, read_srt, srt_path, time_to_ms, write_srt
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
@@ -41,8 +41,8 @@ def run(slug: str, max_px: int = MAX_PX):
     over_count = 0
     for e in entries:
         parts = e.text.split("\\N", 1)
-        zh = parts[0].strip()
-        en = parts[1].strip() if len(parts) > 1 else ""
+        zh = clean_srt_text(parts[0])
+        en = clean_srt_text(parts[1]) if len(parts) > 1 else ""
 
         if _cn_pixel_width(zh) <= max_px:
             result.append(e)
@@ -86,6 +86,11 @@ def run(slug: str, max_px: int = MAX_PX):
             text = f"{seg_zh}\\N{seg_en}" if seg_en else seg_zh
             result.append(SubEntry(len(result) + 1, ms_to_time(cursor), ms_to_time(seg_end), text))
             cursor = seg_end
+
+    # Sort by start time (entries can be out of order due to overlapping source)
+    result.sort(key=lambda e: time_to_ms(e.start))
+    for i, e in enumerate(result):
+        e.index = i + 1
 
     out = srt_path(slug, "04_split.srt")
     write_srt(result, out)

@@ -461,7 +461,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <div class="pipe">
       <span>① 选题</span><span class="arr">→</span>
       <span style="background:var(--green-bg);border-color:var(--green);">② 下载</span><span class="arr">→</span>
-      <span style="background:var(--green-bg);border-color:var(--green);">③ 断句</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">③ Whisper转录</span><span class="arr">→</span>
       <span style="background:var(--green-bg);border-color:var(--green);">④ 赞助检测</span><span class="arr">→</span>
       <span style="background:var(--green-bg);border-color:var(--green);">⑤ 翻译</span><span class="arr">→</span>
       <span style="background:var(--green-bg);border-color:var(--green);">⑥ 字宽拆分</span><span class="arr">→</span>
@@ -584,9 +584,9 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 
     <div class="stage-row">
       <h4>⑦ ASS</h4>
-      <pre><span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span>                    <span class="dim"># 默认无背景框</span>
-<span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bg-opacity 0.5  <span class="dim"># 50% 黑底</span>
-<span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bg-padding 20   <span class="dim"># 自定义间距</span></pre>
+      <pre><span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bord 1 --outline-alpha 128  <span class="dim"># 推荐：1px 50%透明黑边</span>
+<span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bord 3       <span class="dim"># 3px不透明描边（Netflix标准）</span>
+<span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bg-opacity 0.5  <span class="dim"># 背景色块替代方案</span></pre>
       <table>
         <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
         <tbody>
@@ -736,7 +736,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
         <tr><td class="nowrap">④</td><td>赞助检测</td><td><code>02_seg_clean.srt</code><br><code>_sponsor_cuts.json</code></td><td class="path">_runtime/字幕/02_seg_clean.srt<br>_runtime/字幕/_sponsor_cuts.json</td><td>clean 条目 ≤ seg；json 中 cut 段 ≥10s；确认无误杀正片</td></tr>
         <tr><td class="nowrap">⑤</td><td>翻译</td><td><code>03_zh.srt</code></td><td class="path">_runtime/字幕/03_zh.srt</td><td>条目数 = 02_seg_clean；每行含 <code>\N</code> 双语；无非 ASCII 乱码段</td></tr>
         <tr><td class="nowrap">⑥</td><td>字宽拆分</td><td><code>04_split.srt</code></td><td class="path">_runtime/字幕/04_split.srt</td><td>中文字数 ≤28 字/行；无单帧闪烁段（<2s 已合并）</td></tr>
-        <tr><td class="nowrap">⑦</td><td>ASS</td><td><code>05.ass</code><br><code>transcript.txt</code></td><td class="path">_runtime/字幕/05.ass<br>_runtime/字幕/transcript.txt</td><td>CN SimHei 42px + EN 36px；<code>\N</code> 单事件双语；Layer 1 文字 + Layer 0 背景框（可选）；无段间重叠</td></tr>
+        <tr><td class="nowrap">⑦</td><td>ASS</td><td><code>05.ass</code><br><code>transcript.txt</code></td><td class="path">_runtime/字幕/05.ass<br>_runtime/字幕/transcript.txt</td><td>CN SimHei 42px + EN 36px；<code>\N</code> 单事件双语；bord=1 outline-alpha=128（1px 50%透明黑边）；无段间重叠</td></tr>
         <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑧</td><td>渲染</td><td><code>&lt;标题&gt;.mp4</code>（成片）<br><code>test_*.mp4</code>（测试片）</td><td class="path">成片/&lt;标题&gt;.mp4<br>_runtime/test_*.mp4</td><td>测试片先行（30-60s 验证同步）；全片 H.264 CRF=23 + AAC 128k；字幕无重叠/无渲染异常</td></tr>
         <tr><td class="nowrap">⑨</td><td>百度云上传</td><td>EPUB 已上传</td><td class="path">百度云盘「猫波信号站电子书」</td><td>bypy upload 成功，共享文件夹可见</td></tr>
         <tr><td class="nowrap">⑩</td><td>元数据 JSON</td><td><code>metadata.json</code></td><td class="path">_runtime/metadata.json</td><td>含 title/tags/description/chapters，供 stage_15/16 消费</td></tr>
@@ -744,7 +744,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
         <tr><td class="nowrap">⑫</td><td>封面</td><td><code>cover.jpg</code><br><code>frames/</code>（截图帧）</td><td class="path">cover.jpg<br>_runtime/frames/</td><td>1920×1080 JPG ≤4.8MB；黄字 165px max #FFC82D 纯色无描边；安全区 1440px；底图亮度 0.80；人物正脸</td></tr>
         <tr><td class="nowrap">⑬</td><td>标题</td><td>Claude 输出（无独立文件）</td><td class="path">—</td><td>3-5 候选标题；≤80 字；格式=「嘉宾身份 嘉宾名：核心论断」</td></tr>
         <tr><td class="nowrap">⑭</td><td>电子书 EPUB</td><td><code>draft.md</code><br><code>&lt;标题&gt;.epub</code></td><td class="path">_runtime/draft.md<br>电子书/&lt;标题&gt;.epub</td><td>md 可发布 B站专栏；epub 全中文，微信读书可导入</td></tr>
-        <tr><td class="nowrap">⑮</td><td>发布面板</td><td><code>发布面板.html</code><br><code>chapters_bilibili.json</code></td><td class="path">发布面板.html<br>_runtime/chapters_bilibili.json</td><td>章节 ≤10 个；标签 3-10 个；简介含章节时间戳</td></tr>
+        <tr><td class="nowrap">⑮</td><td>发布面板</td><td><code>发布面板.html</code><br><code>chapters_bilibili.json</code></td><td class="path">发布面板.html<br>_runtime/chapters_bilibili.json</td><td>章节 ≤10 个，每标题 ≤16 字；标签 3-10 个；简介含章节时间戳</td></tr>
         <tr style="border-top:2px solid var(--pink);"><td class="nowrap">⑯</td><td>B站上传</td><td><code>HANDOFF.md</code><br><code>.published</code></td><td class="path">HANDOFF.md<br>.published（空标记文件）</td><td>草稿箱确认存在 / API 返回成功；HANDOFF 含 BV号+发布时间；选题库已更新状态→已发布</td></tr>
       </tbody>
     </table>

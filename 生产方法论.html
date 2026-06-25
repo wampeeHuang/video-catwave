@@ -314,7 +314,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <div class="pipe">
     <span>① 选题</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">③ 断句</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">③ Whisper转录</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">④ 赞助检测</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑤ 翻译</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑥ 字宽拆分</span><span class="arr">→</span>
@@ -795,7 +795,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <div class="pipe">
     <span style="background:#ECFDF5;border-color:#10B981;">① 选题</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">③ 断句</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">③ Whisper转录</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">④ 赞助检测</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑤ 翻译</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑥ 字宽拆分</span><span class="arr">→</span>
@@ -818,7 +818,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tbody>
     <tr><td class="nowrap">① 选题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>飞书 API + Claude 评分</td><td>候选池 → URL + slug</td><td>~5m</td></tr>
     <tr><td class="nowrap">② 下载</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>yt-dlp</code></td><td>URL → mp4 + srt</td><td>~3m</td></tr>
-    <tr><td class="nowrap">③ 断句</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_03_segment.py</code></td><td>01_raw.srt → 02_seg.srt</td><td>~30s</td></tr>
+    <tr><td class="nowrap">③ Whisper转录</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_03_whisper.py</code></td><td>source.mp4 → 02_seg.srt（音频对齐，无重叠）</td><td>~3m</td></tr>
     <tr><td class="nowrap">④ 赞助检测</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td>DeepSeek API（stage_04_sponsor.py）</td><td>02_seg.srt → 02_seg_clean.srt + _sponsor_cuts.json</td><td>~30s</td></tr>
     <tr><td class="nowrap">⑤ 翻译</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td>DeepSeek API（stage_05_translate.py）</td><td>02_seg_clean.srt → 03_zh.srt</td><td>~1m</td></tr>
     <tr><td class="nowrap">⑥ 字宽拆分</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_06_split.py</code></td><td>03_zh.srt → 04_split.srt</td><td>&lt;1s</td></tr>
@@ -840,11 +840,11 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <thead><tr><th>段</th><th>脚本</th><th>产出文件</th><th>落盘位置</th><th>格式</th><th>条目</th><th>说明</th></tr></thead>
     <tbody>
     <tr><td class="nowrap">②</td><td><code>stage_02_download.py</code></td><td><code>source.mp4</code><br><code>01_raw.srt</code></td><td>lab → 手动搬入 output <code>素材/</code><br>output <code>字幕/</code></td><td>MP4<br>SRT</td><td>—<br>5093</td><td>yt-dlp 原始下载<br>YouTube 滑动窗口</td></tr>
-    <tr><td class="nowrap">③</td><td><code>stage_03_segment.py</code></td><td><code>02_seg.srt</code></td><td>output <code>字幕/</code></td><td>SRT</td><td>540</td><td>delta 去重→LLM 标点→句合并→长句拆分</td></tr>
+    <tr><td class="nowrap">③</td><td><code>stage_03_whisper.py</code></td><td><code>02_seg.srt</code></td><td>output <code>字幕/</code></td><td>SRT</td><td>540</td><td>faster-whisper 音频对齐 → VAD 分割 → 去重，时间戳无重叠</td></tr>
     <tr><td class="nowrap">④</td><td><code>stage_04_sponsor.py</code></td><td><code>02_seg_clean.srt</code><br><code>_sponsor_cuts.json</code></td><td>output <code>字幕/</code></td><td>SRT<br>JSON</td><td>505<br>—</td><td>切掉 25 条广告<br>ffmpeg 剪切时间点</td></tr>
     <tr><td class="nowrap">⑤</td><td><code>stage_05_translate.py</code></td><td><code>03_zh.srt</code></td><td>output <code>字幕/</code></td><td>SRT (<code>\N</code> 双语)</td><td>505</td><td>DeepSeek EN→ZH, 并发5</td></tr>
     <tr><td class="nowrap">⑥</td><td><code>stage_06_split.py</code></td><td><code>04_split.srt</code></td><td>output <code>字幕/</code></td><td>SRT</td><td>1104</td><td>像素宽度检测 + 标点拆分, 286条超宽</td></tr>
-    <tr><td class="nowrap">⑦</td><td><code>stage_07_ass.py</code></td><td><code>05.ass</code><br><code>transcript.txt</code></td><td>output <code>字幕/</code></td><td>ASS<br>TXT</td><td>1104<br>—</td><td>WrapStyle 0, 背景框 50%黑<br>纯中文逐行文本</td></tr>
+    <tr><td class="nowrap">⑦</td><td><code>stage_07_ass.py</code></td><td><code>05.ass</code><br><code>transcript.txt</code></td><td>output <code>字幕/</code></td><td>ASS<br>TXT</td><td>1104<br>—</td><td>bord=1 alpha=128 半透明黑边<br>纯中文逐行文本</td></tr>
     <tr><td class="nowrap">⑧</td><td><code>stage_08_render.py</code></td><td><code>&lt;标题&gt;.mp4</code></td><td>output <code>成片/</code></td><td>MP4</td><td>—</td><td>ffmpeg 渲染, H.264+AAC</td></tr>
     </tbody>
   </table>
@@ -903,12 +903,11 @@ Keep it concise and natural. Preserve technical terms where appropriate.</pre>
   </table>
 
   <pre># 调用方式
-python stage_07_ass.py --slug &lt;slug&gt;                          # 默认：50% 黑底 + 15px 间距
-python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.6          # 60% 不透明度
-python stage_07_ass.py --slug &lt;slug&gt; --bg-padding 20           # 20px 间距
-python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0            # 无背景框</pre>
+python stage_07_ass.py --slug &lt;slug&gt; --bord 1 --outline-alpha 128  # 推荐：1px 50%透明黑边
+python stage_07_ass.py --slug &lt;slug&gt; --bord 3                       # 3px不透明描边
+python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背景色块替代</pre>
 
-  <p style="font-size:12px;color:var(--muted);">渲染后拖进度条检查：背景框应盖住浅色画面区域使白字清晰可读，框不应溢出到无关区域，导角应自然不尖锐。</p>
+  <p style="font-size:12px;color:var(--muted);">渲染后拖进度条检查：字幕应清晰可读，白字黑边应在任何背景上可见。</p>
 
   <h4>赞助商检测（Karpathy 方案 · 2026-06-20）</h4>
   <div class="hl hl-r"><strong>背景：</strong>Kevin Weil 期 167/247 条 (68%) 翻译失败。根因不在翻译 prompt——是把"判定是否值得翻"和"翻译"混在了同一个步骤里。DeepSeek 遇到 ASR 质量差的英文直接跳过整行。D-02 已判：赞助商段直接剪切，不走翻译。</div>

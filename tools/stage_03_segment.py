@@ -1,18 +1,10 @@
-"""Stage ③: Extract delta from YouTube sliding-window captions, LLM adds punctuation.
+"""DEPRECATED — Use stage_03_whisper.py instead.
 
-Usage: python stage_03_segment.py --slug <slug>
-Input:  <output>/_runtime/素材/01_raw.srt
-Output: <output>/_runtime/字幕/02_seg.srt
+YouTube auto-caption timestamps are sliding windows with inherent overlaps
+(see _ref/pitfalls.md §时序漂移). This script is kept as emergency fallback
+only — it requires --force to run and prints a warning.
 
-Key insight: YouTube auto-captions are sliding windows. Each 2-3s fragment repeats
-previous text + adds new words. 10ms stubs mark word boundaries.
-
-Strategy:
-  1. Filter 10ms stubs
-  2. Extract NEW text from each fragment (delta)
-  3. Batch consecutive deltas → LLM adds punctuation ONLY (no <S> splitting)
-  4. Map punctuation back to individual deltas
-  5. Each delta keeps its ORIGINAL YouTube timestamp (millisecond precision)
+Usage: python stage_03_segment.py --slug <slug> --force
 """
 import argparse
 import json
@@ -31,7 +23,16 @@ from _lib import (
 MIN_DURATION_MS = 100
 
 
-def run(slug: str, *, api_key: str | None = None):
+def run(slug: str, *, api_key: str | None = None, force: bool = False):
+    if not force:
+        print("=" * 60)
+        print("  DEPRECATED — Use stage_03_whisper.py instead.")
+        print("  YouTube auto-caption timestamps are sliding windows with")
+        print("  inherent overlaps. Whisper timestamps are audio-aligned.")
+        print("  Add --force to run this script anyway.")
+        print("=" * 60)
+        sys.exit(1)
+
     api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
 
     video = find_video(slug)
@@ -315,7 +316,8 @@ def _parse_punctuation(response: str, batch: list[SubEntry]) -> list[SubEntry]:
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(description="③ Delta extraction + punctuation")
+    p = argparse.ArgumentParser(description="③ [DEPRECATED] Delta extraction + punctuation")
     p.add_argument("--slug", required=True)
+    p.add_argument("--force", action="store_true", help="Suppress deprecation warning")
     args = p.parse_args()
-    run(args.slug)
+    run(args.slug, force=args.force)

@@ -20,7 +20,7 @@ YouTube → B站 搬运管线。本文件每次对话自动加载，是所有操
 ## 1. 管线流程
 
 ```
-② 下载 ──→ ③ 去重叠+标点 ──→ ④ 赞助检测 ──→ ⑤ 翻译 ──→ ⑥ 字宽检查 ──→ ⑦ ASS ──→ ⑧ 渲染
+② 下载 ──→ ③ Whisper转录 ──→ ④ 赞助检测 ──→ ⑤ 翻译 ──→ ⑥ 字宽检查 ──→ ⑦ ASS ──→ ⑧ 渲染
                机械段（每阶段独立脚本，可单独重跑）
 
 ⑨ 百度云上传 ──→ ⑩ 元数据 JSON ──→ ⑪ 金句提取 ──→ ⑫ 封面 ──→ ⑬ 标题 ──→ ⑭ 电子书 ──→ ⑮ 发布面板 ──→ ⑯ B站上传
@@ -65,8 +65,8 @@ D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>\
 # ② 下载
 python tools/stage_02_download.py --url "<YouTube URL>" --slug <slug>
 
-# ③ 去重叠 + LLM 补标点
-python tools/stage_03_segment.py --slug <slug>
+# ③ Whisper 转录（时间锚点，不可用 segment 替代）
+python tools/stage_03_whisper.py --slug <slug>
 
 # ④ 赞助检测
 python tools/stage_04_sponsor.py --slug <slug>
@@ -77,8 +77,8 @@ python tools/stage_05_translate.py --slug <slug>
 # ⑥ 标点优先拆分 + 像素宽度检查
 python tools/stage_06_split.py --slug <slug>
 
-# ⑦ ASS + transcript
-python tools/stage_07_ass.py --slug <slug>
+# ⑦ ASS + transcript（--bord 3 白字黑边，Netflix 标准）
+python tools/stage_07_ass.py --slug <slug> --bord 3
 
 # ⑧ 渲染（--duration 60 做测试片）
 python tools/stage_08_render.py --slug <slug> --title "标题" [--duration 60]
@@ -102,7 +102,7 @@ python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 
 | 要改什么 | 从哪个阶段重跑 |
 |----------|---------------|
-| 断句粒度 | ③ → ④ → ⑤ → ⑥ → ⑦ → ⑧ |
+| Whisper 转录 | ③ → ④ → ⑤ → ⑥ → ⑦ → ⑧ |
 | 翻译质量/专名 | ⑤ → ⑥ → ⑦ → ⑧ |
 | 字宽阈值 | ⑥ → ⑦ → ⑧ |
 | ASS 样式 | ⑦ → ⑧ |
@@ -112,11 +112,11 @@ python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 
 | 阶段 | 检查项 | 标准 |
 |------|--------|------|
-| ③ | 断句粒度 | 每段 5-15 词 |
+| ③ | Whisper 转录 | 输出 02_seg.srt，时间戳无重叠，直接绑定音频波形 |
 | ④ | 赞助检测 | 抽检被剔段落确为赞助 |
 | ⑤ | 翻译 | 行数=④，专名留英文 |
 | ⑥ | 字宽 | 中文像素宽 ≤1520px（SimHei 42px） |
-| ⑦ | ASS | Outline=0，MarginL/R=200 |
+| ⑦ | ASS | Outline=3, OutlineColour=opaque black, MarginL/R=200 |
 | ⑧ | 渲染 | 音画同步，赞助已裁 |
 
 ## 3. 封面工作流
@@ -167,6 +167,7 @@ python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 **章节规则**：
 - ≤10 段（B站硬上限）
 - 格式 `HH:MM:SS 标题`（必须带小时位）
+- **标题 ≤16 字**（B站硬上限，超长截断）
 - 间隔 ≥5 秒，按时间递增
 - 入口：创作中心 → 稿件管理 → 视频右侧「···」→ 个性化配置 → 分段章节
 
@@ -292,6 +293,7 @@ python tools/stage_09_baidu_upload.py --slug <slug>
 ## 7. 文件纪律
 
 - 所有产出物落 `D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>\`
+- **目录命名宪法**: 格式 `YYYYMMDD_slug`，日期 = 处理当天（不是视频发布日期）。`_lib.py` 的 `slug_dir()` 自动强制此规则，裸 slug 自动补当天日期前缀
 - 封面固定 `cover.jpg`，不保留多版本
 - 成片只放最终交付物，测试片放 `_runtime/`
 - `_runtime/` 保留溯源，发布后不删

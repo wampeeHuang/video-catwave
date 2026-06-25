@@ -17,10 +17,10 @@ from _lib import (
 )
 
 CN_FS = 42       # SimHei
-EN_FS = 32       # Segoe UI Bold
+EN_FS = 36       # Microsoft YaHei (matches \fs36 in _generate_ass)
 
 
-def run(slug: str, bg_opacity: float = 0, bg_padding: int = 15):
+def run(slug: str, bg_opacity: float = 0, bg_padding: int = 15, bord: int = 0, outline_alpha: int = 255):
     src = srt_path(slug, "04_split.srt")
     if not src.exists():
         print(f"ERROR: {src} not found. Run stage_06 first.")
@@ -28,10 +28,15 @@ def run(slug: str, bg_opacity: float = 0, bg_padding: int = 15):
 
     entries = read_srt(src)
     fixed = _clip_overlaps(entries)
-    ass = _generate_ass(fixed, bg_opacity, bg_padding)
+    ass = _generate_ass(fixed, bg_opacity, bg_padding, bord, outline_alpha)
     ass_path = srt_path(slug, "05.ass")
     ass_path.write_text(ass, encoding="utf-8")
-    label = f"bg={bg_opacity:.0%} pad={bg_padding}px" if bg_opacity > 0 else "no bg"
+    if bord > 0:
+        label = f"bord={bord}px alpha={outline_alpha}"
+    elif bg_opacity > 0:
+        label = f"bg={bg_opacity:.0%} pad={bg_padding}px"
+    else:
+        label = "no bg/bord"
     print(f"[⑦] ASS: {len(fixed)} events → {ass_path.name}  ({label})")
 
     cn_entries = [_cn_only(e) for e in fixed]
@@ -42,20 +47,45 @@ def run(slug: str, bg_opacity: float = 0, bg_padding: int = 15):
 
 
 def _clip_overlaps(entries: list[SubEntry]) -> list[SubEntry]:
+    # Sort by start time; for same start, keep shorter (more specific) entry, drop longer
+    entries = sorted(entries, key=lambda e: (time_to_ms(e.start), time_to_ms(e.end) - time_to_ms(e.start)))
     fixed = []
-    for i, e in enumerate(entries):
+    prev_start_ms = -1
+    for e in entries:
+        start_ms = time_to_ms(e.start)
         end_ms = time_to_ms(e.end)
-        if i + 1 < len(entries):
-            next_start_ms = time_to_ms(entries[i + 1].start)
-            if end_ms > next_start_ms:
-                end_ms = max(next_start_ms - 20, time_to_ms(e.start) + 500)
-        fixed.append(SubEntry(e.index, e.start, ms_to_time(end_ms), e.text))
+        # Drop entries that start at the exact same ms as the one we kept
+        if start_ms == prev_start_ms:
+            continue
+        fixed.append(e)
+        prev_start_ms = start_ms
+
+    # Clip end times so entries don't overlap
+    for i in range(len(fixed) - 1):
+        end_ms = time_to_ms(fixed[i].end)
+        next_start_ms = time_to_ms(fixed[i + 1].start)
+        if end_ms > next_start_ms:
+            min_end = time_to_ms(fixed[i].start) + 500
+            fixed[i].end = ms_to_time(max(next_start_ms - 20, min_end))
+
+    # Re-index
+    for i, e in enumerate(fixed):
+        e.index = i + 1
     return fixed
+
+
+def _clean_text(text: str) -> str:
+    """Strip sound-effect markers and speaker-change arrows."""
+    import re
+    text = re.sub(r'\[(?:音乐|music|掌声|Applause|笑声|Laughter)\]', '', text)
+    text = re.sub(r'>>\s*', '', text)
+    text = re.sub(r'  +', ' ', text)
+    return text.strip()
 
 
 def _cn_only(e: SubEntry) -> SubEntry:
     parts = e.text.split("\\N", 1)
-    return SubEntry(e.index, e.start, e.end, parts[0])
+    return SubEntry(e.index, e.start, e.end, _clean_text(parts[0]))
 
 
 def _px_width(text: str, fs: int) -> int:
@@ -64,7 +94,7 @@ def _px_width(text: str, fs: int) -> int:
     for ch in text:
         cp = ord(ch)
         if cp < 128:
-            w += int(fs * 0.55)
+            w += int(fs * 0.50)
         elif 0x4E00 <= cp <= 0x9FFF or 0x3000 <= cp <= 0x303F:
             w += fs
         else:
@@ -73,18 +103,18 @@ def _px_width(text: str, fs: int) -> int:
 
 
 def _bg_box(cn_text: str, en_text: str, padding: int, alpha_hex: str) -> str:
-    """Generate drawing rectangle that spans both CN and EN lines as one block.
+    """Generate drawing rectangle behind subtitle text.
 
     Alignment=2 (bottom centre): X=0 is center, Y=0 is bottom of text, Y goes up.
     """
     cn_w = _px_width(cn_text, CN_FS)
-    en_w = _px_width(en_text, EN_FS)
+    en_w = _px_width(en_text, EN_FS) if en_text else 0
     max_w = max(cn_w, en_w)
-    hw = max_w // 2 + padding  # half box width
+    hw = max_w // 2 + padding
 
-    cn_h = int(CN_FS * 1.25)   # line height
-    en_h = int(EN_FS * 1.25)
-    gap = 5                     # \N gap
+    cn_h = int(CN_FS * 1.25)
+    en_h = int(EN_FS * 1.25) if en_text else 0
+    gap = 5 if en_text else 0
     text_h = cn_h + en_h + gap
     top = text_h + padding
     bottom = -padding
@@ -96,9 +126,19 @@ def _bg_box(cn_text: str, en_text: str, padding: int, alpha_hex: str) -> str:
     )
 
 
-def _generate_ass(entries: list[SubEntry], bg_opacity: float, bg_padding: int) -> str:
+def _generate_ass(entries: list[SubEntry], bg_opacity: float, bg_padding: int, bord: int = 0, outline_alpha: int = 255) -> str:
     alpha_hex = f"{int((1.0 - bg_opacity) * 255):02X}" if bg_opacity > 0 else "00"
     use_bg = bg_opacity > 0
+
+    if bord > 0:
+        alpha_hex_outline = f"{outline_alpha:02X}"
+        outline_colour = f"&H{alpha_hex_outline}000000&"
+        outline_val = bord
+        shadow_val = 1
+    else:
+        outline_colour = "&H00000000&"
+        outline_val = 0
+        shadow_val = 0
 
     header = f"""[Script Info]
 Title: Bilingual Subtitles
@@ -108,7 +148,7 @@ PlayResY: 1080
 WrapStyle: 0
 
 [V4+ Styles]
-Style: Default,SimHei,{CN_FS},&H00FFFFFF&,&H00000000&,&H00000000&,&H00000000&,0,0,0,0,100,100,0,0,1,0,0,2,200,200,45,1
+Style: Default,SimHei,{CN_FS},&H00FFFFFF&,&H00000000&,{outline_colour},&H00000000&,0,0,0,0,100,100,0,0,1,{outline_val},{shadow_val},2,200,200,45,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -118,21 +158,21 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         start = _ass_time(e.start)
         end = _ass_time(e.end)
         parts = e.text.split("\\N", 1)
-        cn = parts[0].strip()
-        en = parts[1].strip() if len(parts) > 1 else ""
+        cn = _clean_text(parts[0])
+        en = _clean_text(parts[1]) if len(parts) > 1 else ""
 
         # Text event (Layer 1)
-        text = e.text.replace("\\N", "\\N{\\fnMicrosoft YaHei\\fs36}")
+        if en:
+            text = f"{cn}\\N{{\\fnMicrosoft YaHei\\fs36}}{en}"
+        else:
+            text = cn
         lines.append(f"Dialogue: 1,{start},{end},Default,,0,0,45,,{text}")
 
         # Background box event (Layer 0) — separate event avoids libass 0.17.4
         # bug where {\p1} drawing commands leak as visible text when combined
         # with text in the same Dialogue event.
-        if use_bg and cn and en:
+        if use_bg and cn:
             box = _bg_box(cn, en, bg_padding, alpha_hex)
-            lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,45,,{box}")
-        elif use_bg and cn:
-            box = _bg_box(cn, cn, bg_padding, alpha_hex)
             lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,45,,{box}")
     return "\n".join(lines)
 
@@ -150,5 +190,9 @@ if __name__ == "__main__":
                    help="Background box opacity 0.0-1.0 (default 0=disabled)")
     p.add_argument("--bg-padding", type=int, default=15,
                    help="Background box padding in px (default 15)")
+    p.add_argument("--bord", type=int, default=0,
+                   help="Text border/outline in px (default 0=disabled). Netflix standard is 3.")
+    p.add_argument("--outline-alpha", type=int, default=255,
+                   help="Outline alpha 0-255 (default 255=opaque. 128=50%%, 0=invisible)")
     args = p.parse_args()
-    run(args.slug, bg_opacity=args.bg_opacity, bg_padding=args.bg_padding)
+    run(args.slug, bg_opacity=args.bg_opacity, bg_padding=args.bg_padding, bord=args.bord, outline_alpha=args.outline_alpha)

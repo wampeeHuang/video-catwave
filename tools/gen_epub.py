@@ -9,9 +9,10 @@ import re
 import sys
 from pathlib import Path
 
-from ebooklib import epub
+sys.path.insert(0, str(Path(__file__).parent))
+from _lib import slug_dir
 
-OUTPUT_BASE = Path(r"D:\workspace\_output\猫波信号站\视频")
+from ebooklib import epub
 
 
 def parse_srt(path: Path) -> list[dict]:
@@ -27,10 +28,18 @@ def parse_srt(path: Path) -> list[dict]:
             continue
         body = "\n".join(lines[2:])
         parts = body.split("\\N", 1)
-        zh = parts[0].strip()
-        en = parts[1].strip() if len(parts) > 1 else ""
+        zh = _clean(parts[0])
+        en = _clean(parts[1]) if len(parts) > 1 else ""
         entries.append({"start": m.group(1), "zh": zh, "en": en})
     return entries
+
+
+def _clean(text: str) -> str:
+    """Strip [音乐]/[music]/>> markers and extra whitespace."""
+    text = re.sub(r"\[(?:音乐|music|掌声|Applause|笑声|Laughter)\]", "", text)
+    text = re.sub(r">>\s*", "", text)
+    text = re.sub(r"  +", " ", text)
+    return text.strip()
 
 
 def time_to_seconds(t: str) -> int:
@@ -38,7 +47,7 @@ def time_to_seconds(t: str) -> int:
     return int(h) * 3600 + int(m) * 60 + int(float(s))
 
 
-def build_epub(entries, cover_path, output_path, title, author, source, lang="bilingual", baidu_link=None):
+def build_epub(entries, cover_path, output_path, title, author, source, lang="zh", baidu_link=None):
     book = epub.EpubBook()
 
     slug = re.sub(r"[^a-z0-9-]", "", title.lower().replace(" ", "-")[:40])
@@ -173,7 +182,7 @@ def main():
                         help="Baidu Cloud share link for EPUB colophon")
     args = parser.parse_args()
 
-    base = OUTPUT_BASE / args.slug
+    base = slug_dir(args.slug)
     srt = base / "_runtime/字幕/03_zh.srt"
     cover = base / "cover.jpg"
     safe_title = args.title.replace("：", "-").replace(":", "-")

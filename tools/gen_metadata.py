@@ -13,7 +13,8 @@ import re
 import sys
 from pathlib import Path
 
-OUTPUT_BASE = Path(r"D:\workspace\_output\猫波信号站\视频")
+sys.path.insert(0, str(Path(__file__).parent))
+from _lib import slug_dir
 
 
 def time_to_seconds(t: str) -> int:
@@ -83,8 +84,6 @@ def auto_chapters(entries: list[dict], max_chapters: int = 10) -> list[list[str]
 
 def read_draft_description(slug: str) -> str | None:
     """Try to read description from draft.md."""
-    from _lib import slug_dir
-
     draft = slug_dir(slug) / "_runtime" / "draft.md"
     if not draft.exists():
         return None
@@ -124,7 +123,7 @@ def main():
                         help="Path to chapters JSON file (auto-generated if omitted)")
     args = parser.parse_args()
 
-    base = OUTPUT_BASE / args.slug
+    base = slug_dir(args.slug)
     srt = base / "_runtime" / "字幕" / "03_zh.srt"
 
     if not srt.exists():

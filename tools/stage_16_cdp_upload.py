@@ -26,7 +26,16 @@ import time
 import websocket
 from pathlib import Path
 
-OUTPUT_ROOT = Path(r"D:\workspace\_output\猫波信号站\视频")
+# Fix GBK console encoding on Windows
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
+sys.path.insert(0, str(Path(__file__).parent))
+from _lib import slug_dir as _slug_dir
 BILI_UPLOAD_URL = "https://member.bilibili.com/platform/upload/video/frame"
 BILI_MANAGE_URL = "https://member.bilibili.com/platform/upload-manage"
 
@@ -651,19 +660,19 @@ def check_form_state(send):
 
 def find_assets(slug):
     """Find cover, video, and metadata for a given slug."""
-    slug_dir = OUTPUT_ROOT / slug
-    if not slug_dir.exists():
-        print(f"ERROR: slug 目录不存在: {slug_dir}")
+    base = _slug_dir(slug)
+    if not base.exists():
+        print(f"ERROR: slug 目录不存在: {base}")
         sys.exit(1)
 
     # Cover
-    cover = slug_dir / "cover.jpg"
+    cover = base / "cover.jpg"
     if not cover.exists():
         print(f"WARNING: cover not found: {cover}")
         cover = None
 
     # Video (in 成片/)
-    video_dir = slug_dir / "成片"
+    video_dir = base / "成片"
     video = None
     if video_dir.exists():
         videos = list(video_dir.glob("*.mp4"))
@@ -677,7 +686,7 @@ def find_assets(slug):
                         break
 
     # Metadata
-    metadata = slug_dir / "_runtime" / "metadata.json"
+    metadata = base / "_runtime" / "metadata.json"
     if not metadata.exists():
         print(f"WARNING: metadata not found: {metadata}")
         metadata = None
