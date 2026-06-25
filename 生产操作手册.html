@@ -1,0 +1,1028 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>生产操作手册 · 猫波信号站</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F2EEDF;
+  --ink: #2A241B;
+  --ink-soft: #5C5345;
+  --muted: #8C8275;
+  --border: #D9D4C7;
+  --card: #fff;
+  --yellow: #E6A800;
+  --yellow-bg: rgba(230,168,0,0.08);
+  --green: #10B981;
+  --green-bg: #ECFDF5;
+  --purple: #8B5CF6;
+  --purple-bg: #F5F3FF;
+  --pink: #E07A5F;
+  --accent-script: #065F46;
+  --accent-skill: #5B21B6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 70px; background: #1a1a1a; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: "Work Sans", "Noto Sans SC", sans-serif;
+  line-height: 1.75; font-weight: 350;
+}
+
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; gap: 0;
+  padding: 12px 48px;
+  background: rgba(242,238,223,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(42,36,27,0.08);
+  font-size: 13px; font-weight: 450;
+  overflow-x: auto; white-space: nowrap;
+}
+#topnav .brand {
+  font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+  font-weight: 500; font-size: 18px; margin-right: 28px;
+  color: var(--ink); text-decoration: none;
+}
+#topnav a {
+  color: var(--ink-soft); text-decoration: none;
+  padding: 5px 14px; border-radius: 10px;
+  transition: all 0.15s; font-size: 12px;
+}
+#topnav a:hover, #topnav a.on { color: var(--ink); background: rgba(42,36,27,0.06); }
+#topnav .sep { width: 1px; height: 16px; background: var(--border); margin: 0 8px; flex-shrink: 0; }
+
+.hero {
+  margin-top: 56px; padding: 60px 48px 40px;
+  text-align: center;
+}
+.hero h1 {
+  font-family: "Noto Serif SC", "Cormorant Garamond", serif;
+  font-weight: 900; font-size: clamp(40px, 7vw, 64px);
+  letter-spacing: 0.04em; line-height: 1.1;
+}
+.hero h1 span {
+  font-weight: 400; display: block; font-size: 0.35em;
+  letter-spacing: 0.12em; color: var(--muted); margin-top: 6px;
+}
+
+main { max-width: 960px; margin: 0 auto; padding: 0 32px 120px; }
+section { margin: 56px 0; }
+h2 {
+  font-family: "Noto Serif SC", "Cormorant Garamond", serif;
+  font-weight: 700; font-size: 26px; letter-spacing: 0.02em;
+  margin-bottom: 16px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+h2 .num { font-weight: 400; color: var(--muted); font-size: 0.7em; margin-right: 8px; }
+h3 {
+  font-family: "Noto Serif SC", serif;
+  font-weight: 600; font-size: 18px; margin: 24px 0 10px; color: var(--ink);
+}
+h4 { font-weight: 600; font-size: 14px; margin: 16px 0 6px; color: var(--ink-soft); }
+
+p { margin: 6px 0; font-size: 14px; }
+ul, ol { padding-left: 20px; margin: 6px 0; }
+li { margin: 3px 0; font-size: 13px; }
+
+.card {
+  background: var(--card); border-radius: 12px; padding: 20px 24px;
+  margin: 14px 0; border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+}
+
+table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 13px; }
+thead th {
+  background: rgba(0,0,0,0.03); text-align: left; padding: 8px 10px;
+  font-weight: 600; color: var(--ink-soft); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border);
+}
+tbody td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+td.nowrap { white-space: nowrap; }
+td code, code {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.9em; color: var(--yellow); background: var(--yellow-bg);
+  padding: 1px 5px; border-radius: 3px;
+}
+td.path {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.82em; color: var(--ink-soft);
+  word-break: break-all;
+}
+
+pre {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.82em; line-height: 1.7; padding: 12px 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow-x: auto; margin: 6px 0 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+pre .cmd { color: #22863a; }
+pre .arg { color: var(--yellow); font-weight: 600; }
+
+.hl {
+  padding: 10px 16px; border-radius: 8px; margin: 10px 0; font-size: 13px;
+}
+.hl-y { background: var(--yellow-bg); border: 1px solid rgba(230,168,0,0.18); }
+.hl-y strong { color: var(--yellow); }
+.hl-p { background: rgba(224,122,95,0.08); border: 1px solid rgba(224,122,95,0.18); }
+.hl-p strong { color: var(--pink); }
+
+.pipe { display: flex; gap: 0; flex-wrap: wrap; align-items: center; margin: 10px 0 14px; font-size: 12px; }
+.pipe span { background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; white-space: nowrap; }
+.pipe .arr { color: var(--muted); padding: 3px 2px; border: none; background: none; }
+
+.tree {
+  font-family: "SF Mono", "Cascadia Code", "JetBrains Mono", monospace;
+  font-size: 0.8em; line-height: 1.8; padding: 12px 16px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; overflow-x: auto; white-space: pre; margin: 8px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.tree .hl { color: var(--yellow); }
+.tree .dim { color: var(--muted); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.tag-go { background: #81B29A; color: #fff; }
+.tag-warn { background: #F2CC8F; color: var(--ink); }
+.tag-no { background: var(--pink); color: #fff; }
+.tag-script { background: var(--green-bg); color: var(--accent-script); }
+.tag-skill { background: var(--purple-bg); color: var(--accent-skill); }
+.tag-human { background: #FFF7ED; color: #9A3412; }
+
+.footer { text-align: center; padding: 32px 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 48px; }
+
+/* stage detail */
+.stage-row { border-left: 3px solid var(--green); padding-left: 12px; margin: 10px 0; }
+.stage-row.ai { border-left-color: var(--purple); }
+.stage-row h4 { margin-top: 0; }
+
+.path-block {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px; margin: 8px 0;
+  font-family: "SF Mono", "Cascadia Code", monospace;
+  font-size: 0.82em; line-height: 1.8;
+  white-space: pre; overflow-x: auto;
+}
+
+@media (max-width: 720px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  #topnav { padding: 10px 16px; gap: 4px; }
+  #topnav .brand { margin-right: 12px; font-size: 16px; }
+  main { padding: 0 16px 80px; }
+  .hero { padding: 48px 20px 32px; }
+}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <a class="brand" href="#hero">猫波信号站</a>
+  <a href="#s1">选题</a>
+  <span class="sep"></span>
+  <a href="#s2">管线</a>
+  <a href="#s3">发布</a>
+  <a href="#s3-cdp">CDP上传</a>
+  <span class="sep"></span>
+  <a href="#s4">附录</a>
+</nav>
+
+<div class="hero" id="hero">
+  <h1>生产操作手册<span>猫波信号站 · Operations Manual</span></h1>
+</div>
+
+<main>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- 双基地 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div class="card">
+  <h3>双基地架构</h3>
+  <p>管线脚本在 <strong>lab</strong>（出图纸），成品产出在 <strong>output</strong>（出成果）。两处各有独立的 <code>CLAUDE.md</code> 宪法。</p>
+  <table>
+    <thead><tr><th>基地</th><th>路径</th><th>放什么</th><th>宪法</th></tr></thead>
+    <tbody>
+      <tr><td><strong>lab</strong> 管线基地</td><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\</td><td>脚本、参数、方法论、本文档</td><td class="path">lab/CLAUDE.md</td></tr>
+      <tr><td><strong>output</strong> 成果基地</td><td class="path">D:\workspace\_output\猫波信号站\</td><td>选题库、视频成品、频道资产</td><td class="path">output/CLAUDE.md</td></tr>
+    </tbody>
+  </table>
+
+  <h4>完整目录</h4>
+  <div class="tree">lab/  D:\workspace\lab\2026-06-16-<span class="hl">猫波信号站</span>\
+├── <span class="hl">CLAUDE.md</span>              <span class="dim"># 管线硬约束 + 步骤定义</span>
+├── <span class="hl">生产操作手册.html</span>      <span class="dim"># 本文档</span>
+├── <span class="hl">tools/</span>                  <span class="dim"># 脚本：stage_02 ~ stage_08 + gen_cover + gen_epub</span>
+├── <span class="hl">_ref/</span>                   <span class="dim"># 生产参数 + 踩坑日志</span>
+├── _archive/              <span class="dim"># 历史版本</span>
+└── _runtime/              <span class="dim"># 开发测试</span></div>
+  <div class="tree">output/  D:\workspace\_output\<span class="hl">猫波信号站</span>\
+├── <span class="hl">CLAUDE.md</span>              <span class="dim"># 产出宪法</span>
+├── <span class="hl">选题库/</span>                <span class="dim"># 内容源 + 候选池 + 已发布</span>
+├── 频道资产/              <span class="dim"># 头像/签名/UID</span>
+└── 视频/
+    └── &lt;YYYYMMDD_slug&gt;/
+        ├── 成片/&lt;标题&gt;.mp4
+        ├── cover.jpg
+        ├── 发布面板.html
+        ├── 电子书/&lt;标题&gt;.epub
+        ├── HANDOFF.md
+        ├── _tests/
+        └── _runtime/   <span class="dim"># 过程归档</span></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- §1 选题 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2><span class="num">01</span>选题</h2>
+  <p style="color:var(--muted);">选题方法定义在本文档。选题数据唯一真相源：<code>D:\workspace\_output\猫波信号站\选题库\</code></p>
+
+  <!-- 1.1 内容源 & 巡检 -->
+  <div class="card">
+    <h3>1.1 内容源 & 巡检</h3>
+    <p>巡检清单：<code>D:\workspace\_output\猫波信号站\选题库\内容源.md</code>（35 个固定源 + 4 个聚合发现站）</p>
+
+    <div class="hl hl-y">
+      <strong>频率：每周 2 次（周一 + 周四），全量扫，不分优先级。</strong>
+    </div>
+
+    <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">三条约束交汇在此：</p>
+    <ul style="font-size:13px;color:var(--ink-soft);">
+      <li><strong>源节奏</strong> — 核心源标注"每周"更新。YouTube/播客都是周更，多于 2 次/周 = 多数扫描无新内容，浪费人力</li>
+      <li><strong>产能匹配</strong> — 实测 8 天产出 3 条（有效吞吐 ≈ 2–3 天/条）。每次巡检只需攒 1–2 个候选即够下一期，2 次/周刚好供上，不积压不过期</li>
+      <li><strong>投入产出</strong> — 全量扫一次 ≈ 5–10 分钟。每天扫 = 35min/周，2 次 = 10min/周。且暂无自动化脚本，全手动</li>
+    </ul>
+
+    <table>
+      <thead><tr><th>类型</th><th>清单</th></tr></thead>
+      <tbody>
+        <tr><td>YouTube 频道</td><td>@Anthropic / @OpenAI / @AndrejKarpathy / @GoogleDeepMind / @mckaywrigley / @YannicKilcher 等 12 个</td></tr>
+        <tr><td>播客栏目</td><td>Lenny's Podcast / Lex Fridman / No Priors / Training Data / Latent Space / Cognitive Revolution / Lightcone 等 14 个</td></tr>
+        <tr><td>信号人物</td><td>Karpathy / Kevin Weil / Amanda Askell / Boris Cherny 等 29 人（完整清单见内容源.md）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 1.2 初筛 -->
+  <div class="card">
+    <h3>1.2 初筛</h3>
+    <p style="color:var(--muted);">≤ 3 分钟 / 条。任意一项 NO → 放弃。</p>
+    <table>
+      <thead><tr><th>维度</th><th>标准</th><th>数据来源</th></tr></thead>
+      <tbody>
+        <tr><td><strong>AI 相关性</strong></td><td>AI/科技话题，非娱乐/生活/纯新闻</td><td>标题 + 缩略图 + 频道定位</td></tr>
+        <tr><td><strong>信号人物</strong></td><td>嘉宾在信号人物清单上，或同级别公信人物</td><td>内容源.md 信号人物表</td></tr>
+        <tr><td><strong>播放热度</strong></td><td>近期发布（≤3 个月），播放量显著高于频道均值</td><td>YouTube 列表页</td></tr>
+        <tr><td><strong>讨论度</strong></td><td>评论活跃、社区引用、跨频道讨论</td><td>评论数 + 社区引用</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 1.3 B站交叉检索 -->
+  <div class="card">
+    <h3>1.3 B站交叉检索</h3>
+    <p>每期必做，独占性唯一依据。</p>
+    <pre><span class="cmd">WebFetch</span> search.bilibili.com/video?keyword=<span class="arg">嘉宾名+标题关键词</span></pre>
+    <p>搜索词：<code>嘉宾英文名 中文</code>、<code>嘉宾常用译名</code>、<code>演讲核心主题</code></p>
+  </div>
+
+  <!-- 1.4 五维评分 -->
+  <div class="card">
+    <h3>1.4 四维评分</h3>
+    <p>数据落盘：<code>D:\workspace\_output\猫波信号站\选题库\候选池.csv</code>（主表，唯一真相源）</p>
+    <p style="font-size:12px;color:var(--muted);">CSV 固定列：date, slug, 嘉宾, 标题, URL, 时效性, 独占性, 权威, 长期, 总分, 状态, 来源。排除行不删，防重复评估。</p>
+
+    <table>
+      <thead><tr><th>维度</th><th>权重</th><th>3 分</th><th>2 分</th><th>1 分</th></tr></thead>
+      <tbody>
+        <tr><td><strong>时效性</strong></td><td>×3</td><td>6 个月内</td><td>1 年内</td><td>&gt;1 年</td></tr>
+        <tr><td><strong>独占性</strong></td><td>×3</td><td>B站零中字</td><td>有搬运无中字</td><td>已有精品中字</td></tr>
+        <tr><td><strong>人物权威</strong></td><td>×2</td><td>CEO/核心团队/学界领袖</td><td>知名创作者</td><td>素人</td></tr>
+        <tr><td><strong>长期价值</strong></td><td>×2</td><td>方法论/框架/哲学</td><td>趋势分析</td><td>纯新闻</td></tr>
+
+      </tbody>
+    </table>
+    <div class="hl hl-y">
+      <strong>总分 = 时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2</strong>（满分 30）<br>
+      <span class="tag tag-go">≥25 立即做</span> <span class="tag tag-warn">20–24 备选</span> <span class="tag tag-no">&lt;20 排除</span><br>
+      <span style="font-size:12px;color:var(--muted);">例外：长期价值=3 时，即使独占性=1 仍可入选。独占性=1 <strong>且</strong> 长期价值≤2 时才触发排除。</span>
+    </div>
+  </div>
+
+  <!-- 1.5 排除标准 -->
+  <div class="card">
+    <h3>1.5 排除标准（一票否决）</h3>
+    <table>
+      <thead><tr><th>#</th><th>条件</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>B站已有精品中字 <strong>且</strong> 内容为纯新闻/时效型（≤1个月）</td><td>需求已被满足 + 无长尾价值</td></tr>
+        <tr><td>2</td><td>版权敏感（电影/音乐为主）</td><td>合规红线</td></tr>
+        <tr><td>3</td><td>纯娱乐/标题党/营销号风格</td><td>与频道定位不符</td></tr>
+        <tr><td>4</td><td>语音质量差——口音过重/背景噪音大/多说话人重叠</td><td>ASR 准确率 &lt;85%，翻译不可控</td></tr>
+        <tr><td>5</td><td>翻译后主观判定搬运价值不足</td><td>Cat Wu Tokyo 2026 先例</td></tr>
+        <tr><td>6</td><td>纯 talker——嘉宾无建造/研究记录，仅观点输出</td><td>信息密度低，观点缺乏实践验证</td></tr>
+        <tr><td>7</td><td>内容为纯新闻/时效型（≤1 周有效）</td><td>与长期价值定位冲突</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 1.6 信息密度 -->
+  <div class="card">
+    <h3>1.6 信息密度（翻译后精算）</h3>
+    <table>
+      <thead><tr><th>指标</th><th>算法</th><th>高密度</th><th>低密度（排除）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>观点密度</strong></td><td>独特观点数 ÷ 视频时长（分钟）</td><td>≥ 2 个/分</td><td>&lt; 0.5 个/分</td></tr>
+        <tr><td><strong>数据引述率</strong></td><td>数字/百分比/时间跨度的出现频率</td><td>≥ 1 次/3 分钟</td><td>无数据仅观点</td></tr>
+        <tr><td><strong>实操占比</strong></td><td>含具体步骤/方法/工具的句段 ÷ 总句段</td><td>≥ 30%</td><td>&lt; 10%</td></tr>
+        <tr><td><strong>语音填充率</strong></td><td>非信息填充词（um/you know/我觉得）占比</td><td>&lt; 15%</td><td>&gt; 30%</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--muted);">随机抽 3 段 × 2 分钟人工评估，与估算值偏差 &gt; 30% 时以精算为准。</p>
+  </div>
+
+  <!-- 1.7 状态流转 -->
+  <div class="card">
+    <h3>1.7 状态流转 & 生命周期</h3>
+    <div class="path-block">发现 → 初筛(4维) → B站交叉检索 → 五维评分
+  ├─ &lt;20 分 → <span class="dim">已废弃/</span>（直接排除，记原因）
+  ├─ 20–24 分 → <span class="dim">候选池</span>（备选）
+  └─ ≥25 分 → <span class="dim">候选池</span>（优先）→ 排期 → 生产中
+         ├─ 翻译后判定不通过 → <span class="dim">已废弃/</span>（+判定原因）
+         └─ 通过 → 制作完成 → <span class="dim">已发布/</span></div>
+
+    <h4>排期优先级</h4>
+    <p>总分降序 → 时效性降序 → 人物热度 → 多样性。直接在 CSV 排序对比。</p>
+
+    <h4>数据复盘反馈</h4>
+    <table>
+      <thead><tr><th>节点</th><th>动作</th><th>反馈到</th></tr></thead>
+      <tbody>
+        <tr><td>24h</td><td>记录初始播放/点击率</td><td>封面+标题策略调整</td></tr>
+        <tr><td>7d</td><td>全维度复盘（播放趋势/留存率/互动/粉丝转化），写复盘笔记</td><td class="path">已发布/<slug>.md</td></tr>
+        <tr><td>30d</td><td>长尾判断，持续播放 → 调高同类嘉宾权重</td><td>评分权重调整</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;color:var(--muted);">复盘笔记路径：<code>D:\workspace\_output\猫波信号站\视频\<slug>\_runtime\复盘.md</code></p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- §2 管线 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2><span class="num">02</span>管线</h2>
+  <p style="color:var(--muted);">脚本目录：<code>D:\workspace\lab\2026-06-16-猫波信号站\tools\</code>。产出目录：<code>D:\workspace\_output\猫波信号站\视频\<slug>\</code>。工程参数唯一真相源：<code>lab/_ref/生产参数.md</code>。完整踩坑记录：<code>lab/_ref/pitfalls.md</code>。</p>
+
+  <!-- 时间轴宪法 -->
+  <div class="card" style="border-left:3px solid var(--yellow);">
+    <h3>时间轴宪法（不可违背）</h3>
+    <table>
+      <tbody>
+        <tr><td style="white-space:nowrap;font-weight:600;">1. 剥离 YouTube 字幕</td><td>② 下载的 <code>01_raw.srt</code> 仅作参考存档。<strong>禁止</strong>将 YouTube 字幕用于时间轴。YouTube 自动字幕有 +2.3s 系统滞后（已通过 whisper_compare.py 实测验证），用它做锚点 = 字幕永远漂移。</td></tr>
+        <tr><td style="white-space:nowrap;font-weight:600;">2. Whisper 为唯一锚点</td><td>③ Whisper 转录的 <code>02_seg.srt</code> 是下游唯一输入。所有翻译、拆分、ASS、渲染均以 Whisper 时间戳为准。</td></tr>
+        <tr><td style="white-space:nowrap;font-weight:600;">3. 双源保留</td><td><code>01_raw.srt</code>（YouTube 原始）+ <code>01_whisper.*</code>（Whisper 原始）均作为过程文件永久保留。改名不移，覆盖不删。下游只消费 <code>02_seg.srt</code>。</td></tr>
+        <tr><td style="white-space:nowrap;font-weight:600;">4. 视频无内嵌字幕</td><td><code>source.mp4</code> 不含任何 subtitle track（已通过 ffprobe 验证）。如有内嵌字幕轨，② 下载时必须剥离。</td></tr>
+        <tr><td style="white-space:nowrap;font-weight:600;">5. ④ 为时间锚点</td><td>赞助检测 + 视频裁切在 stage ④ 完成，切完立即用 <code>_shift_timestamps()</code> 修正所有下游字幕时间戳。此后时间轴不再变化。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.0 前置 -->
+  <div class="card">
+    <h3>2.0 前置条件</h3>
+
+    <h4>环境变量</h4>
+    <pre>DEEPSEEK_API_KEY=<span class="arg"><your-key></span></pre>
+
+    <h4>命名约定</h4>
+    <p><code>slug = YYYYMMDD_guest-name-platform</code>，例：<code>20260620_kevin-weil-lenny</code></p>
+
+    <h4>视频目录结构</h4>
+    <div class="tree">D:\workspace\_output\猫波信号站\视频\<span class="hl">&lt;YYYYMMDD_slug&gt;</span>\
+├── 成片/&lt;标题&gt;.mp4
+├── cover.jpg
+├── 发布面板.html
+├── 电子书/&lt;标题&gt;.epub
+├── HANDOFF.md
+├── _tests/              <span class="dim"># 测试片，不上线</span>
+└── _runtime/
+    ├── 素材/source.mp4   <span class="dim"># ② 下载后手动搬入</span>
+    ├── 字幕/             <span class="dim"># ②-⑦ 阶段产出</span>
+    │   ├── 01_raw.srt         <span class="dim"># ② YouTube 原始（保留）</span>
+    │   ├── 01_whisper.srt     <span class="dim"># ③ Whisper 原始（保留）</span>
+    │   ├── 01_whisper.json    <span class="dim"># ③ Whisper 完整数据</span>
+    │   ├── 02_seg.srt
+    │   ├── 02_seg_clean.srt
+    │   ├── 03_zh.srt
+    │   ├── 04_split.srt
+    │   ├── 05.ass
+    │   ├── transcript.txt
+    │   └── _sponsor_cuts.json
+    ├── frames/           <span class="dim"># ⑬ 封面截图候选帧</span>
+    ├── draft.md          <span class="dim"># ⑫ 专栏文章草稿</span>
+    ├── chapters_bilibili.json  <span class="dim"># ⑪ 章节节点</span>
+    ├── 发布面板过程/
+    ├── 封面过程/
+    └── 测试片/           <span class="dim"># 字幕效果验证</span></div>
+  </div>
+
+  <!-- 2.1 总览 -->
+  <div class="card">
+    <h3>2.1 管线总览</h3>
+    <p>16 阶段。分三段：<strong style="color:var(--green);">机械段 ②-⑧</strong>（独立脚本，可单独重跑）+ <strong style="color:var(--purple);">AI 段 ⑨-⑮</strong>（Claude 决策 + 调脚本）+ <strong style="color:var(--pink);">上传段 ⑯</strong>（API 或 CDP 浏览器）。① 选题是独立的评分管线。</p>
+
+    <div class="pipe">
+      <span>① 选题</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">② 下载</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">③ 断句</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">④ 赞助检测</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">⑤ 翻译</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">⑥ 字宽拆分</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">⑦ ASS</span><span class="arr">→</span>
+      <span style="background:var(--green-bg);border-color:var(--green);">⑧ 渲染</span>
+    </div>
+    <div class="pipe" style="margin-top:4px;">
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑨ 百度云上传</span><span class="arr">→</span>
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑩ 元数据 JSON</span><span class="arr">→</span>
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑪ 金句提取</span><span class="arr">→</span>
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑫ 封面</span><span class="arr">→</span>
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑬ 标题</span><span class="arr">→</span>
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑭ 电子书 EPUB</span><span class="arr">→</span>
+      <span style="background:var(--purple-bg);border-color:var(--purple);">⑮ 发布面板</span>
+    </div>
+    <div class="pipe" style="margin-top:4px;">
+      <span style="background:rgba(224,122,95,0.12);border-color:var(--pink);">⑯ B站上传</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:6px;">├─ API 直连 (stage_15, &lt;500MB)</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:6px;">└─ CDP 浏览器 (stage_16, 1GB+)</span>
+    </div>
+
+    <p style="font-size:11px;color:var(--muted);margin-top:4px;">
+      <span style="display:inline-block;width:10px;height:10px;background:var(--green-bg);border:1px solid var(--green);border-radius:2px;vertical-align:middle;"></span> = script（独立阶段脚本）&nbsp;&nbsp;
+      <span style="display:inline-block;width:10px;height:10px;background:var(--purple-bg);border:1px solid var(--purple);border-radius:2px;vertical-align:middle;"></span> = skill（Claude 决策 + 调脚本）
+    </p>
+
+    <!-- 一表纵览 -->
+    <table style="margin-top:16px;">
+      <thead><tr><th>#</th><th>阶段</th><th>类型</th><th>工具</th><th>输入 → 输出</th><th>～耗时</th></tr></thead>
+      <tbody>
+        <tr><td class="nowrap">①</td><td>选题</td><td><span class="tag tag-skill">skill</span></td><td>飞书 API + Claude 评分</td><td>候选池 → URL + slug</td><td>~5m</td></tr>
+        <tr><td class="nowrap">②</td><td>下载</td><td><span class="tag tag-script">script</span></td><td><code>stage_02_download.py</code> (yt-dlp)</td><td>URL → source.mp4 + 01_raw.srt</td><td>~3m</td></tr>
+        <tr><td class="nowrap">③</td><td>Whisper 转录</td><td><span class="tag tag-script">script</span></td><td><code>stage_03_whisper.py</code> (faster-whisper)</td><td>source.mp4 → 02_seg.srt + 01_whisper.*</td><td>~1-2m</td></tr>
+        <tr><td class="nowrap">④</td><td>赞助检测+切视频</td><td><span class="tag tag-script">script</span></td><td><code>stage_04_sponsor.py</code> (DeepSeek) + ffmpeg</td><td>02_seg.srt → 02_seg_clean.srt + source_clean.mp4 + _sponsor_cuts.json</td><td>~1m</td></tr>
+        <tr><td class="nowrap">⑤</td><td>翻译</td><td><span class="tag tag-script">script</span></td><td><code>stage_05_translate.py</code> (DeepSeek)</td><td>02_seg_clean.srt → 03_zh.srt</td><td>~1m</td></tr>
+        <tr><td class="nowrap">⑥</td><td>字宽拆分</td><td><span class="tag tag-script">script</span></td><td><code>stage_06_split.py</code></td><td>03_zh.srt → 04_split.srt</td><td>&lt;1s</td></tr>
+        <tr><td class="nowrap">⑦</td><td>ASS</td><td><span class="tag tag-script">script</span></td><td><code>stage_07_ass.py</code></td><td>04_split.srt → 05.ass + transcript.txt</td><td>&lt;1s</td></tr>
+        <tr><td class="nowrap">⑧</td><td>渲染</td><td><span class="tag tag-script">script</span></td><td><code>stage_08_render.py</code> (ffmpeg)</td><td>mp4 + ass + cuts.json → 成片 mp4</td><td>~20m</td></tr>
+        <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑨</td><td>百度云上传</td><td><span class="tag tag-script">script</span></td><td><code>stage_09_baidu_upload.py</code> (bypy)</td><td>EPUB → 百度云盘「猫波信号站电子书」</td><td>~2m</td></tr>
+        <tr><td class="nowrap">⑩</td><td>元数据 JSON</td><td><span class="tag tag-script">script</span></td><td><code>gen_metadata.py</code></td><td>标题/标签/简介/章节 → metadata.json</td><td>&lt;1s</td></tr>
+        <tr><td class="nowrap">⑪</td><td>金句提取</td><td><span class="tag tag-skill">skill</span></td><td>Claude 读 transcript</td><td>transcript.txt → 封面大字 + 标题候选</td><td>~5m</td></tr>
+        <tr><td class="nowrap">⑫</td><td>封面</td><td><span class="tag tag-skill">skill</span></td><td><strong>video-catwave</strong> → <code>gen_cover.py</code></td><td>截图帧 + 已定标题 + 金句 → cover.jpg</td><td>~2m</td></tr>
+        <tr><td class="nowrap">⑬</td><td>标题</td><td><span class="tag tag-skill">skill</span></td><td>Claude 读金句</td><td>金句 → 3-5 候选标题</td><td>~3m</td></tr>
+        <tr><td class="nowrap">⑭</td><td>电子书 EPUB</td><td><span class="tag tag-skill">skill</span></td><td>Claude + <code>gen_epub.py</code></td><td>transcript → draft.md + 电子书/&lt;标题&gt;.epub</td><td>~15m</td></tr>
+        <tr><td class="nowrap">⑮</td><td>发布面板</td><td><span class="tag tag-skill">skill</span></td><td>Claude 读 transcript + 模板</td><td>→ 发布面板.html（标题/标签/简介/章节/金句）</td><td>~10m</td></tr>
+        <tr style="border-top:2px solid var(--pink);"><td class="nowrap">⑯</td><td>B站上传</td><td><span class="tag tag-human">human + script</span></td><td><code>stage_15_publish.py</code> (API) 或 <code>stage_16_cdp_upload.py</code> (CDP)</td><td>成品文件 → B站草稿箱 / 已发布</td><td>~5-40m</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.2 机械段 ②-⑧ -->
+  <div class="card">
+    <h3>2.2 机械段 ②-⑧</h3>
+    <p style="color:var(--muted);">每个阶段一个独立脚本，阶段间通过 SRT/JSON 文件通信，可单独重跑。脚本全部在 <code>D:\workspace\lab\2026-06-16-猫波信号站\tools\</code>。</p>
+
+    <div class="stage-row">
+      <h4>② 下载</h4>
+      <pre><span class="cmd">cd</span> D:\workspace\lab\2026-06-16-猫波信号站
+<span class="cmd">python</span> tools\stage_02_download.py --url <span class="arg"><URL></span> --slug <span class="arg"><slug></span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td>YouTube URL</td><td><code>source.mp4</code> + <code>01_raw.srt</code></td><td>lab <code>_runtime/&lt;slug&gt;_process/</code> → 手动搬入 output <code>_runtime/素材/</code> 和 <code>_runtime/字幕/</code></td></tr>
+        </tbody>
+      </table>
+      <div class="hl hl-p"><strong>必须 H.264(avc1)+AAC(m4a)</strong>，否则拿到 webm/vp9 — B站不兼容。</div>
+      <pre>yt-dlp --write-auto-subs --sub-langs en --convert-subs srt \
+-f "bestvideo[height&lt;=1080][vcodec^=avc1]+bestaudio[ext=m4a]/..." \
+--output "%(title)s.%(ext)s" <span class="arg"><URL></span></pre>
+    </div>
+
+    <div class="stage-row">
+      <h4>③ Whisper 转录 + 断句</h4>
+      <pre><span class="cmd">python</span> tools\stage_03_whisper.py --slug <span class="arg"><slug></span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td><code>source.mp4</code></td><td><code>01_whisper.srt</code> + <code>01_whisper.json</code> + <code>02_seg.srt</code></td><td>output <code>_runtime/字幕/</code></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;">faster-whisper 本地转录 → 按句合并分段。Whisper 时间戳直接绑定音频波形，无 YouTube auto-subs 的 +2.3s 系统滞后。<strong>Whisper 是下游唯一时间锚点。</strong>备选：<code>stage_03_segment.py</code>（YouTube 字幕 + LLM 标点，仅 whisper 不可用时使用）。</p>
+    </div>
+
+    <div class="stage-row">
+      <h4>④ 赞助检测</h4>
+      <pre><span class="cmd">python</span> tools\stage_04_sponsor.py --slug <span class="arg"><slug></span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td><code>02_seg.srt</code> + <code>source.mp4</code></td><td><code>02_seg_clean.srt</code> + <code>source_clean.mp4</code> + <code>_sponsor_cuts.json</code></td><td>output <code>_runtime/字幕/</code> + <code>_runtime/素材/</code></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;">DeepSeek API temp=0 二分类（yes/no），每批 20 条，并发 5。<strong>3 层防御：</strong>Keyword pre-mark（硬关键字锁死）→ gap fill（sponsor 段间 ≤5 行填洞）→ named-entity expansion（公司/人名跨段扩展，max_lookahead=60, max_gap=5）。检测到的赞助段从字幕移除，相邻段合并（间隙 ≤500ms）。<strong>短赞助段（&lt;10s）恢复保留</strong>——太短不值得切，跳帧突兀。≥10s 的写入 <code>_sponsor_cuts.json</code>。<strong>视频剪切在 ④ 完成</strong>（ffmpeg concat → source_clean.mp4），⑧ 只烧字幕不切视频。</p>
+      <div class="hl hl-p"><strong>安全设计：false positive（误杀正片）不可接受。</strong>temp=0 不创造，短段恢复保底，渲染前人工确认切点。</div>
+    </div>
+
+    <div class="stage-row">
+      <h4>⑤ 翻译</h4>
+      <pre><span class="cmd">python</span> tools\stage_05_translate.py --slug <span class="arg"><slug></span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td><code>02_seg_clean.srt</code></td><td><code>03_zh.srt</code>（<code>\N</code> 双语）</td><td>output <code>_runtime/字幕/</code></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;">DeepSeek Chat, temp=0.3, 10 条/批, 并发 5, 超时 120s, 重试 3 次退避 1s/2s/4s。</p>
+    </div>
+
+    <div class="stage-row">
+      <h4>⑥ 字宽拆分</h4>
+      <pre><span class="cmd">python</span> tools\stage_06_split.py --slug <span class="arg"><slug></span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td><code>03_zh.srt</code></td><td><code>04_split.srt</code></td><td>output <code>_runtime/字幕/</code></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;">像素宽度检测 + 标点拆分。中文字数上限 28 字，拆分点 ，。！？；、，硬切兜底 56 字。短段（&lt;2s）合并避免闪烁。</p>
+    </div>
+
+    <div class="stage-row">
+      <h4>⑦ ASS</h4>
+      <pre><span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span>                    <span class="dim"># 默认无背景框</span>
+<span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bg-opacity 0.5  <span class="dim"># 50% 黑底</span>
+<span class="cmd">python</span> tools\stage_07_ass.py --slug <span class="arg"><slug></span> --bg-padding 20   <span class="dim"># 自定义间距</span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td><code>04_split.srt</code></td><td><code>05.ass</code> + <code>transcript.txt</code></td><td>output <code>_runtime/字幕/</code></td></tr>
+        </tbody>
+      </table>
+      <div class="hl hl-y" style="margin-top:8px;"><strong>字幕渲染参数（固定，不调）</strong></div>
+      <table>
+        <tbody>
+          <tr><td>画布</td><td>1920×1080</td></tr>
+          <tr><td>中文</td><td>SimHei, 42px, 白色 #FFFFFF, 无描边, 底部 margin 70px</td></tr>
+          <tr><td>英文</td><td>Microsoft YaHei, 36px (<code>\fn</code> override), 白色</td></tr>
+          <tr><td>双语格式</td><td><code>\N</code> 单事件：中文在上，英文在下。禁止双 Dialogue（libass 碰撞检测会吞字幕）</td></tr>
+          <tr><td>图层</td><td>Layer 0 = 背景框（可选），Layer 1 = 文字。分层防 <code>{\p1}</code> 绘制指令泄漏到可见文本</td></tr>
+          <tr><td>背景框</td><td>默认关闭。开启：<code>--bg-opacity 0.5</code>，半透明黑底（alpha=0x80）+ 15px padding</td></tr>
+          <tr><td>对齐</td><td>Alignment=2（底部居中），MarginV=45</td></tr>
+          <tr><td>时长裁剪</td><td>相邻段重叠部分裁剪（前段 end = 后段 start - 20ms），最短保持 ≥500ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="stage-row">
+      <h4>⑧ 渲染</h4>
+      <pre><span class="cmd">python</span> tools\stage_08_render.py --slug <span class="arg"><slug></span>
+<span class="cmd">python</span> tools\stage_08_render.py --slug <span class="arg"><slug></span> --duration 60 --title test --output-subdir "_runtime"  <span class="dim"># 60s 测试片</span></pre>
+      <table>
+        <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
+        <tbody>
+          <tr><td><code>source_clean.mp4</code>（优先）或 <code>source.mp4</code> + <code>05.ass</code></td><td><code>&lt;标题&gt;.mp4</code></td><td>默认 <code>成片/</code>，测试片放 <code>_runtime/</code></td></tr>
+        </tbody>
+      </table>
+      <div class="hl hl-y" style="margin-top:8px;"><strong>渲染流程（测试先行，不跳步）</strong></div>
+      <table>
+        <tbody>
+          <tr><td>1. 测试片</td><td><code>--duration 60</code> 先渲染前 60s → 播放验证字幕/音频同步 → 确认无误再跑全片</td></tr>
+          <tr><td>2. 全片</td><td>不带 <code>--duration</code> → 完整成片</td></tr>
+          <tr><td>编码</td><td>H.264 NVENC (GPU, 优先) 或 libx264 (CPU 回退), CRF/CQ=23, AAC 128k<br><span style="font-size:11px;color:var(--muted);">RTX 5060 Ti 16GB，NVENC 默认编码，~13x 实时。自动检测：<code>_detect_encoder()</code> → h264_nvenc -cq 23 -preset p4 -rc vbr</span></td></tr>
+          <tr><td>ASS 烧录</td><td>libass (0.17.4), <code>vf=ass='05.ass'</code>，使用 directwrite 字体引擎</td></tr>
+          <tr><td>视频源</td><td><code>find_video()</code> 优先取 <code>source_clean.mp4</code>（④ 已切赞助），否则回退 <code>source.mp4</code>。切视频在 ④ 完成，⑧ 只烧字幕。</td></tr>
+          <tr><td>验证标准</td><td>无重叠字幕、\N 分行正确、中英同步、无 libass 渲染异常</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2.3 判定 -->
+  <div class="card">
+    <h3>2.3 判定 Go/No-Go</h3>
+    <p>翻译完成后、字宽拆分前。逐项打钩，任一 <span class="tag tag-no">No-Go</span> = 排除，全部 <span class="tag tag-go">Go</span> = 继续。</p>
+    <table>
+      <thead><tr><th>#</th><th>检查项</th><th>Go 标准</th><th>No-Go 标准</th></tr></thead>
+      <tbody>
+        <tr><td>G1</td><td><strong>信息密度</strong></td><td>观点密度 ≥ 2/分，实操占比 ≥ 30%</td><td>观点密度 &lt; 0.5/分，或实操占比 &lt; 10%</td></tr>
+        <tr><td>G2</td><td><strong>翻译覆盖率</strong></td><td>非赞助段 ≥ 95% 有翻译</td><td>&lt; 80%（赞助段不计）</td></tr>
+        <tr><td>G3</td><td><strong>金句可提取性</strong></td><td>至少 2 个满足 ≥3 维度的金句</td><td>无满足 ≥2 维度的候选</td></tr>
+        <tr><td>G4</td><td><strong>嘉宾视觉可用性</strong></td><td>至少 1 帧正脸清晰</td><td>所有帧模糊/侧脸/表情崩坏</td></tr>
+        <tr><td>G5</td><td><strong>B站独占性复核</strong></td><td>翻译后重新搜索，仍零中字</td><td>发现新增中字或同类已上传</td></tr>
+        <tr><td>G6</td><td><strong>时效敏感度</strong></td><td>低或中（≥ 6 个月有效）</td><td>高（&lt; 1 个月失效）</td></tr>
+      </tbody>
+    </table>
+    <div class="hl hl-y"><strong>流程：</strong>翻译完成 → 跑 checklist → 6/6 Go → 继续管线。任一 No-Go → 记录原因 → 移至 <code>已废弃/</code>。</div>
+  </div>
+
+  <!-- 2.4 AI 段 + 上传段 ⑨-⑯ -->
+  <div class="card">
+    <h3>2.4 后半段 ⑨-⑯</h3>
+    <p style="color:var(--muted);">⑨-⑮ 每步需 Claude 读 transcript 做判断，部分步骤调脚本。全部消费 <code>D:\workspace\_output\猫波信号站\视频\<slug>\_runtime\字幕\transcript.txt</code>。⑯ 是上传段，分 API 和 CDP 两路。</p>
+
+    <div class="stage-row ai">
+      <h4>⑨ 百度云盘上传</h4>
+      <p><strong>工具：</strong><code>stage_09_baidu_upload.py</code> (bypy)。上传 EPUB 到百度云盘「猫波信号站电子书」共享文件夹。</p>
+      <pre><span class="cmd">python</span> tools\stage_09_baidu_upload.py --slug <span class="arg"><slug></span></pre>
+    </div>
+
+    <div class="stage-row ai">
+      <h4>⑩ 元数据 JSON</h4>
+      <p><strong>工具：</strong><code>gen_metadata.py</code>。生成 B站投稿元数据（标题/标签/简介/章节）。</p>
+      <pre><span class="cmd">python</span> tools\gen_metadata.py --slug <span class="arg"><slug></span> --title <span class="arg">"标题"</span> --source <span class="arg">"YouTube @频道名"</span> --tags <span class="arg">"tag1,tag2,..."</span></pre>
+    </div>
+
+    <div class="stage-row ai">
+      <h4>⑪ 金句提取</h4>
+      <p><strong>工具：</strong>Claude 读 transcript → 评分金句。输出：封面大字候选（4-8字）+ 标题候选（15-40字）。</p>
+      <p style="font-size:12px;color:var(--muted);">金句维度：反直觉 / 可量化 / 独特性 / 情感张力 / 行动导向。验证标准：5 条候选中 ≥3 条满足 ≥3 维度。</p>
+    </div>
+
+    <div class="stage-row ai">
+      <h4>⑫ 封面</h4>
+      <p><strong>工具：</strong><code>D:\workspace\lab\2026-06-16-猫波信号站\tools\gen_cover.py</code>。封面最后做——拿着已确定的标题文字和金句做图，不反复改。</p>
+      <pre><span class="cmd">python</span> tools\gen_cover.py <span class="arg"><frame.jpg></span> <span class="arg"><cover.jpg></span> --title <span class="arg">"黄字第1行"</span> [--title2 <span class="arg">"黄字第2行"</span>] [--sub <span class="arg">"白字副标题"</span>]</pre>
+      <div class="hl hl-y" style="margin-top:8px;"><strong>设计参数（固定，不调）</strong></div>
+      <table>
+        <tbody>
+          <tr><td>画布</td><td>1920×1080</td></tr>
+          <tr><td>安全区</td><td>1440×1080（4:3 居中），左右各留 60px padding</td></tr>
+          <tr><td>底图</td><td>视频截图帧 → 缩放到 1920×1080 → 亮度 0.80（PIL ImageEnhance）</td></tr>
+          <tr><td>L1 黄字</td><td>最多两行，165px max，自缩至安全区宽度内。字体 msyhbd.ttc（微软雅黑 Bold，回退 simhei.ttf）</td></tr>
+          <tr><td>L1 颜色</td><td>暖黄 #FFC82D <code>rgb(255, 200, 45)</code>，纯色无描边</td></tr>
+          <tr><td>L2 白字</td><td>一行可选，62px，字体相同，白色 #FCFAF5</td></tr>
+          <tr><td>行间距</td><td>黄字间 20px，黄→白 40px，白字后 30px</td></tr>
+          <tr><td>整体对齐</td><td>文本块垂直居中偏上 40px，每行水平居中（anchor=mm）</td></tr>
+          <tr><td>输出</td><td>JPG quality=92，若 &gt;4.8MB 自动降 quality=75。B站限制 ≤5MB</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;">截图选帧：transcript 找 3 句最精彩开场金句 → 定位时间戳 → ffmpeg 提取帧 → 视觉模型评分。要求：深色底 + 暖黄大字 + 人物正脸。</p>
+    </div>
+
+    <div class="stage-row ai">
+      <h4>⑬ 标题</h4>
+      <p><strong>工具：</strong>Claude 读金句 → 生成 3-5 候选标题。格式：<code>嘉宾身份 嘉宾名：核心论断</code>。≤80 字，禁用【】/emoji/《》/#话题。</p>
+    </div>
+
+    <div class="stage-row ai">
+      <h4>⑭ 电子书 EPUB</h4>
+      <p><strong>工具：</strong>Claude 读 transcript → <code>_runtime/draft.md</code>（B站专栏文章 markdown）+ <code>gen_epub.py</code> → <code>电子书/&lt;标题&gt;.epub</code>（全中文，适配微信读书）。</p>
+    </div>
+
+    <div class="stage-row ai">
+      <h4>⑮ 发布面板</h4>
+      <p><strong>工具：</strong>Claude 读 transcript + HTML 模板 → <code>发布面板.html</code>。包含：标题/标签（逐个复制按钮）/分区/合集/简介/章节时间戳/金句候选/封面信息。</p>
+    </div>
+
+    <div class="stage-row" style="border-left-color:var(--pink);">
+      <h4>⑯ B站上传</h4>
+      <p>分两路，按文件大小选择：</p>
+      <table>
+        <thead><tr><th>路线</th><th>适用</th><th>工具</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><strong>A. API 直连</strong></td><td>&lt; 500MB</td><td><code>stage_15_publish.py</code></td><td>B站投稿 API，直接存草稿箱。需要 Cookie（bili_jct + SESSDATA + DedeUserID）</td></tr>
+          <tr><td><strong>B. CDP 浏览器</strong></td><td>1GB+</td><td><code>stage_16_cdp_upload.py</code></td><td>Bit Browser CDP WebSocket 自动化。可自动填写标题/简介/标签/创作声明。详见 <a href="#s3-cdp">§3.4 CDP 上传</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2.5 逐阶段产出物清单 -->
+  <div class="card">
+    <h3>2.5 逐阶段产出物清单</h3>
+    <p style="color:var(--muted);">按阶段逐项检查。每阶段跑完后对清单确认产出文件存在且规格正确，不跳步。</p>
+
+    <table>
+      <thead><tr><th>#</th><th>阶段</th><th>产出文件</th><th>落盘位置（相对视频目录根）</th><th>验收方式</th></tr></thead>
+      <tbody>
+        <tr><td class="nowrap">①</td><td>选题</td><td>飞书记录</td><td class="path">飞书多维表格（非本地文件）</td><td>飞书表格中状态=「候选」</td></tr>
+        <tr><td class="nowrap">②</td><td>下载</td><td><code>source.mp4</code><br><code>01_raw.srt</code></td><td class="path">_runtime/素材/source.mp4<br>_runtime/字幕/01_raw.srt</td><td>mp4 编码 H.264(avc1)+AAC(m4a)；srt 非空</td></tr>
+        <tr><td class="nowrap">③</td><td>Whisper 转录</td><td><code>01_whisper.srt</code><br><code>01_whisper.json</code><br><code>02_seg.srt</code></td><td class="path">_runtime/字幕/01_whisper.srt<br>_runtime/字幕/01_whisper.json<br>_runtime/字幕/02_seg.srt</td><td>01_whisper.* = Whisper 原始转录（保留不覆盖）；02_seg = 断句后供下游消费；json 含浮点时间戳</td></tr>
+        <tr><td class="nowrap">④</td><td>赞助检测</td><td><code>02_seg_clean.srt</code><br><code>_sponsor_cuts.json</code></td><td class="path">_runtime/字幕/02_seg_clean.srt<br>_runtime/字幕/_sponsor_cuts.json</td><td>clean 条目 ≤ seg；json 中 cut 段 ≥10s；确认无误杀正片</td></tr>
+        <tr><td class="nowrap">⑤</td><td>翻译</td><td><code>03_zh.srt</code></td><td class="path">_runtime/字幕/03_zh.srt</td><td>条目数 = 02_seg_clean；每行含 <code>\N</code> 双语；无非 ASCII 乱码段</td></tr>
+        <tr><td class="nowrap">⑥</td><td>字宽拆分</td><td><code>04_split.srt</code></td><td class="path">_runtime/字幕/04_split.srt</td><td>中文字数 ≤28 字/行；无单帧闪烁段（<2s 已合并）</td></tr>
+        <tr><td class="nowrap">⑦</td><td>ASS</td><td><code>05.ass</code><br><code>transcript.txt</code></td><td class="path">_runtime/字幕/05.ass<br>_runtime/字幕/transcript.txt</td><td>CN SimHei 42px + EN 36px；<code>\N</code> 单事件双语；Layer 1 文字 + Layer 0 背景框（可选）；无段间重叠</td></tr>
+        <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑧</td><td>渲染</td><td><code>&lt;标题&gt;.mp4</code>（成片）<br><code>test_*.mp4</code>（测试片）</td><td class="path">成片/&lt;标题&gt;.mp4<br>_runtime/test_*.mp4</td><td>测试片先行（30-60s 验证同步）；全片 H.264 CRF=23 + AAC 128k；字幕无重叠/无渲染异常</td></tr>
+        <tr><td class="nowrap">⑨</td><td>百度云上传</td><td>EPUB 已上传</td><td class="path">百度云盘「猫波信号站电子书」</td><td>bypy upload 成功，共享文件夹可见</td></tr>
+        <tr><td class="nowrap">⑩</td><td>元数据 JSON</td><td><code>metadata.json</code></td><td class="path">_runtime/metadata.json</td><td>含 title/tags/description/chapters，供 stage_15/16 消费</td></tr>
+        <tr><td class="nowrap">⑪</td><td>金句提取</td><td>Claude 输出（无独立文件）</td><td class="path">—</td><td>≥3 条候选满足 ≥3 金句维度（反直觉/可量化/独特性/情感张力/行动导向）</td></tr>
+        <tr><td class="nowrap">⑫</td><td>封面</td><td><code>cover.jpg</code><br><code>frames/</code>（截图帧）</td><td class="path">cover.jpg<br>_runtime/frames/</td><td>1920×1080 JPG ≤4.8MB；黄字 165px max #FFC82D 纯色无描边；安全区 1440px；底图亮度 0.80；人物正脸</td></tr>
+        <tr><td class="nowrap">⑬</td><td>标题</td><td>Claude 输出（无独立文件）</td><td class="path">—</td><td>3-5 候选标题；≤80 字；格式=「嘉宾身份 嘉宾名：核心论断」</td></tr>
+        <tr><td class="nowrap">⑭</td><td>电子书 EPUB</td><td><code>draft.md</code><br><code>&lt;标题&gt;.epub</code></td><td class="path">_runtime/draft.md<br>电子书/&lt;标题&gt;.epub</td><td>md 可发布 B站专栏；epub 全中文，微信读书可导入</td></tr>
+        <tr><td class="nowrap">⑮</td><td>发布面板</td><td><code>发布面板.html</code><br><code>chapters_bilibili.json</code></td><td class="path">发布面板.html<br>_runtime/chapters_bilibili.json</td><td>章节 ≤10 个；标签 3-10 个；简介含章节时间戳</td></tr>
+        <tr style="border-top:2px solid var(--pink);"><td class="nowrap">⑯</td><td>B站上传</td><td><code>HANDOFF.md</code><br><code>.published</code></td><td class="path">HANDOFF.md<br>.published（空标记文件）</td><td>草稿箱确认存在 / API 返回成功；HANDOFF 含 BV号+发布时间；选题库已更新状态→已发布</td></tr>
+      </tbody>
+    </table>
+
+    <h4>字幕链完整性（②-⑦）</h4>
+    <div class="path-block">_runtime/字幕/
+├── 01_raw.srt          <span class="dim"># ② YouTube 原始字幕（下载即保留，不修改）</span>
+├── 01_whisper.srt      <span class="dim"># ③ Whisper 原始转录（保留，不覆盖）</span>
+├── 01_whisper.json     <span class="dim"># ③ Whisper 完整数据（浮点时间戳）</span>
+├── 02_seg.srt          <span class="dim"># ③ 断句后 → 下游输入</span>
+├── 02_seg_clean.srt    <span class="dim"># ④ 去赞助后（无赞助则 = 02_seg.srt）</span>
+├── _sponsor_cuts.json  <span class="dim"># ④ 剪切点（无赞助则空数组）</span>
+├── 03_zh.srt           <span class="dim"># ⑤ 中英双语 \N 格式</span>
+├── 04_split.srt        <span class="dim"># ⑥ 字宽拆分后</span>
+├── 05.ass              <span class="dim"># ⑦ ASS 渲染样式</span>
+└── transcript.txt      <span class="dim"># ⑦ 纯中文全文 → AI 段 ⑨-⑫ 唯一输入</span></div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- §3 发布 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2><span class="num">03</span>发布</h2>
+
+  <!-- 3.1 Checklist -->
+  <div class="card">
+    <h3>3.1 发布 Checklist（逐项打钩）</h3>
+    <table>
+      <thead><tr><th>#</th><th>检查项</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>视频文件命名 = 标题（B站自动识别填入）</td><td>☐</td></tr>
+        <tr><td>2</td><td>投稿类型 = <strong>转载</strong>（不是自制！）</td><td>☐</td></tr>
+        <tr><td>3</td><td>创作声明：勾「内容为转载」+「含有 AI 生成内容」</td><td>☐</td></tr>
+        <tr><td>4</td><td>撞车检查：B站搜索确认无相同视频</td><td>☐</td></tr>
+        <tr><td>5</td><td>转载出处：原作者名 + YouTube + 原链接</td><td>☐</td></tr>
+        <tr><td>6</td><td>分区：知识 > 科技 > 人工智能</td><td>☐</td></tr>
+        <tr><td>7</td><td>合集：猫波译站</td><td>☐</td></tr>
+        <tr><td>8</td><td>封面上传：1920×1080 JPG ≤ 4.8MB</td><td>☐</td></tr>
+        <tr><td>9</td><td>标题：≤80 字，格式 = 嘉宾身份 嘉宾名：核心论断</td><td>☐</td></tr>
+        <tr><td>10</td><td>标签：3-10 个，英文逗号分隔</td><td>☐</td></tr>
+        <tr><td>11</td><td>简介：核心论点 + 嘉宾信息 + 出处 + 章节时间戳</td><td>☐</td></tr>
+        <tr><td>12</td><td>发布后 24h 内更新 CSV + 飞书表格</td><td>☐</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3.2 封面 & 标题 -->
+  <div class="card">
+    <h3>3.2 封面 & 标题规范</h3>
+    <div class="grid-2">
+      <div>
+        <h4>封面参数</h4>
+        <table>
+          <tbody>
+            <tr><td>画布</td><td>1920×1080，安全区 1280×720 居中</td></tr>
+            <tr><td>底图亮度</td><td><strong>0.80</strong></td></tr>
+            <tr><td>主字体</td><td>msyhbd.ttc（备选 simhei.ttf）</td></tr>
+            <tr><td>主色</td><td>暖黄 <strong style="color:#E6A800;">#FFC82D</strong>，辅色暖白 #FCFAF5</td></tr>
+            <tr><td>L1 封面大字</td><td>140-180px, <strong>4-8 字</strong>, 暖黄</td></tr>
+            <tr><td>L2 副标题</td><td>60-80px, 10-16 字, 暖白</td></tr>
+            <tr><td>L3 出处行</td><td>24-28px, 灰 #8C8275, 底部</td></tr>
+            <tr><td>JPG 质量</td><td>92（超 4.8MB 降至 75）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h4>标题公式</h4>
+        <div class="hl hl-y" style="text-align:center;font-size:15px;padding:10px;">
+          <strong>&lt;嘉宾身份&gt; &lt;嘉宾名&gt;：&lt;核心论断&gt;</strong>
+        </div>
+        <table>
+          <tbody>
+            <tr><td>嘉宾身份</td><td>4-10 字，例："OpenAI CPO"</td></tr>
+            <tr><td>嘉宾名</td><td>英文原名，例："Kevin Weil"</td></tr>
+            <tr><td>核心论断</td><td>15-40 字，来自金句提取</td></tr>
+            <tr><td>总字数</td><td>≤80 字</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px;color:var(--muted);">禁用：【】/《》/emoji/#话题/「双语字幕」标签</p>
+      </div>
+    </div>
+    <div class="hl hl-y" style="margin-top:12px;"><strong>封面用 4-8 字金句制造好奇心，标题用完整句式提供权威背书。互补不重复。</strong></div>
+  </div>
+
+  <!-- 3.3 发布后更新 -->
+  <div class="card">
+    <h3>3.3 发布后更新</h3>
+    <table>
+      <thead><tr><th>操作</th><th>路径</th></tr></thead>
+      <tbody>
+        <tr><td>选题库状态→已发布</td><td class="path">output/选题库/候选池.csv</td></tr>
+        <tr><td>写入 BV号/标题/播放量</td><td class="path">候选池.csv + 已发布/<slug>.md</td></tr>
+        <tr><td>已发布归档</td><td class="path">output/选题库/已发布/<slug>.md</td></tr>
+        <tr><td>数据复盘</td><td>24h / 7d / 30d → 反馈到选题评分权重</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- §4 附录 -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2><span class="num">04</span>附录</h2>
+
+  <!-- 3.4 CDP 浏览器上传 -->
+  <div class="card" id="s3-cdp">
+    <h3>3.4 CDP 浏览器上传 <span style="font-weight:400;font-size:0.7em;color:var(--muted);">大文件 (1GB+)</span></h3>
+    <p style="color:var(--muted);">Bit Browser Chrome DevTools Protocol (CDP) 自动化。B站 API 对大文件限速严重，CDP 走浏览器直连可达 0.1~5.6 MB/s。</p>
+
+    <div class="hl hl-y"><strong>前置条件：</strong>Bit Browser 已打开并登录 B站，CDP 端口 55054 已开启。获取 PAGE_ID：浏览器访问 <code>http://127.0.0.1:55054/json</code></div>
+
+    <h4>3.4.1 脚本入口</h4>
+    <pre><span class="cmd">python</span> tools\stage_16_cdp_upload.py --slug <span class="arg"><slug></span> --page-id <span class="arg"><PAGE_ID></span>
+
+<span class="dim"># 分步执行（跳过已完成步骤）</span>
+<span class="cmd">python</span> tools\stage_16_cdp_upload.py --slug <span class="arg"><slug></span> --page-id <span class="arg"><ID></span> --no-upload  <span class="dim"># 视频已上传，只填表</span>
+<span class="cmd">python</span> tools\stage_16_cdp_upload.py --slug <span class="arg"><slug></span> --page-id <span class="arg"><ID></span> --check-only <span class="dim"># 只检查表单状态</span></pre>
+
+    <h4>3.4.2 上传流程（脚本自动执行）</h4>
+    <table>
+      <thead><tr><th>步骤</th><th>操作</th><th>CDP 方法</th><th>可靠性</th></tr></thead>
+      <tbody>
+        <tr><td>1. 连接</td><td>WebSocket 连接 Bit Browser CDP</td><td><code>ws://127.0.0.1:55054/devtools/page/{id}</code></td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>2. 导航</td><td>跳转到 B站投稿页</td><td><code>Page.navigate</code></td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>3. 上传视频</td><td>找到隐藏 file input → 设置文件 → 触发上传</td><td><code>DOM.setFileInputFiles</code> + dispatch change event</td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>4. 监控进度</td><td>轮询页面文本匹配百分比</td><td><code>Runtime.evaluate</code> 正则 <code>(\d+\.?\d*)\s*%</code></td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>5. 填标题</td><td>Vue input 用 native setter + dispatch input/change</td><td><code>Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set</code></td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>6. 填简介</td><td>Quill contenteditable div 直接设置 innerText</td><td><code>div.innerText = text</code> + dispatch input event</td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>7. 标签</td><td>点击推荐标签（hot-tag-item）</td><td>getBoundingClientRect + CDP mouse click</td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>8. 创作声明</td><td>直接设置 Vue 组件 $data.selectedLabel</td><td><code>bcc-select.__vue__.selectedLabel = "含AI生成内容"</code></td><td><span class="tag tag-go">稳定</span></td></tr>
+        <tr><td>9. 封面上传</td><td>打开编辑器 → 设文件 → 点「完成」</td><td>click + DOM.setFileInputFiles + click 完成</td><td><span class="tag tag-warn">不可靠</span></td></tr>
+        <tr><td>10. 存草稿</td><td>点击「存草稿」按钮</td><td>getBoundingClientRect + CDP mouse click</td><td><span class="tag tag-warn">不可靠</span></td></tr>
+      </tbody>
+    </table>
+
+    <h4>3.4.3 CDP 有效方法（已验证）</h4>
+    <table>
+      <thead><tr><th>场景</th><th>方法</th><th>代码模式</th></tr></thead>
+      <tbody>
+        <tr><td>表单输入框（Vue）</td><td>native setter + dispatch events</td><td><code>Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(inp, val); inp.dispatchEvent(new Event('input', {bubbles:true}))</code></td></tr>
+        <tr><td>contenteditable div</td><td>直接设 innerText</td><td><code>div.innerText = text; div.dispatchEvent(new Event('input', {bubbles:true}))</code></td></tr>
+        <tr><td>推荐标签点击</td><td>getBoundingClientRect + CDP mouse</td><td><code>native_click(send, rect.left+rect.width/2, rect.top+rect.height/2)</code></td></tr>
+        <tr><td>标签删除</td><td>SVG.close CDP mouse click</td><td>定位 <code>.label-item-v2-container svg.close</code> 的 rect → CDP click</td></tr>
+        <tr><td>创作声明下拉</td><td>Vue $data 直接赋值</td><td><code>v = document.querySelector('.bcc-select').__vue__; v.selectedLabel = "含AI生成内容"; v.$forceUpdate()</code></td></tr>
+        <tr><td>文件设置</td><td>DOM.setFileInputFiles</td><td><code>send("DOM.setFileInputFiles", {files: [path], nodeId: id})</code></td></tr>
+        <tr><td>状态检查</td><td>Runtime.evaluate 同步表达式</td><td>不用 async/await，返回 JSON.stringify 序列化结果</td></tr>
+        <tr><td>CDP 消息匹配</td><td>按 msg id 过滤响应</td><td>CDP 事件和响应交错到达，必须按 <code>resp.id === mid</code> 过滤</td></tr>
+        <tr><td>截图验证</td><td>Page.captureScreenshot</td><td>format: "png"，返回 base64</td></tr>
+      </tbody>
+    </table>
+
+    <h4>3.4.4 CDP 无效方法（B站 Vue SPA 限制）</h4>
+    <table>
+      <thead><tr><th>场景</th><th>尝试过的方法</th><th>为何无效</th></tr></thead>
+      <tbody>
+        <tr><td>下拉选择（创作声明）</td><td>CDP mouse click 打开下拉 → click 选项</td><td><code>li</code> 元素 height=0，Vue 不响应 CDP 点击事件</td></tr>
+        <tr><td>标签输入框</td><td>CDP key events / JS KeyboardEvent</td><td>Vue 不响应 CDP 级键盘事件</td></tr>
+        <tr><td>封面上传</td><td>点击封面区域 → OS 文件对话框</td><td>CDP 无法控制 OS 原生对话框</td></tr>
+        <tr><td>封面编辑器内的 Vue 处理</td><td>DOM.setFileInputFiles → dispatch change → $forceUpdate</td><td>bcc-upload 组件的 handleUpload 未被触发，文件设置后无预览</td></tr>
+        <tr><td>Vue $emit</td><td>手动触发 Vue 事件</td><td>值不持久化到组件状态</td></tr>
+      </tbody>
+    </table>
+
+    <h4>3.4.5 已知问题与恢复流程</h4>
+
+    <div class="hl hl-p"><strong>封面上传不可靠。</strong>文件可设置到 editor 内的 file input，但 Vue bcc-upload 组件不处理 CDP 触发的 change event。编辑器内无预览图，点「完成」后封面回到 B站默认占位图。<strong>恢复：</strong>在 Bit Browser 中手动拖入封面 → 点「完成」。</div>
+
+    <div class="hl hl-p" style="margin-top:8px;"><strong>上传完成后页面自动跳转。</strong>B站在上传完成后会导航到 <code>/platform/home</code>，表单填写状态丢失。页面会显示「本地浏览器存在1个未提交的视频」。<strong>恢复：</strong>点击「继续编辑」恢复草稿 → 重新运行 <code>--no-upload</code> 填写表单。</div>
+
+    <div class="hl hl-p" style="margin-top:8px;"><strong>CDP 连接可能中断。</strong>页面导航后 WebSocket 可能变为无响应（0 events）。<strong>恢复：</strong>重新获取 PAGE_ID（<code>curl http://127.0.0.1:55054/json</code>），用新 ID 重连。</div>
+
+    <div class="hl hl-p" style="margin-top:8px;"><strong>自定义标签无法通过 CDP 添加。</strong>只能点击推荐标签。脚本未覆盖的标签需手动输入。<strong>恢复：</strong>在 Bit Browser 中逐个输入自定义标签。</div>
+
+    <h4>3.4.6 脚本执行后手动检查清单</h4>
+    <table>
+      <thead><tr><th>#</th><th>检查项</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>创作声明</td><td>确认显示「含AI生成内容」（脚本已自动设置，确认即可）</td></tr>
+        <tr><td>2</td><td>封面上传</td><td>点击封面区域 → 拖入 cover.jpg → 点「完成」→ 确认封面图更新</td></tr>
+        <tr><td>3</td><td>标签完整性</td><td>检查是否有异常标签需删除，补充脚本未覆盖的自定义标签</td></tr>
+        <tr><td>4</td><td>存草稿</td><td>点击「存草稿」→ 确认成功提示</td></tr>
+        <tr><td>5</td><td>草稿验证</td><td>前往创作中心 → 稿件管理 → 确认草稿存在且信息完整</td></tr>
+      </tbody>
+    </table>
+
+    <h4>3.4.7 诊断脚本</h4>
+    <p style="font-size:12px;color:var(--muted);">以下脚本位于 <code>_runtime/cdp/</code>，用于调试 CDP 连接和页面状态。</p>
+    <table>
+      <thead><tr><th>脚本</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td class="path">_runtime/cdp/cdp_list_pages.py</td><td>获取所有 CDP 可调试页面</td></tr>
+        <tr><td class="path">_runtime/cdp/cdp_handle_dialog.py</td><td>处理页面弹窗阻塞 + 检查状态</td></tr>
+        <tr><td class="path">_runtime/cdp/cdp_extract.py</td><td>提取 Cookie（供 API 方案使用）</td></tr>
+        <tr><td class="path">_runtime/cdp/cdp_deep_dive.py</td><td>DOM 分析：创作声明/封面结构诊断</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4.1 平台规范 -->
+  <div class="card">
+    <h3>4.1 平台规范速查</h3>
+
+    <h4>投稿红线</h4>
+    <div class="hl hl-p"><strong>仅添加翻译字幕 ≠ 自制。</strong>必须选「转载」，注明原作者 + YouTube + 原链接。转载冒充自制 = 严重违规。</div>
+
+    <h4>数据规格</h4>
+    <table>
+      <thead><tr><th>项目</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>视频编码</td><td><strong>H.264 (avc1) + AAC</strong></td></tr>
+        <tr><td>分辨率</td><td>≤ 1080p</td></tr>
+        <tr><td>封面尺寸</td><td>1920×1080，≤ 4.8MB JPG</td></tr>
+        <tr><td>标题字数</td><td>≤ 80 字</td></tr>
+        <tr><td>标签</td><td>3-10 个，英文逗号分隔</td></tr>
+        <tr><td>简介</td><td>≤ 2000 字</td></tr>
+        <tr><td>创作声明</td><td>必勾「内容为转载」+「含有 AI 生成内容」</td></tr>
+      </tbody>
+    </table>
+
+    <h4>一票否决</h4>
+    <table>
+      <thead><tr><th>红线</th><th>后果</th></tr></thead>
+      <tbody>
+        <tr><td>转载冒充自制</td><td>严重违规</td></tr>
+        <tr><td>色情低俗/政治敏感</td><td>退回/封号</td></tr>
+        <tr><td>截取影视剧/综艺片段</td><td>版权退回</td></tr>
+        <tr><td>竞品平台 Logo</td><td>限流/退回</td></tr>
+        <tr><td>封面超 5MB</td><td>B站强压缩 → 文字发虚</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4.2 投稿频率 -->
+  <div class="card">
+    <h3>4.2 投稿频率</h3>
+    <div class="hl hl-y"><strong>日均 2 条推荐，3 条上限。</strong>不是不能发更多，是同频道日发 &gt;3 条内部抢量，边际播放递减。发布时间窗：10:00 / 14:00 / 18:00，间隔 ≥ 2h。</div>
+    <table style="margin-top:10px;">
+      <thead><tr><th>维度</th><th>实测值</th></tr></thead>
+      <tbody>
+        <tr><td>每小时上限</td><td>≤ 5 条安全，逾 20 条触发 406 封禁</td></tr>
+        <tr><td>建议间隔</td><td>≥ 12 分钟（常规），≥ 18 分钟（晚高峰 19-22 点）</td></tr>
+        <tr><td>晚高峰限流</td><td>19:00-22:00 风控收紧，间隔 ×1.5</td></tr>
+        <tr><td>相似内容惩罚</td><td>同质标题/封面/标签 → 额外限流</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4.3 已知坑 -->
+  <div class="card">
+    <h3>4.3 已知坑速查</h3>
+    <p style="font-size:12px;color:var(--muted);">完整版：<code>D:\workspace\lab\2026-06-16-猫波信号站\_ref\pitfalls.md</code></p>
+    <table>
+      <thead><tr><th>#</th><th>坑</th><th>修复</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>全角冒号 U+FF1A → shell 编码错误</td><td>替换为 <code>-</code></td></tr>
+        <tr><td>2</td><td>yt-dlp 默认 webm/vp9 → B站不兼容</td><td><code>-f "bestvideo[vcodec^=avc1]..."</code></td></tr>
+        <tr><td>3</td><td>"透明度 80%" = 透过程度 80%</td><td>亮度 0.80</td></tr>
+        <tr><td>4</td><td>ASS 双 Dialogue → libass 碰撞检测吞字幕</td><td>用 <code>\N</code> 单事件</td></tr>
+        <tr><td>5</td><td>Windows PIL 只有 SimHei 够粗</td><td>SimHei + 2px 四周填充</td></tr>
+        <tr><td>6</td><td>DeepSeek 翻译行数不对齐</td><td>截断多余/补齐空行 + 3 次重试</td></tr>
+        <tr><td>7</td><td>无标点长句永不拆分</td><td>max_chars×2 硬切兜底</td></tr>
+        <tr><td>8</td><td>B站 API 直接调用 → 反爬 HTML</td><td>走 WebFetch 浏览器渲染</td></tr>
+        <tr><td>9</td><td>carryover 移了时间戳 → 字幕闪烁</td><td>只裁文本，时间戳锚定句边界</td></tr>
+        <tr><td>10</td><td>封面截图盲抽 → 画面不理想</td><td>transcript 金句定位 + 视觉模型确认</td></tr>
+        <tr><td>11</td><td>赞助商口播翻译跳过 → 68% 未翻译</td><td>赞助检测 + 自动剪切</td></tr>
+        <tr><td>12</td><td>飞书 API field_id → 1254045</td><td>PUT records 用中文字段名</td></tr>
+        <tr><td>13</td><td>ffmpeg Windows 路径含 <code>:</code> → filter parser 报错</td><td>用相对路径绕开</td></tr>
+        <tr><td>14</td><td><strong>音画不同步</strong> — 字幕与口型延迟</td><td>调查中。方向：yt-dlp 字幕偏移 / YouTube 不对齐 / 音频重编码延迟</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4.4 关键文件指针 -->
+  <div class="card">
+    <h3>4.4 关键文件指针</h3>
+    <table>
+      <thead><tr><th>文件</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\CLAUDE.md</td><td>管线硬约束 + 步骤定义</td></tr>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\生产操作手册.html</td><td>本文档</td></tr>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\tools\</td><td>阶段脚本 ②-⑧ + gen_cover + gen_epub</td></tr>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\_ref\生产参数.md</td><td>工程参数唯一真相源</td></tr>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\_ref\pitfalls.md</td><td>完整踩坑记录（现象→根因→修复→预防）</td></tr>
+        <tr><td class="path">D:\workspace\_output\猫波信号站\CLAUDE.md</td><td>产出宪法</td></tr>
+        <tr><td class="path">D:\workspace\_output\猫波信号站\视频\CLAUDE.md</td><td>视频目录规范</td></tr>
+        <tr><td class="path">D:\workspace\_output\猫波信号站\选题库\候选池.csv</td><td>选题主表（唯一真相源）</td></tr>
+        <tr><td class="path">D:\workspace\_output\猫波信号站\选题库\内容源.md</td><td>巡检频道/播客/人物清单</td></tr>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\tools\stage_16_cdp_upload.py</td><td>B站 CDP 浏览器上传（大文件 1GB+）</td></tr>
+        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\_runtime\cdp\</td><td>CDP 诊断/调试脚本</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="footer">猫波信号站 · Production Operations Manual · 2026-06-25</div>
+
+</main>
+</body>
+</html>

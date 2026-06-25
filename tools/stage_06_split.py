@@ -56,15 +56,33 @@ def run(slug: str, max_px: int = MAX_PX):
         start_ms = time_to_ms(e.start)
         end_ms = time_to_ms(e.end)
         total_dur = end_ms - start_ms
-        total_w = sum(_cn_pixel_width(s) for s in segments_zh)
+        seg_widths = [_cn_pixel_width(s) for s in segments_zh]
+        total_w = sum(seg_widths)
+
+        # Merge segments whose estimated duration < 2s into the previous segment
+        MIN_SEG_MS = 2000
+        merged_zh = []
+        merged_en = []
+        for i, seg_zh in enumerate(segments_zh):
+            seg_en = segments_en[i] if i < len(segments_en) else ""
+            est_dur = int(total_dur * seg_widths[i] / total_w) if total_w > 0 else 0
+            if est_dur < MIN_SEG_MS and merged_zh:
+                merged_zh[-1] += seg_zh
+                if merged_en[-1] and seg_en:
+                    merged_en[-1] += " " + seg_en
+            else:
+                merged_zh.append(seg_zh)
+                merged_en.append(seg_en)
+
+        merged_widths = [_cn_pixel_width(s) for s in merged_zh]
+        merged_total_w = sum(merged_widths)
 
         cursor = start_ms
-        for i, seg_zh in enumerate(segments_zh):
-            seg_w = _cn_pixel_width(seg_zh)
-            ratio = seg_w / total_w if total_w > 0 else 1 / len(segments_zh)
-            seg_dur = max(int(total_dur * ratio), 800)
-            seg_end = min(cursor + seg_dur, end_ms)
-            seg_en = segments_en[i] if i < len(segments_en) else en
+        for i, seg_zh in enumerate(merged_zh):
+            ratio = merged_widths[i] / merged_total_w if merged_total_w > 0 else 1 / len(merged_zh)
+            seg_dur = max(int(total_dur * ratio), 400)
+            seg_end = end_ms if i == len(merged_zh) - 1 else cursor + seg_dur
+            seg_en = merged_en[i]
             text = f"{seg_zh}\\N{seg_en}" if seg_en else seg_zh
             result.append(SubEntry(len(result) + 1, ms_to_time(cursor), ms_to_time(seg_end), text))
             cursor = seg_end

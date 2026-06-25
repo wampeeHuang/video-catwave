@@ -16,11 +16,11 @@ from _lib import (
     SubEntry, extract_transcript, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
 )
 
-CN_FS = 42  # SimHei
-EN_FS = 36  # Microsoft YaHei
+CN_FS = 42       # SimHei
+EN_FS = 32       # Segoe UI Bold
 
 
-def run(slug: str, bg_opacity: float = 0.5, bg_padding: int = 15):
+def run(slug: str, bg_opacity: float = 0, bg_padding: int = 15):
     src = srt_path(slug, "04_split.srt")
     if not src.exists():
         print(f"ERROR: {src} not found. Run stage_06 first.")
@@ -122,7 +122,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         en = parts[1].strip() if len(parts) > 1 else ""
 
         # Text event (Layer 1)
-        text = e.text.replace("\\N", "\\N{\\fnMicrosoft YaHei}")
+        text = e.text.replace("\\N", "\\N{\\fnMicrosoft YaHei\\fs36}")
         lines.append(f"Dialogue: 1,{start},{end},Default,,0,0,45,,{text}")
 
         # Background box event (Layer 0) — separate event avoids libass 0.17.4

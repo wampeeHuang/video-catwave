@@ -167,8 +167,8 @@ def main():
     parser.add_argument("--title", required=True, help="Book title on title page")
     parser.add_argument("--author", required=True, help="Guest name(s)")
     parser.add_argument("--source", required=True, help="YouTube channel name (e.g. lexfridman)")
-    parser.add_argument("--lang", choices=["bilingual", "zh"], default="bilingual",
-                        help="Language mode: bilingual (default) or zh (Chinese only)")
+    parser.add_argument("--lang", choices=["bilingual", "zh"], default="zh",
+                        help="Language mode: zh (default, Chinese only) or bilingual")
     parser.add_argument("--baidu-link", default=None,
                         help="Baidu Cloud share link for EPUB colophon")
     args = parser.parse_args()

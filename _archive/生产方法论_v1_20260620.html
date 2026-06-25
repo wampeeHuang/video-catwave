@@ -619,7 +619,7 @@ blockquote .attr { display: block; margin-top: 6px; font-style: normal; font-siz
 <section id="s1">
   <h2><span class="num">01</span>选题方法论</h2>
 
-  <p style="margin-bottom:24px;">选题是管线的第一步。选错 = 全链路白跑。完整流程：<strong>发现 → 初筛 → B站交叉检索 → 五维评分 → 入库候选池 → 排期生产</strong>。</p>
+  <p style="margin-bottom:24px;">选题是管线的第一步。选错 = 全链路白跑。完整流程：<strong>发现 → 初筛 → B站交叉检索 → 四维评分 → 入库候选池 → 排期生产</strong>。</p>
 
   <!-- 1.1 内容发现 -->
   <div class="card">
@@ -745,9 +745,9 @@ blockquote .attr { display: block; margin-top: 6px; font-style: normal; font-siz
   </table>
   </div>
 
-  <!-- 1.4 五维评分 -->
+  <!-- 1.4 四维评分 -->
   <div class="card">
-  <h3>1.4 五维评分</h3>
+  <h3>1.4 四维评分</h3>
   <table>
     <thead><tr><th>维度</th><th>权重</th><th>3 分</th><th>2 分</th><th>1 分</th></tr></thead>
     <tbody>
@@ -755,11 +755,10 @@ blockquote .attr { display: block; margin-top: 6px; font-style: normal; font-siz
     <tr><td><strong>独占性</strong></td><td>×3</td><td>B站零中字</td><td>有搬运无中字</td><td>已有精品中字 → 直接排除</td></tr>
     <tr><td><strong>人物权威</strong></td><td>×2</td><td>Anthropic 核心 / CEO / 学界领袖</td><td>知名创作者</td><td>素人</td></tr>
     <tr><td><strong>长期价值</strong></td><td>×2</td><td>方法论 / 框架 / 哲学</td><td>趋势分析</td><td>纯新闻</td></tr>
-    <tr><td><strong>字幕可用</strong></td><td>×1</td><td>官方字幕</td><td>高质量 auto</td><td>需 whisper</td></tr>
     </tbody>
   </table>
 
-  <div class="hl hl-y"><strong>总分 = 时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2 + 字幕可用×1</strong>（满分 33）<br>
+  <div class="hl hl-y"><strong>总分 = 时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2</strong>（满分 30）<br>
   <span class="tag tag-go">≥25 立即做</span> &nbsp; <span class="tag tag-warn">20–24 备选</span> &nbsp; <span class="tag tag-no">&lt;20 排除</span></div>
   </div>
 
@@ -790,7 +789,7 @@ blockquote .attr { display: block; margin-top: 6px; font-style: normal; font-siz
 ├── 已发布/         <span class="dim"># + BV号/标题/数据</span>
 └── 已废弃/         <span class="dim"># + 废弃原因/教训</span></div>
 
-  <p><strong>CSV 主表</strong> — 每个候选一行，固定列：<code>date, slug, 嘉宾, 标题, URL, 时效性, 独占性, 权威, 长期, 字幕, 总分, 状态, 来源</code>。所有人同一个维度下同一标准比对。排除行不删，防重复评估。</p>
+  <p><strong>CSV 主表</strong> — 每个候选一行，固定列：<code>date, slug, 嘉宾, 标题, URL, 时效性, 独占性, 权威, 长期, 总分, 状态, 来源</code>。所有人同一个维度下同一标准比对。排除行不删，防重复评估。</p>
 
   <h4>排期优先级（候选池 > 1 个时）</h4>
   <p>直接在 CSV 里排序列对比：总分降序 → 时效性降序 → 人物热度（CSV外判断）→ 多样性。</p>

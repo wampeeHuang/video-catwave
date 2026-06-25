@@ -13,6 +13,8 @@ YouTube → B站 搬运管线。本文件每次对话自动加载，是所有操
 | 生成封面 | 读 §3 封面工作流 + `_ref/生产参数.md` §1 |
 | 做发布面板 | 读 §4 发布面板模板 |
 | 发布到B站 | 读 §5 B站发布 |
+| CDP浏览器上传 | 读 §5.1 CDP上传，`python tools/stage_16_cdp_upload.py --help` |
+| 上传百度云盘 | 读 §6 百度云盘上传 |
 | 修bug/改参数 | 读对应工具源码 + `_ref/pitfalls.md` |
 
 ## 1. 管线流程
@@ -21,8 +23,12 @@ YouTube → B站 搬运管线。本文件每次对话自动加载，是所有操
 ② 下载 ──→ ③ 去重叠+标点 ──→ ④ 赞助检测 ──→ ⑤ 翻译 ──→ ⑥ 字宽检查 ──→ ⑦ ASS ──→ ⑧ 渲染
                机械段（每阶段独立脚本，可单独重跑）
 
-⑨ 金句提取 ──→ ⑩ 封面 ──→ ⑪ 标题 ──→ ⑫ 电子书 ──→ ⑬ 元数据 ──→ ⑭ 专栏 ──→ ⑮ 发布面板 ──→ ⑯ B站发布
+⑨ 百度云上传 ──→ ⑩ 元数据 JSON ──→ ⑪ 金句提取 ──→ ⑫ 封面 ──→ ⑬ 标题 ──→ ⑭ 电子书 ──→ ⑮ 发布面板 ──→ ⑯ B站上传
                 AI 决策段（每步需读 transcript 判断）
+
+⑯ 分两路:
+  - API 直连: stage_15_publish.py (小文件, <500MB)
+  - CDP 浏览器: stage_16_cdp_upload.py (大文件, 1GB+)
 ```
 
 ### 环境
@@ -40,10 +46,12 @@ D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>\
 ├── cover.jpg              ← 封面 1920×1080（SimHei 165px + 2px黑边）
 ├── 发布面板.html           ← 标题/标签/简介/章节/金句
 ├── 成片/<B站标题>.mp4       ← 最终视频
+├── 电子书/<书名>.epub       ← gen_epub.py 生成
 ├── _runtime/
 │   ├── 素材/source.mp4     ← yt-dlp 下载
 │   ├── 字幕/01~05          ← 管线中间产物
 │   ├── frames/             ← 截图（封面素材）
+│   ├── metadata.json       ← B站投稿元数据（gen_metadata.py 生成）
 │   ├── draft.md            ← 专栏草稿
 │   └── run.log
 └── .published              ← 发布后创建
@@ -74,6 +82,20 @@ python tools/stage_07_ass.py --slug <slug>
 
 # ⑧ 渲染（--duration 60 做测试片）
 python tools/stage_08_render.py --slug <slug> --title "标题" [--duration 60]
+
+# ⑨ 百度云盘上传 EPUB
+python tools/stage_09_baidu_upload.py --slug <slug>
+
+# ⑩ 生成 B站投稿元数据
+python tools/gen_metadata.py --slug <slug> --title "标题" --source "YouTube @频道名" \
+    --tags "tag1,tag2,..." [--baidu-link "<百度盘链接>"]
+
+# ⑯ B站草稿箱上传 (API)
+python tools/stage_15_publish.py --video <mp4> --metadata <metadata.json> \
+    --cookie "<cookie>" --cover <cover.jpg> --draft
+
+# ⑯ B站上传 (CDP 浏览器，大文件)
+python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 ```
 
 ### 重跑规则
@@ -150,14 +172,124 @@ python tools/stage_08_render.py --slug <slug> --title "标题" [--duration 60]
 
 ## 5. B站发布
 
-Chrome DevTools MCP 浏览器自动化。详见 `_ref/pitfalls.md` §8-11。
+三种方式：
 
-**前置条件**：Chrome DevTools MCP 已连接，浏览器已登录 B站。
+### A. API 直连（小文件首选）
+```powershell
+python tools/stage_15_publish.py --video "<成片/视频.mp4>" \
+    --metadata "_runtime/metadata.json" --cover "cover.jpg" \
+    --cookie "<浏览器Cookie>" --draft
+```
+- `--draft`：存入草稿箱，不直接发布
+- 需要 Cookie 含 `bili_jct`、`SESSDATA`、`DedeUserID`
+- metadata.json 由 `gen_metadata.py` 生成
+- **限制**: 大文件 (>500MB) 可能超时，B站 API 上传限速
 
-**流程**：
-1. 上传视频 → 2. 填标题 → 3. 选分区 → 4. 逐个加标签 → 5. 填简介（Quill编辑器）→ 6. 上传封面 → 7. 存草稿
+### B. CDP 浏览器自动化（大文件推荐，1GB+）
+Bit Browser CDP port 55054，浏览器已登录 B站。
+详细文档：`生产操作手册.html` §3.4 CDP 上传。
 
-## 6. 文件纪律
+**连接**：
+```python
+import websocket
+ws = websocket.create_connection(
+    "ws://127.0.0.1:55054/devtools/page/<PAGE_ID>",
+    timeout=30, suppress_origin=True
+)
+# 必须用 msg_id 匹配过滤 CDP 事件
+```
+
+**上传流程**：
+1. `Page.navigate` → `https://member.bilibili.com/platform/upload/video/frame`
+2. `DOM.querySelectorAll` → 找到隐藏的 `input[type=file]`（class 含 `bcc-upload`）
+3. `DOM.setFileInputFiles` → 设置视频文件，触发上传
+4. 循环 `Runtime.evaluate` 读取进度（body.innerText 正则匹配百分比）
+5. 上传中即可填写表单（标题、简介、标签推荐点击）
+6. 上传完成后页面会跳转到 `/platform/home`，重新导航回 upload 页
+7. 页面显示「共1个未提交视频」→ 点击「继续编辑」恢复草稿
+
+**表单填写（有效的方法）**：
+```python
+# 标题 — Vue 输入框
+expression = '''
+(() => {
+    const inp = document.querySelector('input[placeholder*="标题"]');
+    const s = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    s.call(inp, "标题内容");
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+    return inp.value.length;
+})()
+'''
+
+# 简介 — Quill contenteditable div
+expression = '''
+(() => {
+    const div = document.querySelector('div[contenteditable="true"]');
+    div.focus();
+    div.innerText = "简介内容";
+    div.dispatchEvent(new Event('input', { bubbles: true }));
+    return div.innerText.length;
+})()
+'''
+
+# 标签 — 点击推荐标签（仅限 hot-tag-item）
+# 自定义标签输入：Vue 不响应 CDP 键盘事件，无法通过 CDP 添加
+# 标签删除：CDP Input.dispatchMouseEvent 点击 SVG.close 按钮有效
+```
+
+**CDP 限制（B站 Vue SPA 无法突破）**：
+- Vue 下拉选择（创作声明、分区）：CDP mouse click 无效，li 元素 h=0
+- 标签输入框：Vue 不响应 CDP key events 和 JS KeyboardEvent
+- 封面上传：点击封面触发 OS 文件对话框，CDP 无法控制
+- 页面跳转后表单数据可能丢失
+- **总结**: 视频上传 + 标题 + 简介 + 标签推荐点击 + 分区（自动检测）可通过 CDP 完成；创作声明、自定义标签、封面、存草稿需手动
+
+### C. 手动操作清单（CDP 后必做）
+1. 验证创作声明 → 含AI内容生成（脚本已自动设置，确认即可）
+2. 验证封面上传是否生效
+3. 点击「存草稿」（如脚本未能点击）
+4. 在稿件管理页确认草稿存在
+
+### D. stage_16_cdp_upload.py 管线脚本
+
+```powershell
+# 自动发现 slug 目录下的 cover/video/metadata
+python tools/stage_16_cdp_upload.py --slug <slug> --page-id <PAGE_ID>
+
+# 手动指定参数
+python tools/stage_16_cdp_upload.py --video <mp4> --cover <jpg> \
+    --title "标题" --tags "tag1,tag2" --description "简介..." \
+    --page-id <ID>
+
+# 只填表单不传视频（视频已在页面中）
+python tools/stage_16_cdp_upload.py --slug <slug> --page-id <ID> --no-upload
+
+# 只检查状态
+python tools/stage_16_cdp_upload.py --slug <slug> --page-id <ID> --check-only
+```
+
+脚本执行流程:
+1. 连接 Bit Browser CDP (port 55054)
+2. 导航到 B站上传页
+3. 上传视频 (DOM.setFileInputFiles + 进度监控)
+4. 填写标题 (native setter + Vue input event)
+5. 填写简介 (contenteditable div)
+6. 点击推荐标签
+7. 设置创作声明 → 含AI内容生成 (Vue $data)
+8. 上传封面 (click → editor → setFile → 完成)
+9. 点击存草稿
+
+## 6. 百度云盘上传
+
+```powershell
+python tools/stage_09_baidu_upload.py --slug <slug>
+```
+- 依赖 `bypy`（已安装），需先授权：`bypy info`
+- 上传到「猫波信号站电子书」共享文件夹
+- 永久链接：`https://pan.baidu.com/s/1huGTuQdCWXS0JFERhEf-8g?pwd=1234`
+
+## 7. 文件纪律
 
 - 所有产出物落 `D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>\`
 - 封面固定 `cover.jpg`，不保留多版本
@@ -167,11 +299,11 @@ Chrome DevTools MCP 浏览器自动化。详见 `_ref/pitfalls.md` §8-11。
 - 文件名禁止全角冒号 U+FF1A
 - 每会话结束写 HANDOFF.md
 
-## 7. 决策日志
+## 8. 决策日志
 
 每期视频的决策（选帧、标题候选、布局选择）写入当期 `_runtime/draft.md` 或 HANDOFF.md。不在本文件追加。
 
-## 8. 参考文件
+## 9. 参考文件
 
 | 文件 | 内容 |
 |------|------|

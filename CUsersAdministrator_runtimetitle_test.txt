@@ -1,0 +1,2 @@
+chars: 50
+OpenAI CPO Kevin Weil：如果你构建的产品恰好在AI能力边界，坚持下去——方向对了

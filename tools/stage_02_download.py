@@ -20,8 +20,9 @@ def run(url: str, slug: str) -> Path:
     srt_template = str(process_dir / "01_raw")
     cmd = [
         "yt-dlp",
+        "--remote-components", "ejs:github",
         "--write-auto-subs", "--sub-langs", "en", "--convert-subs", "srt",
-        "-f", "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[ext=m4a]/best[height<=1080]",
+        "-f", "bestvideo[height<=720][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio[ext=m4a]/best[height<=720]",
         "--output", str(process_dir / "%(title)s.%(ext)s"),
         "--write-sub", "--sub-format", "srt",
         url,

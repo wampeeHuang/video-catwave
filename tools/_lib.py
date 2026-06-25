@@ -12,6 +12,8 @@ Path conventions (single source of truth):
 
 import dataclasses
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 # ── Path roots ───────────────────────────────────────────────────────────────
@@ -36,17 +38,46 @@ class SubEntry:
 
 
 def parse_srt(text: str) -> list[SubEntry]:
+    """Parse SRT text, handling YouTube raw SRT quirks (extra blank lines)."""
     entries = []
     blocks = text.strip().split("\n\n")
-    for block in blocks:
-        lines = block.strip().split("\n")
+    i = 0
+    while i < len(blocks):
+        lines = blocks[i].strip().split("\n")
+        # Merge forward: if this block is just index+timestamp (2 lines, 2nd has "-->"),
+        # and next block is text (not a new timestamp block), merge them.
+        if len(lines) == 2 and "-->" in lines[1]:
+            merged = list(lines)
+            j = i + 1
+            while j < len(blocks):
+                next_lines = blocks[j].strip().split("\n")
+                # Stop if next block looks like a new SRT entry (has timestamp on line 1)
+                if len(next_lines) >= 2 and "-->" in next_lines[1]:
+                    break
+                # If next block is just an index number, skip it (already in merged[0])
+                if len(next_lines) == 1 and next_lines[0].strip().isdigit():
+                    j += 1
+                    continue
+                merged.extend(next_lines)
+                j += 1
+            lines = merged
+            i = j
+        else:
+            i += 1
+
         if len(lines) < 3:
             continue
-        idx = int(lines[0].strip())
+        try:
+            idx = int(lines[0].strip())
+        except ValueError:
+            continue
         timing = lines[1].strip()
+        if " --> " not in timing:
+            continue
         start, end = timing.split(" --> ")
         content = "\n".join(lines[2:]).strip()
-        entries.append(SubEntry(idx, start.strip(), end.strip(), content))
+        if content:
+            entries.append(SubEntry(idx, start.strip(), end.strip(), content))
     return entries
 
 
@@ -135,7 +166,18 @@ def srt_path(slug: str, filename: str) -> Path:
 
 
 def find_video(slug: str) -> Path | None:
-    """Find source video in lab _runtime/<slug>_process/."""
+    """Find source video. Prefers source_clean.mp4 (stage ④ cut), falls back to source.mp4."""
+    # Primary: output directory — prefer clean (cut) video
+    out = slug_dir(slug) / "_runtime" / "素材"
+    if out.exists():
+        clean = out / "source_clean.mp4"
+        if clean.exists():
+            return clean
+        mp4s = sorted(out.glob("*.mp4"))
+        if mp4s:
+            return mp4s[0]
+
+    # Fallback: lab _runtime/<slug>_process/
     process_dir = PROCESS_ROOT / slug / "_process"
     if not process_dir.exists():
         hits = sorted(PROCESS_ROOT.glob(f"*_{slug}"))
@@ -146,3 +188,55 @@ def find_video(slug: str) -> Path | None:
         if mp4s:
             return mp4s[0]
     return None
+
+
+# ── Encoder detection ─────────────────────────────────────────────────────────
+
+
+def detect_encoder() -> tuple[str, list[str], int]:
+    """Detect best available encoder. NVENC (GPU) > x264 (CPU).
+    Returns (codec, quality_params, threads).
+    """
+    if shutil.which("nvidia-smi") is not None:
+        try:
+            result = subprocess.run(
+                ["ffmpeg", "-hide_banner", "-encoders"],
+                capture_output=True, text=True, timeout=10,
+            )
+            if "h264_nvenc" in result.stdout:
+                return "h264_nvenc", ["-cq", "23", "-preset", "p4", "-rc", "vbr"], 0
+        except Exception:
+            pass
+    return "libx264", ["-crf", "23"], 4
+
+
+# ── GPU health ─────────────────────────────────────────────────────────────────
+
+
+def gpu_temp() -> int | None:
+    """Read GPU temperature via nvidia-smi. Returns None if unavailable."""
+    try:
+        r = subprocess.run(
+            ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader"],
+            capture_output=True, text=True, timeout=5,
+        )
+        return int(r.stdout.strip())
+    except Exception:
+        return None
+
+
+def check_gpu_temp(max_temp: int = 80) -> tuple[int | None, bool]:
+    """Pre-render GPU temperature gate. Warns above 70, rejects above max_temp.
+    Returns (temp_celsius, ok).
+    """
+    temp = gpu_temp()
+    if temp is None:
+        return None, True
+    if temp > max_temp:
+        print(f"  GPU {temp}C > {max_temp}C, aborted. Wait for cooldown.")
+        return temp, False
+    if temp > 70:
+        print(f"  GPU {temp}C (warm but ok)")
+    else:
+        print(f"  GPU {temp}C OK")
+    return temp, True

@@ -1,20 +1,23 @@
-"""Stage ③: Merge time-overlapping YouTube fragments, then LLM adds punctuation.
+"""Stage ③: Extract delta from YouTube sliding-window captions, LLM adds punctuation.
 
 Usage: python stage_03_segment.py --slug <slug>
 Input:  <lab>/_runtime/<slug>_process/01_raw.srt
 Output: <output>/_runtime/字幕/02_seg.srt
 
-Logic:
-  1. Scan 01_raw.srt fragments. Consecutive fragments whose time ranges overlap
-     are merged into one segment. Max 30s per segment to avoid infinite chains.
-  2. Non-overlapping fragments stay independent.
-  3. Segments are sent to DeepSeek in batches. LLM adds punctuation and
-     splits at EVERY major punctuation mark with <S>. One line per segment.
-  4. Each <S> clause gets a proportional slice of the segment's time range.
+Key insight: YouTube auto-captions are sliding windows. Each 2-3s fragment repeats
+previous text + adds new words. 10ms stubs mark word boundaries.
+
+Strategy:
+  1. Filter 10ms stubs
+  2. Extract NEW text from each fragment (delta)
+  3. Batch consecutive deltas → LLM adds punctuation ONLY (no <S> splitting)
+  4. Map punctuation back to individual deltas
+  5. Each delta keeps its ORIGINAL YouTube timestamp (millisecond precision)
 """
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.request
@@ -25,8 +28,7 @@ from _lib import (
     PROCESS_ROOT, SubEntry, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
 )
 
-MAX_SEGMENT_MS = 30_000  # Max duration per merged segment
-OVERLAP_TOLERANCE_MS = 200  # Gap tolerance for merging
+MIN_DURATION_MS = 100
 
 
 def run(slug: str, *, api_key: str | None = None):
@@ -41,94 +43,216 @@ def run(slug: str, *, api_key: str | None = None):
         sys.exit(1)
 
     raw = read_srt(lab_srt)
-    print(f"[③] {len(raw)} raw fragments → merging overlapping...")
+    print(f"[③] {len(raw)} raw fragments → extracting deltas...")
 
-    merged = _merge_overlapping(raw)
-    print(f"  {len(merged)} segments after time-overlap merge (max {MAX_SEGMENT_MS // 1000}s each)")
+    deltas = _extract_deltas(raw)
+    print(f"  {len(deltas)} deltas (filtered stubs)")
 
     if not api_key:
-        print("  WARNING: No DEEPSEEK_API_KEY, writing merged text as-is")
-        out = srt_path(slug, "02_seg.srt")
-        write_srt(merged, out)
-        print(f"  → {out}")
+        print("  WARNING: No DEEPSEEK_API_KEY, writing deltas as-is")
+        write_srt(deltas, srt_path(slug, "02_seg.srt"))
         return
 
     print(f"  Adding punctuation via DeepSeek...")
-    segmented = _llm_add_punctuation(merged, api_key)
-    print(f"  {len(segmented)} clauses after punctuation split")
+    punctuated = _llm_add_punctuation(deltas, api_key)
+    print(f"  {len(punctuated)} deltas with punctuation")
+
+    merged = _merge_to_sentences(punctuated)
+    print(f"  {len(merged)} sentences after merging")
+
+    split = _split_long_sentences(merged)
+    print(f"  → {len(split)} entries after splitting long sentences")
 
     out = srt_path(slug, "02_seg.srt")
-    write_srt(segmented, out)
+    write_srt(split, out)
     print(f"  → {out}")
 
 
-# ── Mechanical de-overlap ────────────────────────────────────────────────────
+def _extract_deltas(entries: list[SubEntry]) -> list[SubEntry]:
+    """Extract new-text delta from YouTube sliding-window fragments.
 
-
-def _merge_overlapping(entries: list[SubEntry]) -> list[SubEntry]:
-    """Merge consecutive fragments whose time ranges overlap, capped at MAX_SEGMENT_MS."""
-    if not entries:
+    Keeps fragments with duration >= MIN_DURATION_MS. For each, finds the
+    new words that weren't in the previous fragment. Preserves original timing.
+    """
+    meaningful = [e for e in entries
+                  if time_to_ms(e.end) - time_to_ms(e.start) >= MIN_DURATION_MS]
+    if not meaningful:
         return []
+
     result = []
-    i = 0
+    prev = ""
     seq = 0
-    while i < len(entries):
-        buf = [entries[i].text]
-        buf_start = entries[i].start
-        buf_start_ms = time_to_ms(buf_start)
-        buf_end = entries[i].end
-        buf_end_ms = time_to_ms(buf_end)
-        j = i + 1
-        while j < len(entries):
-            next_start_ms = time_to_ms(entries[j].start)
-            # Break if gap too large
-            if next_start_ms > buf_end_ms + OVERLAP_TOLERANCE_MS:
-                break
-            # If cap would trigger, clip current end to avoid overlap with next segment
-            if next_start_ms - buf_start_ms > MAX_SEGMENT_MS:
-                buf_end_ms = max(buf_start_ms + 800, next_start_ms - 20)
-                buf_end = ms_to_time(buf_end_ms)
-                break
-            buf.append(entries[j].text)
-            buf_end = entries[j].end
-            buf_end_ms = time_to_ms(buf_end)
-            j += 1
-        text = " ".join(buf)
-        seq += 1
-        result.append(SubEntry(seq, buf_start, buf_end, text.strip()))
-        i = j
+    for e in meaningful:
+        cur = e.text.strip()
+        if not cur:
+            prev = cur
+            continue
+        delta = _delta(prev, cur)
+        if delta:
+            seq += 1
+            result.append(SubEntry(seq, e.start, e.end, delta))
+        prev = cur
     return result
 
 
-# ── LLM punctuation (short-clause mode) ──────────────────────────────────────
+def _delta(prev: str, cur: str) -> str:
+    """Return the new words in cur that weren't in prev."""
+    if not prev:
+        return cur
+    if prev == cur:
+        return ""
+    pw = prev.split()
+    cw = cur.split()
+    for n in range(min(len(pw), len(cw) - 1), 0, -1):
+        if pw[-n:] == cw[:n]:
+            d = cw[n:]
+            return " ".join(d) if d else ""
+    return cur
 
 
-def _llm_add_punctuation(segments: list[SubEntry], api_key: str) -> list[SubEntry]:
-    """Send segments to DeepSeek. Returns clauses split at every punctuation mark."""
-    if len(segments) < 2:
-        return segments
+SENTENCE_ENDS = {'.', '!', '?'}
 
-    batch_size = 15  # Segments per LLM call
-    all_clauses = []
-    seq = 1
 
-    for bi in range(0, len(segments), batch_size):
-        batch = segments[bi:bi + batch_size]
+def _merge_to_sentences(deltas: list[SubEntry]) -> list[SubEntry]:
+    """Merge consecutive deltas into sentences at period/?! boundaries.
 
-        # Build numbered input
-        lines = [f"{j+1}. {seg.text.strip()}" for j, seg in enumerate(batch)]
-        prompt_lines = "\n".join(lines)
+    A delta ending with . ! ? closes a sentence. Others continue.
+    Merged sentence takes the start of its first delta and the end of its last.
+    """
+    if not deltas:
+        return []
 
+    result = []
+    buf_texts = []
+    buf_start = None
+    seq = 0
+
+    for e in deltas:
+        text = e.text.strip()
+        if not text:
+            continue
+
+        if buf_start is None:
+            buf_start = e.start
+
+        buf_texts.append(text)
+
+        if text[-1] in SENTENCE_ENDS:
+            seq += 1
+            result.append(SubEntry(seq, buf_start, e.end, " ".join(buf_texts)))
+            buf_texts = []
+            buf_start = None
+
+    # Flush remaining (trailing incomplete sentence)
+    if buf_texts:
+        seq += 1
+        result.append(SubEntry(seq, buf_start or deltas[0].start,
+                               deltas[-1].end, " ".join(buf_texts)))
+
+    return result
+
+
+MAX_SENTENCE_MS = 12_000  # Split sentences longer than this at comma boundaries
+
+
+def _split_long_sentences(entries: list[SubEntry]) -> list[SubEntry]:
+    """Split overlong sentences at comma boundaries for readable subtitle duration."""
+    result = []
+    seq = 0
+    for e in entries:
+        dur = time_to_ms(e.end) - time_to_ms(e.start)
+        if dur <= MAX_SENTENCE_MS:
+            seq += 1
+            e.index = seq
+            result.append(e)
+            continue
+
+        text = e.text
+        splits = [m.end() for m in re.finditer(r'[,;]', text)]
+
+        if not splits:
+            # No punctuation — split by words into ~equal chunks
+            words = text.split()
+            if len(words) < 2:
+                seq += 1
+                e.index = seq
+                result.append(e)
+                continue
+            num_chunks = max(2, dur // MAX_SENTENCE_MS + 1)
+            words_per = max(1, len(words) // num_chunks)
+            start_ms = time_to_ms(e.start)
+            end_ms = time_to_ms(e.end)
+            chunk_dur = (end_ms - start_ms) / min(num_chunks, len(words))
+            for ci in range(0, len(words), words_per):
+                chunk_words = words[ci:ci + words_per]
+                if not chunk_words:
+                    continue
+                seq += 1
+                chunk_start = start_ms + int(ci / len(words) * (end_ms - start_ms))
+                chunk_end = min(start_ms + int((ci + len(chunk_words)) / len(words) * (end_ms - start_ms)), end_ms)
+                if ci + words_per >= len(words):
+                    chunk_end = end_ms
+                result.append(SubEntry(seq, ms_to_time(chunk_start), ms_to_time(chunk_end), " ".join(chunk_words)))
+            continue
+
+        # 1+ commas: build split points and distribute time
+        num_chunks = max(2, dur // MAX_SENTENCE_MS + 1)
+        if len(splits) == 1:
+            chunk_starts = [0, splits[0]]
+        else:
+            chunk_size = max(1, len(splits) // num_chunks)
+            chunk_starts = [0]
+            for ci in range(1, num_chunks):
+                idx = min(ci * chunk_size, len(splits) - 1)
+                chunk_starts.append(splits[idx])
+
+        total_chars = len(text)
+        start_ms = time_to_ms(e.start)
+        end_ms = time_to_ms(e.end)
+        for ci in range(len(chunk_starts)):
+            seq += 1
+            cs = chunk_starts[ci]
+            ce = chunk_starts[ci + 1] if ci + 1 < len(chunk_starts) else len(text)
+            chunk_text = text[cs:ce].strip().lstrip(',').lstrip(';').strip()
+            if ci == 0:
+                chunk_start = start_ms
+            else:
+                chunk_start = start_ms + int((end_ms - start_ms) * (chunk_starts[ci - 1] / total_chars))
+            if ci == len(chunk_starts) - 1:
+                chunk_end = end_ms
+            else:
+                chunk_end = start_ms + int((end_ms - start_ms) * (ce / total_chars))
+            result.append(SubEntry(seq, ms_to_time(chunk_start), ms_to_time(chunk_end), chunk_text))
+
+    return result
+
+
+# ── LLM punctuation (preserve timing, only add punctuation) ───────────────────
+
+BATCH_SIZE = 20  # Deltas per LLM call
+
+
+def _llm_add_punctuation(deltas: list[SubEntry], api_key: str) -> list[SubEntry]:
+    """Batch deltas, send to LLM for punctuation only. Returns deltas with punctuation added."""
+    if len(deltas) < 2:
+        return deltas
+
+    result = [None] * len(deltas)
+
+    for bi in range(0, len(deltas), BATCH_SIZE):
+        batch = deltas[bi:bi + BATCH_SIZE]
+        texts = [e.text.strip() for e in batch]
+
+        numbered = "\n".join(f"{j+1}. {t}" for j, t in enumerate(texts))
         prompt = (
-            "Add punctuation (periods, commas, question marks, semicolons, colons) "
-            "to these English transcript fragments. CRITICAL: do NOT change ANY words. Only add punctuation.\n\n"
-            "Split at EVERY punctuation mark with <S>. Do NOT merge fragments together.\n"
-            "Output ONE LINE per input fragment, with its <S>-split clauses all on that one line.\n"
-            "Goal: each <S> clause should be short — one breath, ~5-15 words.\n\n"
-            f"{prompt_lines}"
+            "Add proper punctuation (periods, commas, question marks, semicolons) "
+            "to each line below. CRITICAL: do NOT change, add, remove, reorder, "
+            "or merge ANY words. ONLY add punctuation marks. "
+            "Output exactly the same number of lines, one per input line.\n\n"
+            f"{numbered}"
         )
 
-        result = None
+        response = None
         for attempt in range(2):
             try:
                 req = urllib.request.Request(
@@ -137,87 +261,60 @@ def _llm_add_punctuation(segments: list[SubEntry], api_key: str) -> list[SubEntr
                         "model": "deepseek-chat",
                         "messages": [
                             {"role": "system", "content": (
-                                "You restore punctuation to ASR transcripts. "
-                                "Split at EVERY punctuation mark (. , ; : ! ?) with <S>. "
-                                "Output ONE LINE per input fragment. Never change any word."
+                                "You add punctuation to ASR transcript fragments. "
+                                "NEVER change, add, or remove any words. Only insert "
+                                "punctuation marks (. , ; : ! ?) at appropriate positions. "
+                                "Output exactly one line per input line, same order."
                             )},
                             {"role": "user", "content": prompt},
                         ],
                         "temperature": 0.1,
-                        "max_tokens": 8192,
+                        "max_tokens": 4096,
                     }).encode(),
                     headers={
                         "Authorization": f"Bearer {api_key}",
                         "Content-Type": "application/json",
                     },
                 )
-                with urllib.request.urlopen(req, timeout=180) as resp:
+                with urllib.request.urlopen(req, timeout=120) as resp:
                     body = json.loads(resp.read())
-                    result = body["choices"][0]["message"]["content"].strip()
+                    response = body["choices"][0]["message"]["content"].strip()
                     break
             except Exception as e:
                 if attempt == 1:
-                    print(f"    Batch {bi // batch_size} failed: {e}")
+                    print(f"    Batch {bi // BATCH_SIZE} failed: {e}")
                 time.sleep(2)
 
-        if result:
-            seq = _parse_batch_result(result, batch, all_clauses, seq)
-        else:
-            # Fallback: keep original segments
-            for seg in batch:
-                all_clauses.append(SubEntry(seq, seg.start, seg.end, seg.text))
-                seq += 1
+        parsed = _parse_punctuation(response, batch) if response else batch
+        for j, entry in enumerate(parsed):
+            idx = bi + j
+            if idx < len(result):
+                result[idx] = entry
 
-    if not all_clauses:
-        return segments
-    return all_clauses
+    # Fallback for any missed entries
+    for i, r in enumerate(result):
+        if r is None:
+            result[i] = deltas[i]
+
+    return result
 
 
-def _parse_batch_result(result: str, batch: list[SubEntry], out: list[SubEntry], seq: int) -> int:
-    """Parse LLM output: one line per segment, <S>-split into clauses."""
-    lines = [l.strip() for l in result.split("\n") if l.strip()]
-    # Remove any leading numbers like "1. " that LLM might add
-    import re
-
-    def strip_leading_num(line: str) -> str:
-        return re.sub(r'^\d+\.\s*', '', line.strip())
-
+def _parse_punctuation(response: str, batch: list[SubEntry]) -> list[SubEntry]:
+    """Parse LLM punctuation output back to SubEntry with original timing."""
+    lines = [l.strip() for l in response.split("\n") if l.strip()]
+    result = []
     for j, seg in enumerate(batch):
-        if j >= len(lines):
-            # LLM didn't return enough lines — use original
-            out.append(SubEntry(seq, seg.start, seg.end, seg.text))
-            seq += 1
-            continue
-
-        line = strip_leading_num(lines[j])
-        clauses = [c.strip() for c in line.split("<S>") if c.strip()]
-        if not clauses:
-            out.append(SubEntry(seq, seg.start, seg.end, seg.text))
-            seq += 1
-            continue
-
-        seg_start_ms = time_to_ms(seg.start)
-        seg_end_ms = time_to_ms(seg.end)
-        seg_dur = seg_end_ms - seg_start_ms
-
-        # Distribute time proportionally by character count
-        total_chars = sum(len(c) for c in clauses)
-        cursor = seg_start_ms
-        for ci, clause in enumerate(clauses):
-            ratio = len(clause) / total_chars if total_chars > 0 else 1.0 / len(clauses)
-            dur = max(int(seg_dur * ratio), 800)
-            if ci == len(clauses) - 1:
-                end_ms = seg_end_ms
-            else:
-                end_ms = min(cursor + dur, seg_end_ms)
-            out.append(SubEntry(seq, ms_to_time(cursor), ms_to_time(end_ms), clause))
-            cursor = end_ms
-            seq += 1
-    return seq
+        if j < len(lines):
+            text = re.sub(r'^\d+\.\s*', '', lines[j]).strip()
+            if text:
+                result.append(SubEntry(seg.index, seg.start, seg.end, text))
+                continue
+        result.append(seg)
+    return result
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser(description="③ De-overlap + LLM punctuation")
+    p = argparse.ArgumentParser(description="③ Delta extraction + punctuation")
     p.add_argument("--slug", required=True)
     args = p.parse_args()
     run(args.slug)

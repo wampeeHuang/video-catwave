@@ -277,13 +277,11 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td>1</td><td><strong>成片 mp4</strong></td><td>H.264+AAC, ≤1080p, 内嵌中英双语字幕</td><td>文件名 = B站标题</td></tr>
     <tr><td>2</td><td><strong>封面 JPG</strong></td><td>1920×1080, ≤4.8MB</td><td>嘉宾正脸清晰 + 核心观点文字突出，B站信息流可辨识</td></tr>
     <tr><td>3</td><td><strong>发布面板 HTML</strong></td><td>本地离线页</td><td>标题/标签/简介/封面预览；简介含章节时间戳</td></tr>
-	    <tr><td>4</td><td><strong>章节节点</strong></td><td>MM:SS 话题标题，5–10 个</td><td>从 transcript 提取关键话题转折点，写入简介 + <code>chapters_bilibili.json</code>，B站自动渲染进度条章节标记。≤10 个（平台上限）</td></tr>
-    <tr><td>5</td><td><strong>电子书 EPUB</strong></td><td>电子书/&lt;标题&gt;.epub</td><td>全中文电子书，从翻译 transcript 生成，适合微信读书等阅读器离线阅读</td></tr>
-    <tr><td>6</td><td><strong>过程归档</strong></td><td>_runtime/</td><td>原始字幕→翻译→ASS→帧截图→发布面板过程→封面过程，全链可追溯</td></tr>
-    <tr><td>7</td><td><strong>专栏文章</strong></td><td>Markdown, _runtime/draft.md</td><td>从翻译 transcript 提取：引言,核心论点分节,结尾，B站专栏用</td></tr>
-    <tr><td>8</td><td><strong>测试片</strong></td><td>_tests/ (或 _runtime/测试片/)</td><td>30-60s 样片，验证字幕渲染效果，不上线</td></tr>
-    <tr><td>9</td><td><strong>选题库更新</strong></td><td>CSV + 飞书表格</td><td>状态→已发布，写入 BV号/标题/播放量</td></tr>
-    <tr><td>10</td><td><strong>已发布归档</strong></td><td>选题库/已发布/slug.md</td><td>BV号 + 标题 + 核心数据</td></tr>
+	    <tr><td>4</td><td><strong>章节节点</strong></td><td>MM:SS 话题标题，5–8 个</td><td>从 transcript 提取关键话题转折点，写入简介，B站自动渲染进度条章节标记</td></tr>
+    <tr><td>5</td><td><strong>过程归档</strong></td><td>_runtime/</td><td>原始字幕→翻译→ASS→帧截图，全链可追溯</td></tr>
+    <tr><td>6</td><td><strong>专栏文章</strong></td><td>Markdown, _runtime/draft.md</td><td>从翻译 transcript 提取：引言,核心论点分节,结尾，B站专栏用</td></tr>
+	    <tr><td>7</td><td><strong>选题库更新</strong></td><td>CSV + 飞书表格</td><td>状态→已发布，写入 BV号/标题/播放量</td></tr>
+    <tr><td>8</td><td><strong>已发布归档</strong></td><td>选题库/已发布/slug.md</td><td>BV号 + 标题 + 核心数据</td></tr>
     </tbody>
   </table>
   </div>
@@ -291,23 +289,22 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 0.3 管线全流程（需求层级） -->
   <div class="card">
   <h3>0.3 管线全流程（需求层级）</h3>
-  <p>管线是<strong>满足任务书的手段</strong>——任务书回答"要什么"，管线回答"怎么做"。分两段：<strong style="color:#10B981;">机械段</strong>（②-⑧ 独立阶段脚本，每阶段可单独重跑）+ <strong style="color:#8B5CF6;">AI 段</strong>（⑨-⑭ 每步需 Claude 判断）。完整实现见 <a href="#s3">§03</a>。</p>
+  <p>管线是<strong>满足任务书的手段</strong>——任务书回答"要什么"，管线回答"怎么做"。分两段：<strong style="color:#10B981;">机械段</strong>（②-⑧ 独立阶段脚本，每阶段可单独重跑）+ <strong style="color:#8B5CF6;">AI 段</strong>（⑧-⑬ 每步需 Claude 判断）。完整实现见 <a href="#s3">§03</a>。</p>
   <div class="pipe">
     <span>① 选题</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">③ 断句</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">④ 赞助检测</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">⑤ 翻译</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">⑥ 字宽拆分</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">⑦ ASS</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">⑧ 渲染</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑨ 金句提取</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">④ 翻译</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑤ 判定</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑥ ASS</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">⑦ 渲染</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑧ 金句提取</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑨ 封面</span><span class="arr">→</span>
     <span style="background:#F5F3FF;border-color:#8B5CF6;">⑩ 标题</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑪ 元数据（标签/简介/章节）</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 专栏（B站文章）+ EPUB</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 封面</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑭ 发布</span>
-  <p style="font-size:13px; color:var(--muted);">关键关口：<strong>⑤ 翻译</strong>是素材质量判定点——翻译完成后才能判断内容价值，决定继续或排除（见 <a href="#s1">§01</a> 影视飓风差异）。判定 = Go/No-Go 人工关口（非独立阶段，翻译后执行 <a href="#s3">判定 Checklist</a>）。<strong>⑨ 金句提取</strong>决定标题和封面的钩子质量。<strong>⑩~⑫</strong>先定标题、元数据、专栏文章，<strong>⑬ 封面</strong>最后合成——拿着已确定的标题文字和金句做图，不反复改。</p>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑪ 元数据</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 专栏</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 发布</span>
+  <p style="font-size:13px; color:var(--muted);">关键关口：<strong>④ 翻译</strong>是素材质量判定点——翻译完成后才能判断内容价值，决定继续或排除（见 <a href="#s1">§01</a> 影视飓风差异）。<strong>⑤ 判定</strong>是 Go/No-Go 决策点。<strong>⑧ 金句提取</strong>决定封面和标题的钩子质量。</p>
   </div>
 
   <!-- 0.4 服务对象 & 质量标准 -->
@@ -330,7 +327,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 0.6 选题准绳 -->
   <div class="card">
   <h3>0.5 选题准绳</h3>
-  <p><strong>选什么 = 决定我们服务什么需求。</strong>选错 = 全链路白跑。流程：发现 → 初筛 → B站交叉检索 → 五维评分 → 入库 → 排期。</p>
+  <p><strong>选什么 = 决定我们服务什么需求。</strong>选错 = 全链路白跑。流程：发现 → 初筛 → B站交叉检索 → 四维评分 → 入库 → 排期。</p>
 
   <h4>初筛（3 分钟，看信息源列表页即可，任意一项 NO → 放弃）</h4>
   <table>
@@ -355,7 +352,6 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td><strong>独占性</strong></td><td>×3</td><td>B站零中字</td><td>有搬运无中字</td><td>已有精品中字</td></tr>
     <tr><td><strong>人物权威</strong></td><td>×2</td><td>CEO / 核心团队 / 学界领袖</td><td>知名创作者</td><td>素人</td></tr>
     <tr><td><strong>长期价值</strong></td><td>×2</td><td>方法论 / 框架 / 哲学</td><td>趋势分析</td><td>纯新闻</td></tr>
-
     </tbody>
   </table>
   <div class="hl hl-y"><strong>总分 = 时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2</strong>（满分 30）<br>
@@ -407,7 +403,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <div>
       <h4>状态流转</h4>
       
-      <pre style="font-size:0.78em; line-height:1.8;">发现 → 初筛(4维) → B站交叉检索 → 五维评分
+      <pre style="font-size:0.78em; line-height:1.8;">发现 → 初筛(4维) → B站交叉检索 → 四维评分
   ├─ &lt;20 分 → 已废弃/（直接排除）
   ├─ 20–24 分 → 候选池（备选）
   └─ ≥25 分 → 候选池（优先）→ 排期 → 生产中
@@ -462,7 +458,8 @@ pre .arg { color: var(--yellow); font-weight: 600; }
       <div class="tree">D:\workspace\lab\2026-06-16-<span class="hl">猫波信号站</span>\
 ├── <span class="hl">CLAUDE.md</span>        <span class="dim"># 硬约束 + 管线步骤</span>
 ├── <span class="hl">生产方法论.html</span>    <span class="dim"># 本文档</span>
-├── <span class="hl">tools/</span>              <span class="dim"># 独立阶段脚本 ②-⑧ + gen_cover/gen_epub 等辅助脚本</span>
+├── <span class="hl">video-catwave/tools/</span>      <span class="dim"># 独立阶段脚本 ②-⑧</span>
+├── _tools/          <span class="dim"># gen_cover 等辅助脚本</span>
 ├── _ref/            <span class="dim"># 生产参数 + 踩坑日志</span>
 ├── _archive/        <span class="dim"># 过程归档，不读只存</span>
 ├── _runtime/        <span class="dim"># 开发测试用</span>
@@ -479,10 +476,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
         ├── 成片/&lt;标题&gt;.mp4
         ├── cover.jpg
         ├── 发布面板.html
-        ├── 电子书/&lt;标题&gt;.epub   <span class="dim"># 全中文电子书</span>
-        ├── _tests/              <span class="dim"># 测试片，不上线</span>
-        ├── HANDOFF.md           <span class="dim"># 会话交接</span>
-        └── _runtime/            <span class="dim"># 过程归档</span></div>
+        └── _runtime/  <span class="dim"># 过程归档</span></div>
     </div>
   </div>
   <p style="font-size:12px;color:var(--muted);">视频目录：YYYYMMDD_slug/（纯英文）。文件名禁止全角冒号 U+FF1A。</p>
@@ -586,7 +580,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <table>
     <thead><tr><th>维度</th><th>做了什么</th><th>暴露的问题</th><th>改进方向</th></tr></thead>
     <tbody>
-    <tr><td><strong>选题</strong></td><td>Lenny's Podcast · Kevin Weil，五维评分 29/33，B站零中字</td><td>—</td><td>评分公式验证有效</td></tr>
+    <tr><td><strong>选题</strong></td><td>Lenny's Podcast · Kevin Weil，四维评分 27/30，B站零中字</td><td>—</td><td>评分公式验证有效</td></tr>
     <tr><td><strong>翻译</strong></td><td>DeepSeek Chat，245 条翻译</td><td><span class="tag tag-no">167 条未翻译 (68%)</span> — 赞助商口播 + 语速过快段落，DeepSeek 遇 ASR 质量差的英文直接跳过</td><td>赞助商检测 + 自动跳过 + 非赞助段保证覆盖率</td></tr>
     <tr><td><strong>封面</strong></td><td>SimHei + 暖黄 #FFC82D，布局A（人物左+文字右）</td><td><span class="tag tag-warn">截图盲抽</span> — 均匀抽 5 帧人眼挑，挑到的帧不理想</td><td>transcript 金句定位时间戳 + 视觉模型评分确认</td></tr>
     <tr><td><strong>标题</strong></td><td>"OpenAI CPO Kevin Weil：你现在用的AI是你余生最差的——AI每两个月就颠覆一次"</td><td>—</td><td>壳理论验证有效。标题 = 壳，内容 = 核</td></tr>
@@ -597,7 +591,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   </div>
 </section>
 
-<div class="card"><h3>1.4 反面案例：Cat Wu Tokyo 2026（被排除）</h3><p style="color:var(--muted); font-size:13px;">反面案例的价值不小于正面案例——知道"为什么不做"和知道"为什么做"同等重要。</p><div class="case"><h4>基本事实</h4><table><thead><tr><th>维度</th><th>情况</th></tr></thead><tbody><tr><td>嘉宾</td><td>Cat Wu，AI 创作者</td></tr><tr><td>活动</td><td>Tokyo 2026，英文演讲</td></tr><tr><td>五维评分</td><td>时效性 3 + 独占性 3 + 人物权威 1 + 长期价值 1 + 字幕可用 2 = 23 分（备选）</td></tr><tr><td>翻译后判定</td><td><span class="tag tag-no">排除</span></td></tr></tbody></table></div><div class="case"><h4>排除根因分析</h4><table><thead><tr><th>维度</th><th>发现</th><th>教训</th></tr></thead><tbody><tr><td><strong>利益结构</strong></td><td>个人创作者宣传型演讲，无机构/平台/资本视角</td><td>利益结构越单一，信息独特性越低。优先选多重利益交叉点上的嘉宾</td></tr><tr><td><strong>分发逻辑</strong></td><td>内容已在多个英文渠道广泛分发，B站搬运差异性不足</td><td>独占性不止看B站——看全平台分发广度</td></tr><tr><td><strong>不可替代性</strong></td><td>核心观点在其他访谈中已有更深度表达</td><td>同一嘉宾多期内容横向对比后再决定做哪期</td></tr></tbody></table></div><div class="hl hl-y"><strong>反方观点（为什么这个排除可能错了）：</strong>Cat Wu 在 AI 创作者社区有真实影响力，演讲中的实操细节可能对 B站 AI 创作者有参考价值。排除是因为"23 分 + 翻译后信息密度低"，但作为新人嘉宾试水可能值得。记录此反方观点供未来复盘。</div></div></section><!-- ════════════════ §2 封面 & 标题 ════════════════ -->
+<div class="card"><h3>1.4 反面案例：Cat Wu Tokyo 2026（被排除）</h3><p style="color:var(--muted); font-size:13px;">反面案例的价值不小于正面案例——知道"为什么不做"和知道"为什么做"同等重要。</p><div class="case"><h4>基本事实</h4><table><thead><tr><th>维度</th><th>情况</th></tr></thead><tbody><tr><td>嘉宾</td><td>Cat Wu，AI 创作者</td></tr><tr><td>活动</td><td>Tokyo 2026，英文演讲</td></tr><tr><td>四维评分</td><td>时效性 3 + 独占性 3 + 人物权威 1 + 长期价值 1 = 21 分（备选）</td></tr><tr><td>翻译后判定</td><td><span class="tag tag-no">排除</span></td></tr></tbody></table></div><div class="case"><h4>排除根因分析</h4><table><thead><tr><th>维度</th><th>发现</th><th>教训</th></tr></thead><tbody><tr><td><strong>利益结构</strong></td><td>个人创作者宣传型演讲，无机构/平台/资本视角</td><td>利益结构越单一，信息独特性越低。优先选多重利益交叉点上的嘉宾</td></tr><tr><td><strong>分发逻辑</strong></td><td>内容已在多个英文渠道广泛分发，B站搬运差异性不足</td><td>独占性不止看B站——看全平台分发广度</td></tr><tr><td><strong>不可替代性</strong></td><td>核心观点在其他访谈中已有更深度表达</td><td>同一嘉宾多期内容横向对比后再决定做哪期</td></tr></tbody></table></div><div class="hl hl-y"><strong>反方观点（为什么这个排除可能错了）：</strong>Cat Wu 在 AI 创作者社区有真实影响力，演讲中的实操细节可能对 B站 AI 创作者有参考价值。排除是因为"23 分 + 翻译后信息密度低"，但作为新人嘉宾试水可能值得。记录此反方观点供未来复盘。</div></div></section><!-- ════════════════ §2 封面 & 标题 ════════════════ -->
 <section id="s2">
   <h2><span class="num">02</span>封面 & 标题 <span style="font-weight:400;font-size:0.55em;color:var(--muted);margin-left:12px;">· 李晨阳</span></h2>
   <p style="margin-bottom:24px;">封面和标题是 B站信息流中<strong>同时展示的两个钩子</strong>，各承担 50% 的点击驱动。影视飓风方法论：先定壳（封面+标题），再裹核（内容）。我们的适配版：翻译完成后从 transcript 提取最佳金句做壳。</p>
@@ -776,17 +770,17 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <div class="pipe">
     <span style="background:#ECFDF5;border-color:#10B981;">① 选题</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
-    <span style="background:#ECFDF5;border-color:#10B981;">③ 断句</span><span class="arr">→</span>
+    <span style="background:#ECFDF5;border-color:#10B981;">③ 去重叠+标点</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">④ 赞助检测</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑤ 翻译</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑥ 字宽拆分</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑦ ASS</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">⑧ 渲染</span><span class="arr">→</span>
     <span style="background:#F5F3FF;border-color:#8B5CF6;">⑨ 金句提取</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑩ 标题</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑪ 元数据（标签/简介/章节）</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 专栏（B站文章）+ EPUB</span><span class="arr">→</span>
-    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 封面</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑩ 封面</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑪ 标题</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 元数据</span><span class="arr">→</span>
+    <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 专栏</span><span class="arr">→</span>
     <span style="background:#F5F3FF;border-color:#8B5CF6;">⑭ 发布</span>
   </div>
   <p style="font-size:11px;color:var(--muted);margin-top:6px;">
@@ -806,32 +800,15 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td class="nowrap">⑦ ASS</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_07_ass.py</code></td><td>04_split.srt → 05.ass + transcript.txt</td><td>&lt;1s</td></tr>
     <tr><td class="nowrap">⑧ 渲染</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_08_render.py</code> (ffmpeg + 赞助裁剪)</td><td>mp4 + ass + cuts.json → mp4</td><td>~20m</td></tr>
     <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑨ 金句提取</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → 评分金句</td><td>transcript → 封面大字 + 标题候选</td><td>~5m</td></tr>
-    <tr><td class="nowrap">⑩ 标题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读金句 → 生成 3-5 候选标题</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
-    <tr><td class="nowrap">⑪ 元数据</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → 发布面板 HTML（B站发布表单：标签/简介/章节节点）</td><td>transcript → 标签 + 简介 + 章节节点（≤10个）</td><td>~10m</td></tr>
-    <tr><td class="nowrap">⑫ 专栏</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → draft.md（B站专栏文章）+ <code>gen_epub.py</code> → EPUB 电子书</td><td>transcript → B站专栏文章 markdown + 全中文 EPUB 电子书</td><td>~15m</td></tr>
-    <tr><td class="nowrap">⑬ 封面</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td><strong>video-catwave</strong> skill → <code>gen_cover.py</code></td><td>截图帧 + 已定标题 + 金句 → cover.jpg</td><td>~2m</td></tr>
+    <tr><td class="nowrap">⑩ 封面</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td><strong>video-catwave</strong> skill → <code>gen_cover.py</code></td><td>帧 + 金句 → cover.jpg</td><td>~2m</td></tr>
+    <tr><td class="nowrap">⑪ 标题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 生成 3-5 候选 → 飞书存档</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
+    <tr><td class="nowrap">⑫ 元数据</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>发布面板 HTML（Claude 生成）</td><td>transcript → 标签/简介/章节节点</td><td>~10m</td></tr>
+    <tr><td class="nowrap">⑬ 专栏文章</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → draft.md</td><td>transcript → B站专栏 markdown</td><td>~15m</td></tr>
     <tr><td class="nowrap">⑭ 发布</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human</span></td><td>B站创作者中心</td><td>成品文件 → 审核中/已发布</td><td>~10m</td></tr>
     </tbody>
   </table>
-  <div class="hl hl-y"><strong>独立阶段脚本 ②-⑧：</strong>每个阶段一个 Python 文件，阶段间通过 SRT/JSON 文件通信，可单独重跑。全部脚本在 <code>tools/</code> 下（lab 根目录）。⑧ 之后由 Claude AI 接管 ⑨-⑭，每步 AI 决策 + 人工确认。</div>
-  <p style="font-size:12px;color:var(--muted);">判定 = 翻译完成后的人工 Go/No-Go 关口（非独立阶段）。⑨ 金句提取 = 从 transcript 中选最有力的钩子。</p>
-
-  <h4>阶段产出盘点（Kevin Weil 期实测）</h4>
-  <table>
-    <thead><tr><th>段</th><th>脚本</th><th>产出文件</th><th>落盘位置</th><th>格式</th><th>条目</th><th>说明</th></tr></thead>
-    <tbody>
-    <tr><td class="nowrap">②</td><td><code>stage_02_download.py</code></td><td><code>source.mp4</code><br><code>01_raw.srt</code></td><td>lab → 手动搬入 output <code>素材/</code><br>output <code>字幕/</code></td><td>MP4<br>SRT</td><td>—<br>5093</td><td>yt-dlp 原始下载<br>YouTube 滑动窗口</td></tr>
-    <tr><td class="nowrap">③</td><td><code>stage_03_segment.py</code></td><td><code>02_seg.srt</code></td><td>output <code>字幕/</code></td><td>SRT</td><td>540</td><td>delta 去重→LLM 标点→句合并→长句拆分</td></tr>
-    <tr><td class="nowrap">④</td><td><code>stage_04_sponsor.py</code></td><td><code>02_seg_clean.srt</code><br><code>_sponsor_cuts.json</code></td><td>output <code>字幕/</code></td><td>SRT<br>JSON</td><td>505<br>—</td><td>切掉 25 条广告<br>ffmpeg 剪切时间点</td></tr>
-    <tr><td class="nowrap">⑤</td><td><code>stage_05_translate.py</code></td><td><code>03_zh.srt</code></td><td>output <code>字幕/</code></td><td>SRT (<code>\N</code> 双语)</td><td>505</td><td>DeepSeek EN→ZH, 并发5</td></tr>
-    <tr><td class="nowrap">⑥</td><td><code>stage_06_split.py</code></td><td><code>04_split.srt</code></td><td>output <code>字幕/</code></td><td>SRT</td><td>1104</td><td>像素宽度检测 + 标点拆分, 286条超宽</td></tr>
-    <tr><td class="nowrap">⑦</td><td><code>stage_07_ass.py</code></td><td><code>05.ass</code><br><code>transcript.txt</code></td><td>output <code>字幕/</code></td><td>ASS<br>TXT</td><td>1104<br>—</td><td>WrapStyle 0, 背景框 50%黑<br>纯中文逐行文本</td></tr>
-    <tr><td class="nowrap">⑧</td><td><code>stage_08_render.py</code></td><td><code>&lt;标题&gt;.mp4</code></td><td>output <code>成片/</code></td><td>MP4</td><td>—</td><td>ffmpeg 渲染, H.264+AAC</td></tr>
-    </tbody>
-  </table>
-  <p style="font-size:11px;color:var(--muted);">落盘根路径：<code>D:\workspace\_output\猫波信号站\视频\&lt;slug&gt;\</code>。source.mp4 由 ② 下载到 lab <code>_runtime/&lt;slug&gt;_process/</code>，下载完成后手动搬入 output <code>素材/</code>。③ 是 lab→output 跨界点，此后所有阶段只读写 output。</p>
-
-  <h4>判定 Go/No-Go Checklist（⑤翻译后、⑥字宽前）</h4><p style="font-size:13px;">翻译完成后逐项打钩。任一 <span class="tag tag-no">No-Go</span> = 排除，全部 <span class="tag tag-go">Go</span> = 继续。不是感觉，是打钩。</p><table><thead><tr><th>#</th><th>检查项</th><th>Go 标准</th><th>No-Go 标准</th></tr></thead><tbody><tr><td>G1</td><td><strong>信息密度</strong></td><td>观点密度 &ge; 2/分，实操占比 &ge; 30%</td><td>观点密度 &lt; 0.5/分，或实操占比 &lt; 10%</td></tr><tr><td>G2</td><td><strong>翻译覆盖率</strong></td><td>非赞助段 &ge; 95% 有翻译</td><td>&lt; 80% 非赞助段翻译（赞助段不计）</td></tr><tr><td>G3</td><td><strong>金句可提取性</strong></td><td>至少 2 个满足 &ge;3 维度的可提取金句</td><td>无满足 &ge;2 维度的金句候选</td></tr><tr><td>G4</td><td><strong>嘉宾视觉可用性</strong></td><td>至少 1 帧正脸清晰（光照好、表情自然）</td><td>所有帧模糊/侧脸/表情崩坏</td></tr><tr><td>G5</td><td><strong>B站独占性复核</strong></td><td>翻译后重新 B站搜索，仍零中字</td><td>发现新增中字或同类内容已上传</td></tr><tr><td>G6</td><td><strong>时效敏感度</strong></td><td>时效敏感度 = 低或中（&ge; 6 个月有效）</td><td>时效敏感度 = 高（&lt; 1 个月失效）</td></tr></tbody></table><div class="hl hl-y"><strong>判定流程：</strong>翻译完成 → 跑 checklist → 6/6 Go → 继续管线。任一 No-Go → 记录原因 → 移至已废弃/。</div>
+  <div class="hl hl-y"><strong>独立阶段脚本 ②-⑧：</strong>每个阶段一个 Python 文件，阶段间通过 SRT/JSON 文件通信，可单独重跑。全部脚本在 <code>video-catwave/tools/</code> 下。⑧ 之后由 Claude AI 接管 ⑨-⑭，每步 AI 决策 + 人工确认。</div>
+  <p style="font-size:12px;color:var(--muted);">判定 = 翻译完成后的人工 Go/No-Go 关口（非独立阶段）。⑨ 金句提取 = 从 transcript 中选最有力的钩子。</p><h4>判定 Go/No-Go Checklist（⑤翻译后、⑥字宽前）</h4><p style="font-size:13px;">翻译完成后逐项打钩。任一 <span class="tag tag-no">No-Go</span> = 排除，全部 <span class="tag tag-go">Go</span> = 继续。不是感觉，是打钩。</p><table><thead><tr><th>#</th><th>检查项</th><th>Go 标准</th><th>No-Go 标准</th></tr></thead><tbody><tr><td>G1</td><td><strong>信息密度</strong></td><td>观点密度 &ge; 2/分，实操占比 &ge; 30%</td><td>观点密度 &lt; 0.5/分，或实操占比 &lt; 10%</td></tr><tr><td>G2</td><td><strong>翻译覆盖率</strong></td><td>非赞助段 &ge; 95% 有翻译</td><td>&lt; 80% 非赞助段翻译（赞助段不计）</td></tr><tr><td>G3</td><td><strong>金句可提取性</strong></td><td>至少 2 个满足 &ge;3 维度的可提取金句</td><td>无满足 &ge;2 维度的金句候选</td></tr><tr><td>G4</td><td><strong>嘉宾视觉可用性</strong></td><td>至少 1 帧正脸清晰（光照好、表情自然）</td><td>所有帧模糊/侧脸/表情崩坏</td></tr><tr><td>G5</td><td><strong>B站独占性复核</strong></td><td>翻译后重新 B站搜索，仍零中字</td><td>发现新增中字或同类内容已上传</td></tr><tr><td>G6</td><td><strong>时效敏感度</strong></td><td>时效敏感度 = 低或中（&ge; 6 个月有效）</td><td>时效敏感度 = 高（&lt; 1 个月失效）</td></tr></tbody></table><div class="hl hl-y"><strong>判定流程：</strong>翻译完成 → 跑 checklist → 6/6 Go → 继续管线。任一 No-Go → 记录原因 → 移至已废弃/。</div>
   </div>
 
   <div class="card">
@@ -1421,7 +1398,7 @@ def _load_font(size: int, bold: bool = True) -&gt; ImageFont.FreeTypeFont:
   <table>
     <thead><tr><th>#</th><th>日期</th><th>议题</th><th>选项</th><th>决议</th><th>理由</th></tr></thead>
     <tbody>
-    <tr><td>D-01</td><td>2026-06-19</td><td>五维评分阈值</td><td>A) 25/20 &nbsp; B) 30/25</td><td>A</td><td>B 过严会导致候选池枯竭；25 分已过滤低质选题</td></tr>
+    <tr><td>D-01</td><td>2026-06-19</td><td>四维评分阈值</td><td>A) 25/20 &nbsp; B) 30/25</td><td>A</td><td>B 过严会导致候选池枯竭；25 分已过滤低质选题</td></tr>
     <tr><td>D-02</td><td>2026-06-19</td><td>赞助商口播处理</td><td>A) 保留翻译 &nbsp; B) 直接剪掉</td><td>B</td><td>B站观众对此类内容零兴趣，保留徒增跳失率</td></tr>
     <tr><td>D-03</td><td>2026-06-20</td><td>lab 与 output 分离</td><td>A) 单目录 &nbsp; B) lab(SDK) + output(制作)</td><td>B</td><td>管线迭代和视频制作混在一起，文件管理必然乱</td></tr>
     <tr><td>D-04</td><td>2026-06-20</td><td>初筛人设</td><td>A) 工程师视角（查可行性）&nbsp; B) 策展人视角（判内容价值）</td><td>B</td><td>初筛是内容判断不是技术判断，工程师视角导致标准偏移</td></tr>
