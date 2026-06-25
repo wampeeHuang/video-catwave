@@ -4,41 +4,47 @@
 
 ## 当前状态
 
-**2026-06-25** — 飞书选题库大清理完成。Kevin Weil + Dan Shipper 两期已发布。
+**2026-06-25** — Boris Cherny 发布面板和封面完成。Feishu 选题库大清理完成。Kevin Weil + Dan Shipper 两期已发布。
 
-## 飞书选题库（本次会话操作）
+## 本次会话操作
 
-**字段变更：**
-- 删除「字幕可用」（已从评分维度移除）
-- 「来源」→「来源频道名」（更明确）
-- 「播放量」→「YouTube播放量」，「点赞」→「YouTube点赞」（区分原平台/B站）
-- 新增「中文摘要」字段 — 每条记录一句中文概括
-- Slug 字段加了备注说明
+### Boris Cherny 发布面板 + 封面重制
 
-**数据修复：**
-- 7 条排除记录：来源频道名从「B站已有XX」恢复为真实频道名（Andrej Karpathy、Y Combinator、Stanford Online、Lex Fridman），废弃原因挪入废弃原因字段
-- 4 条候选 slug 从中文日期格式改为英文：`fiona-fung-claude-code-lenny` 等
-- 全部 15 条标题翻译为中文
-- 12 条有 URL 的记录填入 YouTube 播放量和点赞
-- 删除 Cat Wu 记录（内容太差无 URL）
-- Boris Cherny 视频已下架，YouTube 数据为空
+**发布面板** (`发布面板.html`)：
+- 标题：`Claude Code 之父：我不写代码了，开着几十个 Loop 让 AI 7×24 帮我干活`
+- 章节：10 章，全部 ≤16 字，首章起始 00:00:00
+  ```
+  00:00:00 开场与嘉宾介绍
+  00:02:40 Claude Code 意外诞生
+  00:04:30 前六个月完全不好用
+  00:06:21 一年没写代码了
+  00:07:11 手机管理几十个 Loop
+  00:10:04 全员写代码的时代
+  00:10:42 AI 如何摧毁 SaaS
+  00:13:47 YC：做人们爱用的产品
+  00:15:55 编程的印刷术时刻
+  00:18:30 Anthropic 零手写代码
+  ```
+- 简介突出 Loop 概念，核心论点第一条即 Loop 工程
 
-**当前 4 条候选：**
+**封面** (`cover.jpg`)：
+- 帧源：`_runtime/frames_loop/loop_03.jpg`（00:07:50 Loop 讨论段落）
+- 标题双行：「设个 Loop」「AI 7×24 自己跑」
+- 副标题：Claude Code 创建者 · 红杉资本 AI Ascent
+- 1920×1080，201 KB，165px 无缩放
 
-| 选题 | 分 | YouTube播放 | 发布天数 | Slug |
-|------|------|------|------|------|
-| Fiona Fung | 28 | 3.0万 | 4天 | fiona-fung-claude-code-lenny |
-| Google DeepMind | 24 | 4.2万 | 2天 | deepmind-ai-agents-millions |
-| Databricks | 28 | 1310 | 1天 | databricks-agent-cloud-latentspace |
-| Dan Shipper/Every | 24 | 618 | 1天 | dan-shipper-ai-humanity-every |
+**`/loop` 概念**：Claude Code 内置 slash 命令，类似 cron 定时任务但执行 AI agent。设好间隔后 Claude 自动循环执行（修 CI、管 PR、聚合反馈）。Boris 开了几十个 loop 7×24 运行。与 `/schedule`（Routines）的区别：`/loop` 在本地 session 跑（最长 3 天），`/schedule` 在云端跑（合上笔记本也不停）。
 
-**推荐优先级**：Fiona Fung > DeepMind > Databricks > Dan Shipper/Every
+### Feishu 选题库（上周操作，已记录）
 
-## 下一步
+详见上期 HANDOFF。当前 4 条候选：Fiona Fung (28分) > Google DeepMind (24分) > Databricks (28分) > Dan Shipper/Every (24分)。
 
-1. **跑新选题扫描** — 触发 OpenClaw cron job（工具架定时器 `猫波信号站选题巡检`），或直接 `lark-cli base` 写入
-2. **或直接做 Fiona Fung** — 分数最高、势头最好、与已做的 Boris+Dan 形成 Claude Code 系列视角互补
-3. 做新一期时从 AGENT_GUIDE.md §1 管线流程 ② 开始
+## 待办
+
+1. **Cursor Team 标题优化** — 当前标题太泛（"AI编程的未来"），需换具体标题。已做竞品调研，用户尚未选定方向
+2. **跑新选题扫描** — 触发 OpenClaw cron job 或直接 `lark-cli base` 写入
+3. **Boris Cherny 更新到 B站** — 需手动操作（CDP 限制）：更新标题、添加章节、上传新封面
+4. **或直接做 Fiona Fung** — 分数最高、势头最好、与 Boris+Dan 形成 Claude Code 系列视角互补
 
 ## 飞书
 

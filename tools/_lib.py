@@ -18,7 +18,7 @@ from pathlib import Path
 
 # ── Path roots ───────────────────────────────────────────────────────────────
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent  # lab/2026-06-16-猫波信号站
+PROJECT_ROOT = Path(__file__).resolve().parent.parent  # lab/2026-06-16-猫波信号站
 RUNTIME = Path("D:/workspace/_output/猫波信号站/视频")
 PROCESS_ROOT = PROJECT_ROOT / "_runtime"
 

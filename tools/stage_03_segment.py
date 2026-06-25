@@ -1,7 +1,7 @@
 """Stage ③: Extract delta from YouTube sliding-window captions, LLM adds punctuation.
 
 Usage: python stage_03_segment.py --slug <slug>
-Input:  <lab>/_runtime/<slug>_process/01_raw.srt
+Input:  <output>/_runtime/素材/01_raw.srt
 Output: <output>/_runtime/字幕/02_seg.srt
 
 Key insight: YouTube auto-captions are sliding windows. Each 2-3s fragment repeats
@@ -25,7 +25,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _lib import (
-    PROCESS_ROOT, SubEntry, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
+    SubEntry, find_video, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
 )
 
 MIN_DURATION_MS = 100
@@ -34,15 +34,16 @@ MIN_DURATION_MS = 100
 def run(slug: str, *, api_key: str | None = None):
     api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
 
-    lab_srt = PROCESS_ROOT / slug / "_process" / "01_raw.srt"
-    if not lab_srt.exists():
-        hits = sorted(PROCESS_ROOT.glob(f"*_{slug}"))
-        lab_srt = hits[0] / "_process" / "01_raw.srt" if hits else lab_srt
-    if not lab_srt.exists():
-        print(f"ERROR: {lab_srt} not found. Run stage_02_download first.")
+    video = find_video(slug)
+    if not video or not video.exists():
+        print(f"ERROR: No video found for slug '{slug}'. Run stage_02_download first.")
+        sys.exit(1)
+    raw_srt = video.parent / "01_raw.srt"
+    if not raw_srt.exists():
+        print(f"ERROR: {raw_srt} not found. Run stage_02_download first.")
         sys.exit(1)
 
-    raw = read_srt(lab_srt)
+    raw = read_srt(raw_srt)
     print(f"[③] {len(raw)} raw fragments → extracting deltas...")
 
     deltas = _extract_deltas(raw)
