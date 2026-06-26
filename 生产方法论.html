@@ -301,7 +301,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td>6</td><td><strong>过程归档</strong></td><td>_runtime/</td><td>原始字幕→翻译→ASS→帧截图→发布面板过程→封面过程，全链可追溯</td></tr>
     <tr><td>7</td><td><strong>专栏文章</strong></td><td>Markdown, _runtime/draft.md</td><td>从翻译 transcript 提取：引言,核心论点分节,结尾，B站专栏用</td></tr>
     <tr><td>8</td><td><strong>测试片</strong></td><td>_tests/ (或 _runtime/测试片/)</td><td>30-60s 样片，验证字幕渲染效果，不上线</td></tr>
-    <tr><td>9</td><td><strong>选题库更新</strong></td><td>CSV + 飞书表格</td><td>状态→已发布，写入 BV号/标题/播放量</td></tr>
+    <tr><td>9</td><td><strong>选题库更新</strong></td><td>飞书表格</td><td>状态→已发布，写入 BV号/标题/播放量</td></tr>
     <tr><td>10</td><td><strong>已发布归档</strong></td><td>选题库/已发布/slug.md</td><td>BV号 + 标题 + 核心数据</td></tr>
     </tbody>
   </table>
@@ -310,7 +310,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 0.3 管线全流程（需求层级） -->
   <div class="card">
   <h3>0.3 管线全流程（需求层级）</h3>
-  <p>管线是<strong>满足任务书的手段</strong>——任务书回答"要什么"，管线回答"怎么做"。分两段：<strong style="color:#10B981;">机械段</strong>（②-⑧ 独立阶段脚本，每阶段可单独重跑）+ <strong style="color:#8B5CF6;">AI 段</strong>（⑨-⑭ 每步需 Claude 判断）。完整实现见 <a href="#s3">§03</a>。</p>
+  <p>管线是<strong>满足任务书的手段</strong>——任务书回答"要什么"，管线回答"怎么做"。分两段：<strong style="color:#10B981;">机械段</strong>（②-⑧ 独立阶段脚本，每阶段可单独重跑）+ <strong style="color:#8B5CF6;">AI 段</strong>（⑩-⑮ 每步需 Claude 判断）。完整实现见 <a href="#s3">§03</a>。</p>
   <div class="pipe">
     <span>① 选题</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
@@ -326,7 +326,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <span style="background:#F5F3FF;border-color:#8B5CF6;">⑫ 专栏（B站文章）+ EPUB</span><span class="arr">→</span>
     <span style="background:#F5F3FF;border-color:#8B5CF6;">⑬ 封面</span><span class="arr">→</span>
     <span style="background:#F5F3FF;border-color:#8B5CF6;">⑭ 发布</span>
-  <p style="font-size:13px; color:var(--muted);">关键关口：<strong>⑤ 翻译</strong>是素材质量判定点——翻译完成后才能判断内容价值，决定继续或排除（见 <a href="#s1">§01</a> 影视飓风差异）。判定 = Go/No-Go 人工关口（非独立阶段，翻译后执行 <a href="#s3">判定 Checklist</a>）。<strong>⑨ 金句提取</strong>决定标题和封面的钩子质量。<strong>⑩~⑫</strong>先定标题、元数据、专栏文章，<strong>⑬ 封面</strong>最后合成——拿着已确定的标题文字和金句做图，不反复改。</p>
+  <p style="font-size:13px; color:var(--muted);">关键关口：<strong>⑤ 翻译</strong>是素材质量判定点——翻译完成后才能判断内容价值，决定继续或排除（见 <a href="#s1">§01</a> 影视飓风差异）。判定 = Go/No-Go 人工关口（非独立阶段，翻译后执行 <a href="#s3">判定 Checklist</a>）。<strong>⑪ 金句提取</strong>决定标题和封面的钩子质量。<strong>⑪~⑬</strong>先定金句、封面、标题，<strong>⑭ 电子书</strong>和<strong>⑮ 发布面板</strong>并行生成——拿着已确定的标题文字和金句做图，不反复改。</p>
   </div>
 
   <!-- 0.4 服务对象 & 质量标准 -->
@@ -417,7 +417,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
       <h4>选题库</h4>
       <div class="tree">选题库/
 ├── <span class="hl">内容源.md</span>        <span class="dim"># 唯一真相源</span>
-├── <span class="hl">候选池.csv</span>       <span class="dim"># 主表，固定列 sort/filter</span>
+├── <span class="hl">飞书多维表格</span>       <span class="dim"># 选题主表（唯一真相源）</span>
 ├── 候选池/slug.md    <span class="dim"># 仅≥25分追加详情</span>
 ├── 已发布/           <span class="dim"># + BV号/标题/数据</span>
 └── 已废弃/           <span class="dim"># + 废弃原因/教训</span></div>
@@ -478,7 +478,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <div class="grid-2">
     <div>
       <h4>管线 SDK（lab）</h4>
-      <div class="tree">D:\workspace\lab\2026-06-16-<span class="hl">猫波信号站</span>\
+      <div class="tree">D:\workspace\<span class="hl">猫波信号站</span>\
 ├── <span class="hl">CLAUDE.md</span>        <span class="dim"># 硬约束 + 管线步骤</span>
 ├── <span class="hl">生产方法论.html</span>    <span class="dim"># 本文档</span>
 ├── <span class="hl">tools/</span>              <span class="dim"># 独立阶段脚本 ②-⑧ + gen_cover/gen_epub 等辅助脚本</span>
@@ -791,7 +791,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 
   <div class="card">
   <h3>3.1 管线总览</h3>
-  <p style="font-size:13px;margin-bottom:12px;">管线分两段：<strong style="color:#10B981;">第一阶段 ②-⑧ = 机械管线（独立阶段脚本）</strong>，每阶段一个独立脚本（<code>stage_02_download.py</code> ~ <code>stage_08_render.py</code>），可以单独重跑，阶段间通过 SRT/JSON 文件通信。<strong style="color:#8B5CF6;">第二阶段 ⑨-⑭ = AI 技能（Claude 决策 + 脚本渲染）</strong>，每步需要读 transcript 做判断再调工具。选题① 是独立的评分管线。</p>
+  <p style="font-size:13px;margin-bottom:12px;">管线分两段：<strong style="color:#10B981;">第一阶段 ②-⑧ = 机械管线（独立阶段脚本）</strong>，每阶段一个独立脚本（<code>stage_02_download.py</code> ~ <code>stage_08_render.py</code>），可以单独重跑，阶段间通过 SRT/JSON 文件通信。<strong style="color:#8B5CF6;">第二阶段 ⑩-⑮ = AI 技能（Claude 决策 + 脚本渲染）</strong>，每步需要读 transcript 做判断再调工具。选题① 是独立的评分管线。</p>
   <div class="pipe">
     <span style="background:#ECFDF5;border-color:#10B981;">① 选题</span><span class="arr">→</span>
     <span style="background:#ECFDF5;border-color:#10B981;">② 下载</span><span class="arr">→</span>
@@ -824,22 +824,24 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td class="nowrap">⑥ 字宽拆分</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_06_split.py</code></td><td>03_zh.srt → 04_split.srt</td><td>&lt;1s</td></tr>
     <tr><td class="nowrap">⑦ ASS</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_07_ass.py</code></td><td>04_split.srt → 05.ass + transcript.txt</td><td>&lt;1s</td></tr>
     <tr><td class="nowrap">⑧ 渲染</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_08_render.py</code> (ffmpeg + 赞助裁剪)</td><td>mp4 + ass + cuts.json → mp4</td><td>~20m</td></tr>
-    <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑨ 金句提取</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → 评分金句</td><td>transcript → 封面大字 + 标题候选</td><td>~5m</td></tr>
-    <tr><td class="nowrap">⑩ 标题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读金句 → 生成 3-5 候选标题</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
-    <tr><td class="nowrap">⑪ 元数据</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → 发布面板 HTML（B站发布表单：标签/简介/章节节点）</td><td>transcript → 标签 + 简介 + 章节节点（≤10个）</td><td>~10m</td></tr>
-    <tr><td class="nowrap">⑫ 专栏</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → draft.md（B站专栏文章）+ <code>gen_epub.py</code> → EPUB 电子书</td><td>transcript → B站专栏文章 markdown + 全中文 EPUB 电子书</td><td>~15m</td></tr>
-    <tr><td class="nowrap">⑬ 封面</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td><strong>video-catwave</strong> skill → <code>gen_cover.py</code></td><td>截图帧 + 已定标题 + 金句 → cover.jpg</td><td>~2m</td></tr>
-    <tr><td class="nowrap">⑭ 发布</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human</span></td><td>B站创作者中心</td><td>成品文件 → 审核中/已发布</td><td>~10m</td></tr>
+    <tr style="border-top:2px solid var(--border);"><td class="nowrap">⑨</td><td>百度云上传</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>stage_09_baidu_upload.py</code> (bypy)</td><td>EPUB → 百度云盘「猫波信号站电子书」</td><td>~2m</td></tr>
+    <tr><td class="nowrap">⑩</td><td>元数据</td><td><span class="tag" style="background:#ECFDF5;color:#065F46;">script</span></td><td><code>gen_metadata.py</code></td><td>标题/标签/简介/章节 → metadata.json</td><td>&lt;1s</td></tr>
+    <tr><td class="nowrap">⑪</td><td>金句提取</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript → 评分金句</td><td>transcript → 封面大字 + 标题候选</td><td>~5m</td></tr>
+    <tr><td class="nowrap">⑫</td><td>封面</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td><strong>video-catwave</strong> skill → <code>gen_cover.py</code></td><td>截图帧 + 已定标题 + 金句 → cover.jpg</td><td>~2m</td></tr>
+    <tr><td class="nowrap">⑬</td><td>标题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读金句 → 生成 3-5 候选标题</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
+    <tr><td class="nowrap">⑭</td><td>电子书 EPUB</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude + <code>gen_epub.py</code></td><td>transcript → draft.md + 电子书/&lt;标题&gt;.epub</td><td>~15m</td></tr>
+        <tr><td class="nowrap">⑮</td><td>发布面板</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript + 模板</td><td>→ 发布面板.html（标题/标签/简介/章节/金句）</td><td>~10m</td></tr>
+        <tr style="border-top:2px solid var(--pink);"><td class="nowrap">⑯</td><td>B站上传</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human + script</span></td><td><code>stage_15_publish.py</code> (API) 或 <code>stage_16_cdp_upload.py</code> (CDP)</td><td>成品文件 → B站草稿箱 / 已发布</td><td>~5-40m</td></tr>
     </tbody>
   </table>
-  <div class="hl hl-y"><strong>独立阶段脚本 ②-⑧：</strong>每个阶段一个 Python 文件，阶段间通过 SRT/JSON 文件通信，可单独重跑。全部脚本在 <code>tools/</code> 下（lab 根目录）。⑧ 之后由 Claude AI 接管 ⑨-⑭，每步 AI 决策 + 人工确认。</div>
-  <p style="font-size:12px;color:var(--muted);">判定 = 翻译完成后的人工 Go/No-Go 关口（非独立阶段）。⑨ 金句提取 = 从 transcript 中选最有力的钩子。</p>
+  <div class="hl hl-y"><strong>独立阶段脚本 ②-⑧：</strong>每个阶段一个 Python 文件，阶段间通过 SRT/JSON 文件通信，可单独重跑。全部脚本在 <code>D:\workspace\猫波信号站\tools\</code>。⑨ 之后由 Claude AI 接管 ⑩-⑮，每步 AI 决策。</div>
+  <p style="font-size:12px;color:var(--muted);">判定 = 翻译完成后的 Go/No-Go 关口（非独立阶段）。⑪ 金句提取 = 从 transcript 中选最有力的钩子。</p>
 
   <h4>阶段产出盘点（Kevin Weil 期实测）</h4>
   <table>
     <thead><tr><th>段</th><th>脚本</th><th>产出文件</th><th>落盘位置</th><th>格式</th><th>条目</th><th>说明</th></tr></thead>
     <tbody>
-    <tr><td class="nowrap">②</td><td><code>stage_02_download.py</code></td><td><code>source.mp4</code><br><code>01_raw.srt</code></td><td>lab → 手动搬入 output <code>素材/</code><br>output <code>字幕/</code></td><td>MP4<br>SRT</td><td>—<br>5093</td><td>yt-dlp 原始下载<br>YouTube 滑动窗口</td></tr>
+    <tr><td class="nowrap">②</td><td><code>stage_02_download.py</code></td><td><code>source.mp4</code><br><code>01_raw.srt</code></td><td>output <code>素材/</code><br>output <code>字幕/</code></td><td>MP4<br>SRT</td><td>—<br>5093</td><td>yt-dlp 原始下载<br>YouTube 滑动窗口</td></tr>
     <tr><td class="nowrap">③</td><td><code>stage_03_whisper.py</code></td><td><code>02_seg.srt</code></td><td>output <code>字幕/</code></td><td>SRT</td><td>540</td><td>faster-whisper 音频对齐 → VAD 分割 → 去重，时间戳无重叠</td></tr>
     <tr><td class="nowrap">④</td><td><code>stage_04_sponsor.py</code></td><td><code>02_seg_clean.srt</code><br><code>_sponsor_cuts.json</code></td><td>output <code>字幕/</code></td><td>SRT<br>JSON</td><td>505<br>—</td><td>切掉 25 条广告<br>ffmpeg 剪切时间点</td></tr>
     <tr><td class="nowrap">⑤</td><td><code>stage_05_translate.py</code></td><td><code>03_zh.srt</code></td><td>output <code>字幕/</code></td><td>SRT (<code>\N</code> 双语)</td><td>505</td><td>DeepSeek EN→ZH, 并发5</td></tr>
@@ -848,7 +850,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td class="nowrap">⑧</td><td><code>stage_08_render.py</code></td><td><code>&lt;标题&gt;.mp4</code></td><td>output <code>成片/</code></td><td>MP4</td><td>—</td><td>ffmpeg 渲染, H.264+AAC</td></tr>
     </tbody>
   </table>
-  <p style="font-size:11px;color:var(--muted);">落盘根路径：<code>D:\workspace\_output\猫波信号站\视频\&lt;slug&gt;\</code>。source.mp4 由 ② 下载到 lab <code>_runtime/&lt;slug&gt;_process/</code>，下载完成后手动搬入 output <code>素材/</code>。③ 是 lab→output 跨界点，此后所有阶段只读写 output。</p>
+  <p style="font-size:11px;color:var(--muted);">落盘根路径：<code>D:\workspace\_output\猫波信号站\视频\&lt;slug&gt;\</code>。source.mp4 由 ② 直接下载到 output <code>素材/</code>。③ 是 lab→output 跨界点，此后所有阶段只读写 output。</p>
 
   <h4>判定 Go/No-Go Checklist（⑤翻译后、⑥字宽前）</h4><p style="font-size:13px;">翻译完成后逐项打钩。任一 <span class="tag tag-no">No-Go</span> = 排除，全部 <span class="tag tag-go">Go</span> = 继续。不是感觉，是打钩。</p><table><thead><tr><th>#</th><th>检查项</th><th>Go 标准</th><th>No-Go 标准</th></tr></thead><tbody><tr><td>G1</td><td><strong>信息密度</strong></td><td>观点密度 &ge; 2/分，实操占比 &ge; 30%</td><td>观点密度 &lt; 0.5/分，或实操占比 &lt; 10%</td></tr><tr><td>G2</td><td><strong>翻译覆盖率</strong></td><td>非赞助段 &ge; 95% 有翻译</td><td>&lt; 80% 非赞助段翻译（赞助段不计）</td></tr><tr><td>G3</td><td><strong>金句可提取性</strong></td><td>至少 2 个满足 &ge;3 维度的可提取金句</td><td>无满足 &ge;2 维度的金句候选</td></tr><tr><td>G4</td><td><strong>嘉宾视觉可用性</strong></td><td>至少 1 帧正脸清晰（光照好、表情自然）</td><td>所有帧模糊/侧脸/表情崩坏</td></tr><tr><td>G5</td><td><strong>B站独占性复核</strong></td><td>翻译后重新 B站搜索，仍零中字</td><td>发现新增中字或同类内容已上传</td></tr><tr><td>G6</td><td><strong>时效敏感度</strong></td><td>时效敏感度 = 低或中（&ge; 6 个月有效）</td><td>时效敏感度 = 高（&lt; 1 个月失效）</td></tr></tbody></table><div class="hl hl-y"><strong>判定流程：</strong>翻译完成 → 跑 checklist → 6/6 Go → 继续管线。任一 No-Go → 记录原因 → 移至已废弃/。</div>
   </div>
@@ -983,8 +985,8 @@ python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背
   <table>
     <thead><tr><th>操作</th><th>位置</th></tr></thead>
     <tbody>
-    <tr><td>选题库状态→已发布</td><td><strong>候选池.csv 是主表（唯一真相源）</strong>，飞书表格是镜像（对外展示/团队协作）。冲突时以 CSV 为准。</td></tr>
-    <tr><td>写入 BV号/B站标题/播放量</td><td>CSV 行 + 飞书表格（字段名：B站BV号、B站标题、播放量）</td></tr>
+    <tr><td>选题库状态→已发布</td><td><strong>飞书多维表格是主表（唯一真相源）</strong>，选题库本地文件均为派生视图。</td></tr>
+    <tr><td>写入 BV号/B站标题/播放量</td><td>飞书表格（字段名：B站BV号、B站标题、播放量）</td></tr>
     <tr><td>已发布归档</td><td>已发布/slug.md</td></tr>
     <tr><td>数据复盘节点</td><td>24h / 7d / 30d 记录 → 反馈到选题决策（§00 反馈闭环）</td></tr>
     </tbody>
@@ -998,7 +1000,7 @@ python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背
     <tbody>
     <tr><td>封面/标题/字幕参数变</td><td><code>_ref/生产参数.md</code> → 本文档 §02–03 → <code>gen_cover.py</code> / pipeline</td></tr>
     <tr><td>新踩坑</td><td><code>_ref/pitfalls.md</code> → 本文档 §5.4</td></tr>
-    <tr><td>选题标准变</td><td>本文档 §00 → 候选池.csv 评分公式</td></tr>
+    <tr><td>选题标准变</td><td>本文档 §00 → 飞书选题库 评分公式</td></tr>
     <tr><td>pipeline 功能扩展</td><td><code>CLAUDE.md</code> → 本文档 §03</td></tr>
     <tr><td>产出规范变</td><td><code>D:\workspace\_output\猫波信号站\CLAUDE.md</code></td></tr>
     </tbody>
@@ -1015,7 +1017,7 @@ python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背
   <table>
     <thead><tr><th>文件</th><th>用途</th></tr></thead>
     <tbody>
-    <tr><td><code>D:\workspace\lab\2026-06-16-猫波信号站\CLAUDE.md</code></td><td>管线硬约束 + 步骤定义</td></tr>
+    <tr><td><code>D:\workspace\猫波信号站\CLAUDE.md</code></td><td>管线硬约束 + 步骤定义</td></tr>
     <tr><td><code>D:\workspace\_output\猫波信号站\CLAUDE.md</code></td><td>产出宪法（目录规范 + 生命周期）</td></tr>
     <tr><td><code>D:\workspace\_output\猫波信号站\视频\CLAUDE.md</code></td><td>视频目录规范</td></tr>
     <tr><td><code>D:\workspace\_output\猫波信号站\选题库\飞书选题库.md</code></td><td>飞书 API 参数 + 字段速查 + Token 刷新</td></tr>
@@ -1186,23 +1188,49 @@ python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背
   </div>
 
   <div class="card">
-  <h3>5.6 管线成本对照</h3>
+  <h3>5.6 管线成本测算 <span style="font-weight:400;font-size:0.55em;color:var(--muted);margin-left:8px;">更新 2026-06-26</span></h3>
   <p style="font-size:13px;color:var(--muted);">单条视频全链路成本拆解。以"管线约束"视角标注——不计人力，只计系统调用。</p>
 
-  <h4>全链路成本表</h4>
+  <h4>LLM 调用点（全管线仅 3 处）</h4>
+  <table>
+    <thead><tr><th>阶段</th><th>任务</th><th>模型</th><th>批次大小</th><th>负载</th></tr></thead>
+    <tbody>
+    <tr><td>③ 断句标点</td><td>给英文加标点</td><td>deepseek-chat (V4-Flash)</td><td>20 条/批</td><td>低，简单补标点</td></tr>
+    <tr><td>④ 赞助检测</td><td>二分类 yes/no</td><td>deepseek-chat (V4-Flash)</td><td>20 条/批</td><td>低，temp=0</td></tr>
+    <tr><td>⑤ EN→ZH 翻译</td><td>字幕翻译</td><td>deepseek-chat (V4-Flash)</td><td>10 条/批</td><td>最高，含专有名词系统提示</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:11px;color:var(--pink);margin-top:4px;">⚠ <code>deepseek-chat</code> 将于 2026-07-24 退役，届时迁移至 <code>deepseek-v4-flash</code>（同价，改 3 个脚本各一行）。</p>
+
+  <h4>全链路成本表（90min 视频参考）</h4>
   <table>
     <thead><tr><th>环节</th><th>工具/模型</th><th>计费方式</th><th>单条成本</th><th>备注</th></tr></thead>
     <tbody>
-    <tr><td>内容发现</td><td>WebFetch / yt-dlp</td><td>—</td><td>$0</td><td>本地抓取，不计费</td></tr>
-    <tr><td>ASR 语音转写</td><td>whisper（本地）</td><td>—</td><td>$0</td><td>本地 GPU，不计费</td></tr>
-    <tr><td>翻译</td><td>DeepSeek V4 Flash</td><td>$0.14/1M input &middot; $0.28/1M output</td><td>~$0.02-0.05</td><td>60min 视频约 15K tokens in + 12K out</td></tr>
-    <tr><td>字幕格式转换</td><td>Python 脚本</td><td>—</td><td>$0</td><td>纯文本处理</td></tr>
+    <tr><td>内容发现</td><td>WebFetch / yt-dlp</td><td>—</td><td>$0</td><td>本地抓取</td></tr>
+    <tr><td>ASR 语音转写</td><td>faster-whisper（本地 GPU）</td><td>—</td><td>$0</td><td>150W × 0.5h ≈ 忽略</td></tr>
+    <tr><td>③ 断句标点</td><td>DeepSeek V4-Flash</td><td>$0.14/$0.28 per 1M</td><td>~$0.01</td><td>~30K in + 20K out</td></tr>
+    <tr><td>④ 赞助检测</td><td>DeepSeek V4-Flash</td><td>$0.14/$0.28 per 1M</td><td>~$0.01</td><td>~40K in + 3K out</td></tr>
+    <tr><td>⑤ EN→ZH 翻译</td><td>DeepSeek V4-Flash</td><td>$0.14/$0.28 per 1M</td><td>~$0.03</td><td>~55K in + 35K out（最大开销）</td></tr>
+    <tr style="border-top:1px solid var(--border);"><td><strong>API 小计</strong></td><td></td><td></td><td><strong>~$0.05</strong></td><td>含 ~10% 重试余量</td></tr>
+    <tr><td>⑥ 字宽拆分</td><td>Python 脚本</td><td>—</td><td>$0</td><td>纯文本</td></tr>
+    <tr><td>⑦ ASS 生成</td><td>Python 脚本</td><td>—</td><td>$0</td><td>纯文本</td></tr>
+    <tr><td>⑧ 视频渲染</td><td>ffmpeg NVENC</td><td>—</td><td>$0</td><td>GPU 编码 ~100W × 1.5h</td></tr>
     <tr><td>封面帧提取</td><td>ffmpeg</td><td>—</td><td>$0</td><td>本地</td></tr>
-    <tr><td>封面排版合成</td><td>PIL（gen_cover.py）</td><td>—</td><td>$0</td><td>截图叠文字，不触发 API</td></tr>
-    <tr><td>封面视觉检查</td><td>MiniCPM-V 4.6（本地）</td><td>—</td><td>$0</td><td>localhost:8080，约 2.5GB 显存</td></tr>
-    <tr><td>封面结论回传</td><td>DeepSeek V4 Flash</td><td>$0.14/1M input</td><td>&lt; $0.001</td><td>仅传文字结论约 500 tokens</td></tr>
-    <tr><td>视频封装</td><td>ffmpeg</td><td>—</td><td>$0</td><td>本地</td></tr>
-    <tr><td>B站上传</td><td>B站网页端</td><td>—</td><td>$0</td><td>手动</td></tr>
+    <tr><td>封面排版合成</td><td>PIL（gen_cover.py）</td><td>—</td><td>$0</td><td>本地</td></tr>
+    <tr><td>封面视觉检查</td><td>MiniCPM-V 4.6（本地）</td><td>—</td><td>$0</td><td>localhost:8080</td></tr>
+    <tr><td>EPUB 生成</td><td>gen_epub.py</td><td>—</td><td>$0</td><td>纯文本</td></tr>
+    <tr><td>B站上传</td><td>B站网页端 / CDP</td><td>—</td><td>$0</td><td>手动或脚本</td></tr>
+    </tbody>
+  </table>
+
+  <h4>算力电费（非 API）</h4>
+  <table>
+    <thead><tr><th>环节</th><th>硬件</th><th>功耗</th><th>时长/条</th><th>电费/条</th></tr></thead>
+    <tbody>
+    <tr><td>Whisper 转录</td><td>GPU</td><td>~150W</td><td>~0.4h</td><td>~$0.005</td></tr>
+    <tr><td>NVENC 编码</td><td>GPU (ASIC)</td><td>~100W</td><td>~1.1h</td><td>~$0.009</td></tr>
+    <tr><td>其余 CPU</td><td>CPU</td><td>~50W</td><td>~0.3h</td><td>~$0.001</td></tr>
+    <tr style="border-top:1px solid var(--border);"><td><strong>算力小计</strong></td><td></td><td></td><td></td><td><strong>~$0.015</strong></td></tr>
     </tbody>
   </table>
 
@@ -1210,11 +1238,24 @@ python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背
   <table>
     <thead><tr><th>计费方式</th><th>环节</th><th>模型/工具</th><th>单条成本</th></tr></thead>
     <tbody>
-    <tr><td style="background:#ECFDF5;"><strong>本地零成本</strong></td><td>ASR / 字幕 / 封面帧 / 封装 / 上传</td><td>whisper / PIL / ffmpeg</td><td><strong>$0</strong></td></tr>
+    <tr><td style="background:#ECFDF5;"><strong>本地零成本</strong></td><td>ASR / 字幕 / 封面 / EPUB / 上传</td><td>whisper / PIL / ffmpeg / gen_epub</td><td><strong>$0</strong></td></tr>
     <tr><td style="background:#ECFDF5;"><strong>本地视觉零成本</strong></td><td>封面检查</td><td>MiniCPM-V 4.6 (llama-server)</td><td><strong>$0</strong></td></tr>
-    <tr><td style="background:#ECFDF5;"><strong>云端备选零成本</strong></td><td>封面检查（备选）</td><td>GLM-4.6V-Flash（智谱免费）</td><td><strong>$0</strong></td></tr>
-    <tr><td style="background:#FFF7ED;"><strong>API 计费</strong></td><td>翻译</td><td>DeepSeek V4 Flash</td><td><strong>~$0.03</strong></td></tr>
-    <tr><td style="background:#FFF7ED;"><strong>API 计费</strong></td><td>封面结论回传</td><td>DeepSeek V4 Flash（仅文本）</td><td><strong>&lt; $0.001</strong></td></tr>
+    <tr><td style="background:#FFF7ED;"><strong>API 计费</strong></td><td>③ 断句 + ④ 赞助检测</td><td>DeepSeek V4-Flash</td><td><strong>~$0.02</strong></td></tr>
+    <tr><td style="background:#FFF7ED;"><strong>API 计费</strong></td><td>⑤ EN→ZH 翻译</td><td>DeepSeek V4-Flash</td><td><strong>~$0.03</strong></td></tr>
+    <tr><td style="background:#FEF3C7;"><strong>电费</strong></td><td>GPU + CPU 算力</td><td>RTX 5060 Ti / CPU</td><td><strong>~$0.015</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:12px;color:var(--muted);margin-top:8px;"><strong>结论：单条 ~90min 视频全链路成本 $0.07（API $0.05 + 电费 $0.02）。</strong>6 选题整轮 ~$0.31（¥2.5）。全链路唯一计费模型是 DeepSeek V4-Flash，其余均为本地零成本。为什么不用 Pro：管线把 LLM 当批量小任务处理器（每批 10-20 行字幕，无跨批依赖），非长程推理任务，Flash 在该模式上效率最优。</p>
+
+  <h4>DeepSeek 定价参考（2026-06）</h4>
+  <table>
+    <thead><tr><th>模型</th><th>输入 / 1M tokens</th><th>输出 / 1M tokens</th><th>说明</th></tr></thead>
+    <tbody>
+    <tr><td>deepseek-chat (V4-Flash)</td><td>$0.14</td><td>$0.28</td><td>当前使用，<strong>2026-07-24 退役</strong></td></tr>
+    <tr><td>deepseek-v4-flash</td><td>$0.14</td><td>$0.28</td><td>同价替代</td></tr>
+    <tr><td>deepseek-v4-pro</td><td>$1.74</td><td>$3.48</td><td>长程推理，贵 ~12x</td></tr>
+    <tr><td>Qwen3.7-Max</td><td>$2.50</td><td>$7.50</td><td>贵 ~18-27x，不推荐</td></tr>
     </tbody>
   </table>
 
@@ -1222,14 +1263,14 @@ python stage_07_ass.py --slug &lt;slug&gt; --bg-opacity 0.5                # 背
   <table>
     <thead><tr><th>误区</th><th>为什么错</th><th>正确认识</th></tr></thead>
     <tbody>
+    <tr><td>"只有翻译花钱"</td><td>断句标点和赞助检测也调 API</td><td>全管线 3 个 LLM 调用点，翻译占 ~60%，其余 ~40%</td></tr>
+    <tr><td>"用 Pro 翻译质量更好"</td><td>管线每批 10-20 行字幕，无跨批依赖</td><td>Flash 在批量小任务模式上效率最优，Pro 的 12x 价格换不到质量提升</td></tr>
     <tr><td>"识图通过 Claude 走 Anthropic API"</td><td>Claude Read 图片的确走 API 计费，但管线不是用 Read 看图</td><td>管线走 MiniCPM-V 本地（localhost:8080），不触发 Anthropic 计费</td></tr>
     <tr><td>"DeepSeek 处理图片要 token"</td><td>DeepSeek V4 不支持视觉输入，无法直接"看"图</td><td>MiniCPM-V 本地消化图片 → 吐文字 → 文字进 DeepSeek，只计文字 token</td></tr>
     <tr><td>"封面要 AI 生图"</td><td>B站科技区封面本质是排版设计，不是创意图像生成</td><td>PIL 截图叠文字即可，免费且排版可控</td></tr>
     <tr><td>"成本估算用人时"</td><td>AI 管线并行，瓶颈不在人力在系统</td><td>先列系统约束（API 速率/平台规则/算力），人力只作为最终确认环节串联</td></tr>
     </tbody>
   </table>
-
-  <p style="font-size:12px;color:var(--muted);margin-top:8px;"><strong>结论：全链路唯一计费点是 DeepSeek 翻译（~$0.03/条）。</strong>周均 12 条 → 月均 ~$1.80。其余环节均为本地零成本。§0.8 发布节奏中的产能估算基于此链路结构，以系统约束而非人力约束为准。</p>
   </div>
 </section>
 
@@ -1452,7 +1493,7 @@ def _load_font(size: int, bold: bool = True) -&gt; ImageFont.FreeTypeFont:
 </section>
 
 <div class="footer">
-  猫波信号站 · 生产方法论 · v3.2 · 最后更新 2026-06-21
+  猫波信号站 · 生产方法论 · v3.3 · 最后更新 2026-06-26
 </div>
 
 </main>

@@ -228,13 +228,13 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <table>
     <thead><tr><th>基地</th><th>路径</th><th>放什么</th><th>宪法</th></tr></thead>
     <tbody>
-      <tr><td><strong>lab</strong> 管线基地</td><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\</td><td>脚本、参数、方法论、本文档</td><td class="path">lab/CLAUDE.md</td></tr>
+      <tr><td><strong>lab</strong> 管线基地</td><td class="path">D:\workspace\猫波信号站\</td><td>脚本、参数、方法论、本文档</td><td class="path">lab/CLAUDE.md</td></tr>
       <tr><td><strong>output</strong> 成果基地</td><td class="path">D:\workspace\_output\猫波信号站\</td><td>选题库、视频成品、频道资产</td><td class="path">output/CLAUDE.md</td></tr>
     </tbody>
   </table>
 
   <h4>完整目录</h4>
-  <div class="tree">lab/  D:\workspace\lab\2026-06-16-<span class="hl">猫波信号站</span>\
+  <div class="tree">lab/  D:\workspace\<span class="hl">猫波信号站</span>\
 ├── <span class="hl">CLAUDE.md</span>              <span class="dim"># 管线硬约束 + 步骤定义</span>
 ├── <span class="hl">生产操作手册.html</span>      <span class="dim"># 本文档</span>
 ├── <span class="hl">tools/</span>                  <span class="dim"># 脚本：stage_02 ~ stage_08 + gen_cover + gen_epub</span>
@@ -243,7 +243,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 └── _runtime/              <span class="dim"># 开发测试</span></div>
   <div class="tree">output/  D:\workspace\_output\<span class="hl">猫波信号站</span>\
 ├── <span class="hl">CLAUDE.md</span>              <span class="dim"># 产出宪法</span>
-├── <span class="hl">选题库/</span>                <span class="dim"># 内容源 + 候选池 + 已发布</span>
+├── <span class="hl">选题库/</span>                <span class="dim"># 内容源清单（飞书为选题主表）</span>
 ├── 频道资产/              <span class="dim"># 头像/签名/UID</span>
 └── 视频/
     └── &lt;YYYYMMDD_slug&gt;/
@@ -269,14 +269,14 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <p>巡检清单：<code>D:\workspace\_output\猫波信号站\选题库\内容源.md</code>（35 个固定源 + 4 个聚合发现站）</p>
 
     <div class="hl hl-y">
-      <strong>频率：每周 2 次（周一 + 周四），全量扫，不分优先级。</strong>
+      <strong>频率：每周 3 次（周一、周三、周五），全量扫，yt-dlp 自动化。</strong>
     </div>
 
     <p style="font-size:13px;color:var(--ink-soft);margin-top:8px;">三条约束交汇在此：</p>
     <ul style="font-size:13px;color:var(--ink-soft);">
-      <li><strong>源节奏</strong> — 核心源标注"每周"更新。YouTube/播客都是周更，多于 2 次/周 = 多数扫描无新内容，浪费人力</li>
-      <li><strong>产能匹配</strong> — 实测 8 天产出 3 条（有效吞吐 ≈ 2–3 天/条）。每次巡检只需攒 1–2 个候选即够下一期，2 次/周刚好供上，不积压不过期</li>
-      <li><strong>投入产出</strong> — 全量扫一次 ≈ 5–10 分钟。每天扫 = 35min/周，2 次 = 10min/周。且暂无自动化脚本，全手动</li>
+      <li><strong>源节奏</strong> — 核心源标注"每周"更新。YouTube/播客周更，3 次/周覆盖所有源的新增窗口，间隔均匀不积压</li>
+      <li><strong>产能匹配</strong> — Agent 管线日产 2–3 条。3 次/周的巡检节奏持续供料，每次扫出 2–4 个候选即够 2 天跑量</li>
+      <li><strong>投入产出</strong> — yt-dlp 批量扫源，全 agent 自动化。单次扫描 35 个源 API 调用 ~2–5 分钟，无人工环节</li>
     </ul>
 
     <table>
@@ -292,7 +292,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 1.2 初筛 -->
   <div class="card">
     <h3>1.2 初筛</h3>
-    <p style="color:var(--muted);">≤ 3 分钟 / 条。任意一项 NO → 放弃。</p>
+    <p style="color:var(--muted);">≤ 30 秒 / 条（agent 判别）。任意一项 NO → 放弃。</p>
     <table>
       <thead><tr><th>维度</th><th>标准</th><th>数据来源</th></tr></thead>
       <tbody>
@@ -315,8 +315,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 1.4 五维评分 -->
   <div class="card">
     <h3>1.4 四维评分</h3>
-    <p>数据落盘：<code>D:\workspace\_output\猫波信号站\选题库\候选池.csv</code>（主表，唯一真相源）</p>
-    <p style="font-size:12px;color:var(--muted);">CSV 固定列：date, slug, 嘉宾, 标题, URL, 时效性, 独占性, 权威, 长期, 总分, 状态, 来源。排除行不删，防重复评估。</p>
+    <p>数据落盘：飞书多维表格（<a href="https://fcn7dgp1xcm8.feishu.cn/base/F7E8bJie5aX3BvsZz1Xc9KiznNb?table=tblIs359fHfIapwd" style="color:var(--yellow);">选题库</a>，唯一真相源）。禁止手工拼 JSON，统一走 <code>stage_01_topic_onboard.py</code>。</p>
 
     <table>
       <thead><tr><th>维度</th><th>权重</th><th>3 分</th><th>2 分</th><th>1 分</th></tr></thead>
@@ -364,7 +363,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
         <tr><td><strong>语音填充率</strong></td><td>非信息填充词（um/you know/我觉得）占比</td><td>&lt; 15%</td><td>&gt; 30%</td></tr>
       </tbody>
     </table>
-    <p style="font-size:12px;color:var(--muted);">随机抽 3 段 × 2 分钟人工评估，与估算值偏差 &gt; 30% 时以精算为准。</p>
+    <p style="font-size:12px;color:var(--muted);">随机抽 3 段 × 2 分钟，agent 翻译后评估，与估算值偏差 &gt; 30% 时以精算为准。</p>
   </div>
 
   <!-- 1.7 状态流转 -->
@@ -391,6 +390,43 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     </table>
     <p style="font-size:12px;color:var(--muted);">复盘笔记路径：<code>D:\workspace\_output\猫波信号站\视频\<slug>\_runtime\复盘.md</code></p>
   </div>
+
+  <!-- 1.8 飞书记录入库 -->
+  <div class="card">
+    <h3>1.8 飞书记录入库</h3>
+    <p>所有选题记录写入飞书多维表格。优先用 <code>stage_01_topic_onboard.py</code> 脚本，<strong>禁止手工拼 JSON</strong>。</p>
+
+    <h4>工具入口</h4>
+    <pre><span class="cmd">python</span> tools\stage_01_topic_onboard.py \
+    --url <span class="arg">"https://youtube.com/watch?v=XXX"</span> \
+    --title <span class="arg">"中文标题（身份：主题）"</span> \
+    --guest <span class="arg">"Guest Name"</span> --source <span class="arg">"Channel Name"</span> \
+    --summary <span class="arg">"一句话中文摘要"</span> \
+    --timeliness <span class="arg">N</span> --exclusivity <span class="arg">N</span> --authority <span class="arg">N</span> --longevity <span class="arg">N</span> \
+    --create</pre>
+    <p style="font-size:12px;color:var(--muted);">脚本自动：拉 YouTube 元数据（播放量/点赞/上传日期）→ 校验中文标题 → 计算总分 → 校验必填字段 → 写入飞书。全部通过才写，缺字段直接报错退出。</p>
+
+    <h4>必填字段清单</h4>
+    <p style="font-size:12px;color:var(--muted);">以下字段缺一不可。特殊情况必须手工操作时对照此清单逐项检查，漏一个 = 欠债。</p>
+    <table>
+      <thead><tr><th>字段</th><th>来源</th><th>校验</th></tr></thead>
+      <tbody>
+        <tr><td>标题</td><td>Agent 提供</td><td>必须含中文字符，格式：<code>身份+姓名：主题概括</code></td></tr>
+        <tr><td>URL</td><td>Agent 提供</td><td>YouTube 视频链接</td></tr>
+        <tr><td>嘉宾</td><td>Agent 提供</td><td>英文原名</td></tr>
+        <tr><td>来源频道名</td><td>Agent 提供</td><td>频道官方名称，用于映射 slug 标签</td></tr>
+        <tr><td>中文摘要</td><td>Agent 提供</td><td>一句话中文摘要</td></tr>
+        <tr><td>Slug</td><td>自动生成</td><td><code>嘉宾-视频ID-来源标签</code></td></tr>
+        <tr><td>日期</td><td>yt-dlp 拉取</td><td>YYYY-MM-DD</td></tr>
+        <tr><td>YouTube播放量</td><td>yt-dlp 拉取</td><td>整数</td></tr>
+        <tr><td>YouTube点赞</td><td>yt-dlp 拉取</td><td>整数</td></tr>
+        <tr><td>时效性/独占性/人物权威/长期价值</td><td>Agent 评分</td><td>0-5 分</td></tr>
+        <tr><td>总分</td><td>自动计算</td><td>时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2</td></tr>
+      </tbody>
+    </table>
+
+    <div class="hl hl-p" style="margin-top:12px;"><strong>教训（2026-06-26）：</strong>手工拼 JSON 入库 6 条记录，遗漏标题/播放量/点赞字段，补标题时填了 YouTube 英文原标题。根因：缺 stage_① 脚本 + 无输出前校验 + "标题=中文"约定只在数据里不在代码里。<strong>修复：</strong>创建 <code>stage_01_topic_onboard.py</code>，中文标题必填 + 中文字符检测 + 所有必填字段输出前校验。详见 agentboard tip: <code>feishu-record-incomplete-fields.md</code>。</div>
+  </div>
 </section>
 
 <!-- ════════════════════════════════════════════════════════════════ -->
@@ -398,7 +434,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 <!-- ════════════════════════════════════════════════════════════════ -->
 <section id="s2">
   <h2><span class="num">02</span>管线</h2>
-  <p style="color:var(--muted);">脚本目录：<code>D:\workspace\lab\2026-06-16-猫波信号站\tools\</code>。产出目录：<code>D:\workspace\_output\猫波信号站\视频\<slug>\</code>。工程参数唯一真相源：<code>lab/_ref/生产参数.md</code>。完整踩坑记录：<code>lab/_ref/pitfalls.md</code>。</p>
+  <p style="color:var(--muted);">脚本目录：<code>D:\workspace\猫波信号站\tools\</code>。产出目录：<code>D:\workspace\_output\猫波信号站\视频\<slug>\</code>。工程参数唯一真相源：<code>lab/_ref/生产参数.md</code>。完整踩坑记录：<code>lab/_ref/pitfalls.md</code>。</p>
 
   <!-- 时间轴宪法 -->
   <div class="card" style="border-left:3px solid var(--yellow);">
@@ -433,7 +469,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 ├── HANDOFF.md
 ├── _tests/              <span class="dim"># 测试片，不上线</span>
 └── _runtime/
-    ├── 素材/source.mp4   <span class="dim"># ② 下载后手动搬入</span>
+    ├── 素材/source.mp4   <span class="dim"># ② 下载后搬入</span>
     ├── 字幕/             <span class="dim"># ②-⑦ 阶段产出</span>
     │   ├── 01_raw.srt         <span class="dim"># ② YouTube 原始（保留）</span>
     │   ├── 01_whisper.srt     <span class="dim"># ③ Whisper 原始（保留）</span>
@@ -515,16 +551,16 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 2.2 机械段 ②-⑧ -->
   <div class="card">
     <h3>2.2 机械段 ②-⑧</h3>
-    <p style="color:var(--muted);">每个阶段一个独立脚本，阶段间通过 SRT/JSON 文件通信，可单独重跑。脚本全部在 <code>D:\workspace\lab\2026-06-16-猫波信号站\tools\</code>。</p>
+    <p style="color:var(--muted);">每个阶段一个独立脚本，阶段间通过 SRT/JSON 文件通信，可单独重跑。脚本全部在 <code>D:\workspace\猫波信号站\tools\</code>。</p>
 
     <div class="stage-row">
       <h4>② 下载</h4>
-      <pre><span class="cmd">cd</span> D:\workspace\lab\2026-06-16-猫波信号站
+      <pre><span class="cmd">cd</span> D:\workspace\猫波信号站
 <span class="cmd">python</span> tools\stage_02_download.py --url <span class="arg"><URL></span> --slug <span class="arg"><slug></span></pre>
       <table>
         <thead><tr><th>输入</th><th>输出</th><th>落盘</th></tr></thead>
         <tbody>
-          <tr><td>YouTube URL</td><td><code>source.mp4</code> + <code>01_raw.srt</code></td><td>lab <code>_runtime/&lt;slug&gt;_process/</code> → 手动搬入 output <code>_runtime/素材/</code> 和 <code>_runtime/字幕/</code></td></tr>
+          <tr><td>YouTube URL</td><td><code>source.mp4</code> + <code>01_raw.srt</code></td><td>lab <code>_runtime/&lt;slug&gt;_process/</code> → 搬入 output <code>_runtime/素材/</code> 和 <code>_runtime/字幕/</code></td></tr>
         </tbody>
       </table>
       <div class="hl hl-p"><strong>必须 H.264(avc1)+AAC(m4a)</strong>，否则拿到 webm/vp9 — B站不兼容。</div>
@@ -555,7 +591,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
         </tbody>
       </table>
       <p style="font-size:12px;">DeepSeek API temp=0 二分类（yes/no），每批 20 条，并发 5。<strong>3 层防御：</strong>Keyword pre-mark（硬关键字锁死）→ gap fill（sponsor 段间 ≤5 行填洞）→ named-entity expansion（公司/人名跨段扩展，max_lookahead=60, max_gap=5）。检测到的赞助段从字幕移除，相邻段合并（间隙 ≤500ms）。<strong>短赞助段（&lt;10s）恢复保留</strong>——太短不值得切，跳帧突兀。≥10s 的写入 <code>_sponsor_cuts.json</code>。<strong>视频剪切在 ④ 完成</strong>（ffmpeg concat → source_clean.mp4），⑧ 只烧字幕不切视频。</p>
-      <div class="hl hl-p"><strong>安全设计：false positive（误杀正片）不可接受。</strong>temp=0 不创造，短段恢复保底，渲染前人工确认切点。</div>
+      <div class="hl hl-p"><strong>安全设计：false positive（误杀正片）不可接受。</strong>temp=0 不创造，短段恢复保底，渲染前 agent 复核切点。</div>
     </div>
 
     <div class="stage-row">
@@ -675,7 +711,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
 
     <div class="stage-row ai">
       <h4>⑫ 封面</h4>
-      <p><strong>工具：</strong><code>D:\workspace\lab\2026-06-16-猫波信号站\tools\gen_cover.py</code>。封面最后做——拿着已确定的标题文字和金句做图，不反复改。</p>
+      <p><strong>工具：</strong><code>D:\workspace\猫波信号站\tools\gen_cover.py</code>。封面最后做——拿着已确定的标题文字和金句做图，不反复改。</p>
       <pre><span class="cmd">python</span> tools\gen_cover.py <span class="arg"><frame.jpg></span> <span class="arg"><cover.jpg></span> --title <span class="arg">"黄字第1行"</span> [--title2 <span class="arg">"黄字第2行"</span>] [--sub <span class="arg">"白字副标题"</span>]</pre>
       <div class="hl hl-y" style="margin-top:8px;"><strong>设计参数（固定，不调）</strong></div>
       <table>
@@ -833,12 +869,11 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <div class="card">
     <h3>3.3 发布后更新</h3>
     <table>
-      <thead><tr><th>操作</th><th>路径</th></tr></thead>
+      <thead><tr><th>操作</th><th>方式</th></tr></thead>
       <tbody>
-        <tr><td>选题库状态→已发布</td><td class="path">output/选题库/候选池.csv</td></tr>
-        <tr><td>写入 BV号/标题/播放量</td><td class="path">候选池.csv + 已发布/<slug>.md</td></tr>
-        <tr><td>已发布归档</td><td class="path">output/选题库/已发布/<slug>.md</td></tr>
-        <tr><td>数据复盘</td><td>24h / 7d / 30d → 反馈到选题评分权重</td></tr>
+        <tr><td>飞书状态→已发布</td><td><code>lark-cli base +record-update</code>，字段「状态」=「已发布」</td></tr>
+        <tr><td>写入 BV号/B站标题</td><td>更新飞书同记录，补 BV号、B站标题字段</td></tr>
+        <tr><td>数据复盘</td><td>24h / 7d / 30d 从 B站拉数据 → 记录到飞书 → 反馈选题评分权重</td></tr>
       </tbody>
     </table>
   </div>
@@ -996,7 +1031,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
   <!-- 4.3 已知坑 -->
   <div class="card">
     <h3>4.3 已知坑速查</h3>
-    <p style="font-size:12px;color:var(--muted);">完整版：<code>D:\workspace\lab\2026-06-16-猫波信号站\_ref\pitfalls.md</code></p>
+    <p style="font-size:12px;color:var(--muted);">完整版：<code>D:\workspace\猫波信号站\_ref\pitfalls.md</code></p>
     <table>
       <thead><tr><th>#</th><th>坑</th><th>修复</th></tr></thead>
       <tbody>
@@ -1024,23 +1059,30 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <table>
       <thead><tr><th>文件</th><th>用途</th></tr></thead>
       <tbody>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\CLAUDE.md</td><td>管线硬约束 + 步骤定义</td></tr>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\生产操作手册.html</td><td>本文档</td></tr>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\tools\</td><td>阶段脚本 ②-⑧ + gen_cover + gen_epub</td></tr>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\_ref\生产参数.md</td><td>工程参数唯一真相源</td></tr>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\_ref\pitfalls.md</td><td>完整踩坑记录（现象→根因→修复→预防）</td></tr>
+        <tr style="border-top:2px solid var(--border);"><td colspan="2"><strong>lab 管线基地</strong></td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\CLAUDE.md</td><td>管线硬约束 + 步骤定义</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\生产操作手册.html</td><td>本文档（施工图）</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\生产方法论.html</td><td>设计方案（why / 成本测算 / 案例分析）</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\HANDOFF.md</td><td>会话交接单（当前状态 / 待办 / 路由）</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\tools\</td><td>阶段脚本 ①-⑨,⑯ + gen_cover / gen_epub / gen_metadata</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\_ref\生产参数.md</td><td>工程参数唯一真相源</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\_ref\pitfalls.md</td><td>完整踩坑记录（现象→根因→修复→预防）</td></tr>
+        <tr style="border-top:2px solid var(--border);"><td colspan="2"><strong>output 成果基地</strong></td></tr>
         <tr><td class="path">D:\workspace\_output\猫波信号站\CLAUDE.md</td><td>产出宪法</td></tr>
         <tr><td class="path">D:\workspace\_output\猫波信号站\视频\CLAUDE.md</td><td>视频目录规范</td></tr>
-        <tr><td class="path">D:\workspace\_output\猫波信号站\选题库\候选池.csv</td><td>选题主表（唯一真相源）</td></tr>
+        <tr><td class="path"><a href="https://fcn7dgp1xcm8.feishu.cn/base/F7E8bJie5aX3BvsZz1Xc9KiznNb?table=tblIs359fHfIapwd" target="_blank">飞书多维表格 · 选题库</a></td><td>选题主表（唯一真相源），候选队列视图 <a href="https://fcn7dgp1xcm8.feishu.cn/base/F7E8bJie5aX3BvsZz1Xc9KiznNb?table=tblIs359fHfIapwd&view=vewHaNJhlQ" target="_blank"><code>vewHaNJhlQ</code></a></td></tr>
         <tr><td class="path">D:\workspace\_output\猫波信号站\选题库\内容源.md</td><td>巡检频道/播客/人物清单</td></tr>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\tools\stage_16_cdp_upload.py</td><td>B站 CDP 浏览器上传（大文件 1GB+）</td></tr>
-        <tr><td class="path">D:\workspace\lab\2026-06-16-猫波信号站\_runtime\cdp\</td><td>CDP 诊断/调试脚本</td></tr>
+        <tr style="border-top:2px solid var(--border);"><td colspan="2"><strong>上传 & 调试</strong></td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\tools\stage_16_cdp_upload.py</td><td>B站 CDP 浏览器上传（大文件 1GB+）</td></tr>
+        <tr><td class="path">D:\workspace\猫波信号站\_runtime\cdp\</td><td>CDP 诊断/调试脚本</td></tr>
+        <tr><td class="path">C:\Users\Administrator\.agentboard\tips\feishu-record-incomplete-fields.md</td><td>飞书记录缺字段诊断（agentboard tip）</td></tr>
       </tbody>
     </table>
   </div>
+
 </section>
 
-<div class="footer">猫波信号站 · Production Operations Manual · 2026-06-25</div>
+<div class="footer">猫波信号站 · Production Operations Manual · 2026-06-26</div>
 
 </main>
 </body>

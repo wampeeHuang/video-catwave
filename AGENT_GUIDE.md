@@ -1,4 +1,4 @@
-# 猫波信号站 · Agent Guide
+﻿# 猫波信号站 · Agent Guide
 
 YouTube → B站 搬运管线。本文件每次对话自动加载，是所有操作的唯一指令源。
 
@@ -34,7 +34,7 @@ YouTube → B站 搬运管线。本文件每次对话自动加载，是所有操
 ### 环境
 
 ```powershell
-cd D:\workspace\lab\2026-06-16-猫波信号站
+cd D:\workspace\猫波信号站
 $env:VORTEX_PROXY = "127.0.0.1:7897"
 $env:DEEPSEEK_API_KEY = "<key>"
 ```

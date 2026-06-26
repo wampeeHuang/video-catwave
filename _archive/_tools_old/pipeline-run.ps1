@@ -1,4 +1,4 @@
-# 猫波信号站 · 视频管线启动器
+﻿# 猫波信号站 · 视频管线启动器
 # 用法：双击运行，输入 YouTube URL 即可
 param(
     [string]$url = ""
@@ -14,7 +14,7 @@ if (-not $url) {
     exit 1
 }
 
-$pipelineDir = "D:\workspace\lab\2026-06-16-猫波信号站"
+$pipelineDir = "D:\workspace\猫波信号站"
 $slug = Read-Host "输入目录 slug（如 kevin-weil-lenny，回车跳过自动检测）"
 $title = Read-Host "输入 B站标题（如 OpenAI CPO Kevin Weil...，回车跳过）"
 
