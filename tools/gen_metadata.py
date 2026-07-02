@@ -1,4 +1,4 @@
-"""Generate metadata.json for B站 upload (stage_15_publish.py input).
+"""Generate metadata.json for B站 upload (stage_16_cdp_upload.py input).
 
 Usage:
   python gen_metadata.py --slug <slug> --title "<title>" --source "<source>" \
@@ -67,8 +67,8 @@ def auto_chapters(entries: list[dict], max_chapters: int = 10) -> list[list[str]
             # Use only the Chinese part before \N
             if "\\N" in title:
                 title = title.split("\\N")[0].strip()
-            if len(title) > 30:
-                title = title[:27] + "..."
+            if len(title) > 16:
+                title = title[:14] + ".."
             chapters.append([seconds_to_timestamp(t), title])
             next_at = t + chunk_sec
 
@@ -110,6 +110,21 @@ def build_description(title: str, source: str, baidu_link: str | None = None,
     return desc
 
 
+def validate_chapters(chapters, max_title_chars=16):
+    """B站硬上限: 章节标题 ≤16 字。超长直接报错拦截。"""
+    for i, ch in enumerate(chapters):
+        if isinstance(ch, dict):
+            title = ch.get("title", "")
+        elif isinstance(ch, (list, tuple)) and len(ch) >= 2:
+            title = ch[1]
+        else:
+            continue
+        n = len(title)
+        if n > max_title_chars:
+            print(f"ERROR: 章节 {i+1} 标题 {n} 字（上限 {max_title_chars}）: {title[:40]}")
+            sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate metadata.json for B站 upload")
     parser.add_argument("--slug", required=True, help="Video slug")
@@ -124,7 +139,7 @@ def main():
     args = parser.parse_args()
 
     base = slug_dir(args.slug)
-    srt = base / "_runtime" / "字幕" / "03_zh.srt"
+    srt = base / "_runtime" / "字幕" / "04_split.srt"
 
     if not srt.exists():
         print(f"ERROR: SRT not found: {srt}")
@@ -140,6 +155,8 @@ def main():
             chapters = json.load(f)
     else:
         chapters = auto_chapters(entries)
+
+    validate_chapters(chapters)
 
     # Description
     draft_desc = read_draft_description(args.slug) if not args.description else None
@@ -172,7 +189,7 @@ def main():
     print(f"Desc:      {len(description)} chars")
     print(f"Written:   {out_path}")
     print()
-    print(f"Next: python tools/stage_15_publish.py --video <mp4> --metadata {out_path} --cookie \"<cookie>\" --cover <cover.jpg> --draft")
+    print(f"Next: python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>")
 
 
 if __name__ == "__main__":

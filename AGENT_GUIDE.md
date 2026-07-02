@@ -26,12 +26,10 @@ YouTube → B站 搬运管线。本文件每次对话自动加载，是所有操
 ② 下载 ──→ ③ Whisper转录 ──→ ④ 赞助检测 ──→ ⑤ 翻译 ──→ ⑥ 字宽检查 ──→ ⑦ ASS ──→ ⑧ 渲染
                机械段（每阶段独立脚本，可单独重跑）
 
-⑨ 百度云上传 ──→ ⑩ 元数据 JSON ──→ ⑪ 金句提取 ──→ ⑫ 封面 ──→ ⑬ 标题 ──→ ⑭ 电子书 ──→ ⑮ 发布面板 ──→ ⑯ B站上传
+⑨ 百度云上传 ──→ ⑩ 元数据 JSON ──→ ⑪ 金句提取 ──→ ⑫ 封面 ──→ ⑬ 标题 ──→ ⑭ 电子书 ──→ ⑮ 发布面板 ──→ ⑯ B站上传（实验性）
                 AI 决策段（每步需读 transcript 判断）
 
-⑯ 分两路:
-  - API 直连: stage_15_publish.py (小文件, <500MB)
-  - CDP 浏览器: stage_16_cdp_upload.py (大文件, 1GB+)
+⑯ CDP 浏览器上传: stage_16_cdp_upload.py（⚠️ 实验性，未测通，待专项验证）
 ```
 
 ### 环境
@@ -46,7 +44,7 @@ $env:DEEPSEEK_API_KEY = "<key>"
 
 ```
 D:\workspace\_output\猫波信号站\视频\<YYYYMMDD_slug>\
-├── cover.jpg              ← 封面 1920×1080（SimHei 165px + 2px黑边）
+├── cover.jpg              ← 封面 1920×1080（msyhbd.ttc 纯色无描边，参数见 gen_cover.py）
 ├── 发布面板.html           ← 标题/标签/简介/章节/金句
 ├── 成片/<B站标题>.mp4       ← 最终视频
 ├── 电子书/<书名>.epub       ← gen_epub.py 生成
@@ -80,8 +78,8 @@ python tools/stage_05_translate.py --slug <slug>
 # ⑥ 标点优先拆分 + 像素宽度检查
 python tools/stage_06_split.py --slug <slug>
 
-# ⑦ ASS + transcript（--bord 3 白字黑边，Netflix 标准）
-python tools/stage_07_ass.py --slug <slug> --bord 3
+# ⑦ ASS + transcript（--bord 1 白字1px黑边）
+python tools/stage_07_ass.py --slug <slug> --bord 1
 
 # ⑧ 渲染（--duration 60 做测试片）
 python tools/stage_08_render.py --slug <slug> --title "标题" [--duration 60]
@@ -93,11 +91,7 @@ python tools/stage_09_baidu_upload.py --slug <slug>
 python tools/gen_metadata.py --slug <slug> --title "标题" --source "YouTube @频道名" \
     --tags "tag1,tag2,..." [--baidu-link "<百度盘链接>"]
 
-# ⑯ B站草稿箱上传 (API)
-python tools/stage_15_publish.py --video <mp4> --metadata <metadata.json> \
-    --cookie "<cookie>" --cover <cover.jpg> --draft
-
-# ⑯ B站上传 (CDP 浏览器，大文件)
+# ⑯ B站上传 (CDP 浏览器，⚠️ 实验性，未测通)
 python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 ```
 
@@ -119,31 +113,60 @@ python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 | ④ | 赞助检测 | 抽检被剔段落确为赞助 |
 | ⑤ | 翻译 | 行数=④，专名留英文 |
 | ⑥ | 字宽 | 中文像素宽 ≤1520px（SimHei 42px） |
-| ⑦ | ASS | Outline=3, OutlineColour=opaque black, MarginL/R=200 |
+| ⑦ | ASS | bord=1px 黑边，MarginL/R=200 |
 | ⑧ | 渲染 | 音画同步，赞助已裁 |
+| ⑫ | 封面 | `validate_cover.py` 全项 PASS（尺寸/文字/亮度/居中/字体） |
+| ⑮ | 产出 | `validate_outputs.py` 全项 PASS（文件+章节+帧数+封面） |
 
-## 3. 封面工作流
+## 3. 封面
 
-**必须按此顺序：**
+### 设计定义
+
+封面 = 视频截图底图（亮度压至 0.80）+ 居中文字叠加。**不加频道水印、不加底部信息条、不加装饰线。**
+
+封面传达两件事：
+1. **黄字**：本期核心洞察/金句（吸引点击）
+2. **白字**：谁说的、在哪个节目（提供上下文）
+
+### 文字规则
+
+| 参数 | 颜色 | 字号 | 内容 | 示例 |
+|------|------|------|------|------|
+| `--title` | #FFC82D 暖黄 | 165px 自适应 | 嘉宾核心金句（≤16 字，一行装不下可拆分 `--title2`） | `Benedict Evans冷静拆解AI走向：` |
+| `--title2` | #FFC82D 暖黄 | 165px 自适应 | 金句后半句（可选） | `我们正处在AI的1997年` |
+| `--sub` | #FCFAF5 暖白 | 62px | `嘉宾身份 · 原节目名` | `前a16z合伙人 · Lenny's Podcast` |
+
+**`--sub` 格式固定：`<嘉宾身份> · <原节目名>`**
+
+只有两个变量：嘉宾身份（如「前a16z合伙人」「MIT教授」）+ 原节目名（如「Lenny's Podcast」「Lex Fridman Podcast」）。
+
+以下内容**禁止**出现在封面任何位置：
+- 频道品牌：猫波信号站、猫波译站
+- 翻译/制作信息
+- B站分区、合集名
+- 发布日期、时长
+
+这些信息属于发布面板（§4）和视频简介（§4.5），不属于封面。
+
+### 工作流
 
 ```
-1. 从 transcript.txt 提取 5 条候选金句（4-12 字、有反差/数字、来自嘉宾）
-2. 定位金句时间戳 → ffmpeg 截图至少 5 帧 → 选主讲人正脸最清晰的一张
-3. 读 draft.md 确认标题文案
-4. python tools/gen_cover.py <frame.jpg> <cover.jpg> \
-     --title "<金句>" --sub "<嘉宾身份> · <来源>" --source "<YouTube频道>"
+1. 从 transcript.txt 提取 5 条候选金句（4-16 字、有反差/数字、来自嘉宾）
+2. python tools/select_frame.py --slug <slug> [--keep-all]
+   → 自动抽帧 + Laplacian 清晰度评分 + 肤色检测，输出最佳帧
+   → 帧落 _runtime/frames/，保留最佳，其余删除（--keep-all 保留全部）
+3. 确认标题文案（金句拆分到 --title / --title2）
+4. python tools/gen_cover.py <best_frame.jpg> <cover.jpg> \
+     --title "<黄字金句前半>" [--title2 "<黄字金句后半>"] \
+     --sub "<嘉宾身份> · <原节目名>"
 5. 落盘到产出目录根目录 cover.jpg
+6. python tools/validate_cover.py --slug <slug> --frame <best_frame.jpg>
+   → 验证层：尺寸/文字/亮度/居中/字体 + 白字行数（>1 行 = 可能含频道水印）
+   → ⚠️ 文字内容是人工审查门禁——验证层无法 OCR，须肉眼确认无频道品牌
 ```
 
-**关键参数**（来源 `_ref/生产参数.md` §1）：
-- 画布 1920×1080，亮度 0.80
-- 主标题 SimHei 165px 暖黄 #FFC82D，≤15 字
-- 副标题 SimHei 62px 暖白 #FCFAF5
-- 出处行 SimHei 28px 暖白
-- 文字 2px 黑色 8 方向填充模拟超粗
-- 装饰线 120×4px 暖黄
-- 4:3 安全区 SAFE_W=1440，文字超宽自动缩字
-- JPG ≤4.8MB
+**封面参数唯一真相源**: `tools/gen_cover.py`（生产层）+ `tools/validate_cover.py`（验证层）
+所有参数在这两个文件中定义，其他文档不重复。设计逻辑见 `_ref/生产参数.md` §1。
 
 ## 4. 发布面板模板
 
@@ -178,18 +201,7 @@ python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
 
 三种方式：
 
-### A. API 直连（小文件首选）
-```powershell
-python tools/stage_15_publish.py --video "<成片/视频.mp4>" \
-    --metadata "_runtime/metadata.json" --cover "cover.jpg" \
-    --cookie "<浏览器Cookie>" --draft
-```
-- `--draft`：存入草稿箱，不直接发布
-- 需要 Cookie 含 `bili_jct`、`SESSDATA`、`DedeUserID`
-- metadata.json 由 `gen_metadata.py` 生成
-- **限制**: 大文件 (>500MB) 可能超时，B站 API 上传限速
-
-### B. CDP 浏览器自动化（大文件推荐，1GB+）
+### A. CDP 浏览器自动化（⚠️ 实验性，未测通）
 Bit Browser CDP port 55054，浏览器已登录 B站。
 详细文档：`生产操作手册.html` §3.4 CDP 上传。
 
@@ -249,13 +261,13 @@ expression = '''
 - 页面跳转后表单数据可能丢失
 - **总结**: 视频上传 + 标题 + 简介 + 标签推荐点击 + 分区（自动检测）可通过 CDP 完成；创作声明、自定义标签、封面、存草稿需手动
 
-### C. CDP 后验证（agent 执行，不依赖人工）
+### B. CDP 后验证（agent 执行，不依赖人工）
 1. CDP Runtime.evaluate 读取创作声明下拉确认已选中「含AI内容生成」
 2. CDP Runtime.evaluate 检查封面 img 元素是否存在且 src 非空
 3. CDP click 点击「存草稿」按钮 → 等待「已存草稿」toast 出现
 4. 完成后输出结果摘要：草稿状态 / 封面状态 / 创作声明状态
 
-### D. stage_16_cdp_upload.py 管线脚本
+### C. stage_16_cdp_upload.py 管线脚本
 
 ```powershell
 # 自动发现 slug 目录下的 cover/video/metadata

@@ -831,7 +831,7 @@ pre .arg { color: var(--yellow); font-weight: 600; }
     <tr><td class="nowrap">⑬</td><td>标题</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读金句 → 生成 3-5 候选标题</td><td>金句 → 嘉宾身份 + 嘉宾名：核心论断</td><td>~3m</td></tr>
     <tr><td class="nowrap">⑭</td><td>电子书 EPUB</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude + <code>gen_epub.py</code></td><td>transcript → draft.md + 电子书/&lt;标题&gt;.epub</td><td>~15m</td></tr>
         <tr><td class="nowrap">⑮</td><td>发布面板</td><td><span class="tag" style="background:#F5F3FF;color:#5B21B6;">skill</span></td><td>Claude 读 transcript + 模板</td><td>→ 发布面板.html（标题/标签/简介/章节/金句）</td><td>~10m</td></tr>
-        <tr style="border-top:2px solid var(--pink);"><td class="nowrap">⑯</td><td>B站上传</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human + script</span></td><td><code>stage_15_publish.py</code> (API) 或 <code>stage_16_cdp_upload.py</code> (CDP)</td><td>成品文件 → B站草稿箱 / 已发布</td><td>~5-40m</td></tr>
+        <tr style="border-top:2px solid var(--pink);"><td class="nowrap">⑯</td><td>B站上传</td><td><span class="tag" style="background:#FFF7ED;color:#9A3412;">human + script</span></td><td><code>stage_16_cdp_upload.py</code> (CDP, ⚠️ 实验性)</td><td>成品文件 → B站草稿箱</td><td>~5-40m</td></tr>
     </tbody>
   </table>
   <div class="hl hl-y"><strong>独立阶段脚本 ②-⑧：</strong>每个阶段一个 Python 文件，阶段间通过 SRT/JSON 文件通信，可单独重跑。全部脚本在 <code>D:\workspace\猫波信号站\tools\</code>。⑨ 之后由 Claude AI 接管 ⑩-⑮，每步 AI 决策。</div>

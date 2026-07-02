@@ -1,7 +1,7 @@
 r"""B站 CDP 浏览器自动化上传 · Bit Browser DevTools Protocol.
 
-大文件 (>500MB) 走 CDP 浏览器上传，绕过 API 限速。
-小文件优先用 stage_15_publish.py (API 直连)。
+⚠️ 实验性 — 未测通，待专项验证。
+CDP 上传基础流程可跑通，但创作声明/自定义标签/封面/存草稿等步骤仍需人工介入。
 
 Usage:
   python tools/stage_16_cdp_upload.py --slug <slug> --page-id <CDP_PAGE_ID>
