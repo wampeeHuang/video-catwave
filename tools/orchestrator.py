@@ -122,21 +122,32 @@ def _get_default_tags(candidate: dict) -> str:
     return ",".join(result[:10])
 
 
-def _cover_title(title: str) -> str:
-    """Derive short cover title. Takes segment after last delimiter (：—|～).
-    If still too long for 120px minimum font (~11 CJK chars), gen_cover will
-    warn and validate_cover will fail — operator must shorten the title manually.
+def _cover_title(title: str, identity: str = "") -> tuple[str, str]:
+    """Split title at delimiter into (line1, line2) for cover.
+    Strips identity prefix from line1 when identity is known.
+    Returns ("", "") for unparseable titles (caller should fall back).
     """
-    for delim in ['：', '—', '|', '～']:
+    for delim in ['：', '——', '—', '|', '～']:
         if delim in title:
-            short = title.rsplit(delim, 1)[-1].strip()
-            if short:
-                return short
-    return title
+            parts = title.split(delim, 1)
+            line1 = parts[0].strip()
+            line2 = parts[1].strip().lstrip('—|｜～~- ')
+            if identity and line1.startswith(identity):
+                line1 = line1[len(identity):].strip()
+            if line1 and line2:
+                return line1, line2
+            if line2:
+                return line2, ""
+            return line1, ""
+    # No delimiter — return whole title as single line
+    short = title
+    if identity and short.startswith(identity):
+        short = short[len(identity):].strip() or short
+    return short, ""
 
 
-def _derive_sub(title: str, channel: str, guests: list[str]) -> str:
-    """Derive --sub '<嘉宾身份> · <原节目名>' from candidate metadata."""
+def _derive_sub(title: str, channel: str, guests: list[str]) -> tuple[str, str]:
+    """Derive --sub '<嘉宾身份> · <原节目名>' and extracted identity from candidate metadata."""
     show = channel.replace("@", "").strip()
     if not show:
         return ""
@@ -153,9 +164,14 @@ def _derive_sub(title: str, channel: str, guests: list[str]) -> str:
         m = re.match(r"^([^\x00-\x7f]+)", prefix)
         if m:
             identity = m.group(1).strip()
+        else:
+            # Fallback: ASCII+CJK mixed prefix, e.g. "DeepMind研究员"
+            m = re.match(r"^([A-Za-z0-9]+)\s*([一-鿿]{2,3})", prefix)
+            if m:
+                identity = (m.group(1) + m.group(2)).strip()
     if identity:
-        return f"{identity} · {show}"
-    return show
+        return f"{identity} · {show}", identity
+    return show, ""
 
 
 def process_candidate(candidate: dict, label: str, date_str: str):
@@ -169,7 +185,7 @@ def process_candidate(candidate: dict, label: str, date_str: str):
     title = candidate["title"]
     channel = candidate.get("source_channel", "YouTube")
     guests = candidate.get("guest", [])
-    sub = _derive_sub(title, channel, guests)
+    sub, identity = _derive_sub(title, channel, guests)
 
     print(f"\n{'='*60}")
     print(f"[{label}] {title[:80]}")
@@ -215,6 +231,10 @@ def process_candidate(candidate: dict, label: str, date_str: str):
         )
         if rc_result.returncode == 2:
             print(f"  [bilibili_compliance] WARNING only (exit 2), not blocking")
+            # Persist compliance report for publish panel
+            cr_path = sdir / "_runtime" / "compliance_report.txt"
+            cr_path.parent.mkdir(parents=True, exist_ok=True)
+            cr_path.write_text(rc_result.stdout, encoding="utf-8")
         else:
             return False
 
@@ -264,7 +284,12 @@ def process_candidate(candidate: dict, label: str, date_str: str):
                 frame_path = slug_dir(slug) / "_runtime" / "frames" / best
                 if frame_path.exists():
                     try:
-                        cover_t = candidate.get("cover_title") or _cover_title(title)
+                        cover_t = candidate.get("cover_title") or ""
+                        cover_t2 = ""
+                        if cover_t:
+                            cover_t, cover_t2 = _cover_title(cover_t, "")
+                        else:
+                            cover_t, cover_t2 = _cover_title(title, identity)
                         # Auto-detect position + overlay from frame signals
                         skin_ratio = sel.get("best_skin_ratio", 0) or 0
                         position = detect_position(skin_ratio)
@@ -278,9 +303,12 @@ def process_candidate(candidate: dict, label: str, date_str: str):
                         print(f"  [cover] skin_ratio={skin_ratio:.2f} avg_lum={avg_lum:.0f} → position={position} overlay={overlay}")
                         cmd = [PYTHON, str(TOOLS / "gen_cover.py"),
                                str(frame_path), str(cover_path),
-                               "--title", cover_t, "--sub", sub,
-                               "--overlay", str(overlay),
-                               "--position", position]
+                               "--title", cover_t]
+                        if cover_t2:
+                            cmd += ["--title2", cover_t2]
+                        cmd += ["--sub", sub,
+                                "--overlay", str(overlay),
+                                "--position", position]
                         subprocess.run(
                             cmd,
                             cwd=str(TOOLS.parent), env=ENV,

@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from _lib import slug_dir
 from cover_design import (
     CANVAS, YELLOW, WHITE, FONT_BOLD,
-    MIN_TITLE_PX, MIN_SUB_FS,
+    MIN_TITLE_FS, MIN_SUB_FS,
     EXPECTED_BRIGHTNESS_FACTOR,
     YELLOW_MIN_COVERAGE, WHITE_MIN_COVERAGE,
     MIN_FILE_SIZE_KB, MAX_FILE_SIZE_MB,
@@ -40,7 +40,7 @@ from cover_design import (
 
 # validate_cover measures actual rendered pixel height, which is ~10px less
 # than the PT font size due to PIL font metrics. Adjust threshold accordingly.
-MIN_TITLE_PX = MIN_TITLE_PX - 10
+MIN_TITLE_PX = MIN_TITLE_FS - 10
 MIN_SUB_PX = MIN_SUB_FS - 10
 
 
