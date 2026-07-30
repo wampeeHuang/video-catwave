@@ -57,7 +57,7 @@ def _load_font(size: int, weight: str = "bold") -> ImageFont.FreeTypeFont:
 
 
 def _fit_size(draw, text: str, max_fs: int, min_fs: int = MIN_TITLE_FS) -> tuple[int, ImageFont.FreeTypeFont]:
-    """Return (font_size, font) that fits text in 4:3 safe area. Never below min_fs."""
+    """Return (font_size, font) that fits text in 4:3 safe area."""
     font = _load_font(max_fs, "bold")
     tw = draw.textbbox((0, 0), text, font=font)[2]
     safe_max = SAFE_W - SAFE_PAD * 2
@@ -65,9 +65,15 @@ def _fit_size(draw, text: str, max_fs: int, min_fs: int = MIN_TITLE_FS) -> tuple
         return max_fs, font
     fs = int(max_fs * safe_max / tw)
     if fs < min_fs:
-        print(f"  WARN: {len(text)}字标题需缩至{fs}px < {min_fs}px底线 — 请精简封面标题（120px≈11中文字）")
-        return min_fs, _load_font(min_fs, "bold")
-    return fs, _load_font(fs, "bold")
+        print(f"  WARN: {len(text)}字需缩至{fs}px (底线{min_fs}px) — 请精简封面标题")
+    # Verify at chosen size; shrink further if still over
+    font_at_fs = _load_font(fs, "bold")
+    tw_at_fs = draw.textbbox((0, 0), text, font=font_at_fs)[2]
+    if tw_at_fs > safe_max:
+        fs2 = int(fs * safe_max / tw_at_fs)
+        print(f"  WARN: {fs}px仍超{safe_max}px({tw_at_fs}px), 再缩至{fs2}px")
+        return fs2, _load_font(fs2, "bold")
+    return fs, font_at_fs
 
 
 def generate_cover(
@@ -189,6 +195,13 @@ def main():
                         help="Text position: center or bottom")
     parser.add_argument("--color", default="#FFC82D", help="Accent color hex")
     args = parser.parse_args()
+
+    # Gate: subtitle must not contain channel branding
+    BANNED_IN_SUB = {"猫波信号站", "猫波译站"}
+    for word in BANNED_IN_SUB:
+        if word in args.sub:
+            print(f"ERROR: 封面副标题禁止包含频道名「{word}」, 请只用嘉宾人名")
+            sys.exit(1)
 
     color = tuple(int(args.color.lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
 

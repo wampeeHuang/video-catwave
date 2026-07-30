@@ -205,6 +205,8 @@ def process_candidate(candidate: dict, label: str, date_str: str):
     pipe_result = _run([
         str(TOOLS / "pipeline.py"),
         "--slug", slug, "--url", url, "--title", title,
+        "--feishu-rid", candidate.get("record_id", ""),
+        "--source", channel,
     ], "pipeline", timeout=7200)
     if pipe_result == "429":
         return "429"
@@ -266,6 +268,15 @@ def process_candidate(candidate: dict, label: str, date_str: str):
         meta_cmd.extend(["--summary", curated_summary])
     else:
         meta_cmd.append("--ai-summary")
+    # Pass author / publish_date / source_url for 转载声明 in publish panel
+    guest_list = candidate.get("guest", [])
+    if guest_list:
+        meta_cmd.extend(["--author", ", ".join(guest_list)])
+    pub_date = candidate.get("date", "")
+    if pub_date:
+        meta_cmd.extend(["--publish-date", pub_date])
+    if url:
+        meta_cmd.extend(["--source-url", url])
     if not _run(meta_cmd, "gen_metadata", timeout=300):
         return False
 

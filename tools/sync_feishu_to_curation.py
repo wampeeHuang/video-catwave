@@ -347,5 +347,9 @@ def _check_duration(url: str) -> int | None:
 
 
 if __name__ == "__main__":
-    date_str = sys.argv[1] if len(sys.argv) > 1 else date_type.today().isoformat()
-    run(date_str)
+    import argparse
+    p = argparse.ArgumentParser(description="Sync Feishu bitable → _curation JSON")
+    p.add_argument("date", nargs="?", default=date_type.today().isoformat(),
+                   help="Date string YYYY-MM-DD (default: today)")
+    args = p.parse_args()
+    run(args.date)

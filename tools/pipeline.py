@@ -73,7 +73,7 @@ def _run_stage(name: str, args: list[str], check_files: list[Path], slug: str) -
     return True
 
 
-def run_pipeline(slug: str, url: str, title: str) -> bool:
+def run_pipeline(slug: str, url: str, title: str, feishu_rid: str = "", source: str = "") -> bool:
     sdir = slug_dir(slug)
     sub_dir = sdir / "_runtime" / "字幕"
     safe_title = _safe_filename(title)
@@ -139,6 +139,13 @@ def run_pipeline(slug: str, url: str, title: str) -> bool:
     else:
         print("[⚠️compliance] PASS")
 
+    # Auto-fill Feishu copyright risk (if record_id and source known)
+    if feishu_rid and source:
+        print("[📋feishu] Auto-filling copyright risk...")
+        from _feishu import fill_record_risk
+        fill_record_risk(feishu_rid, source)
+        print("[📋feishu] Done")
+
     print("\nPipeline ②→⑧ complete.")
     return True
 
@@ -148,6 +155,8 @@ if __name__ == "__main__":
     p.add_argument("--slug", required=True)
     p.add_argument("--url", required=True, help="YouTube URL")
     p.add_argument("--title", required=True, help="B站视频标题（也用作文件名）")
+    p.add_argument("--feishu-rid", default="", help="飞书 record_id (用于自动回写侵权风险)")
+    p.add_argument("--source", default="", help="来源频道名 (用于自动评估侵权风险)")
     args = p.parse_args()
-    ok = run_pipeline(args.slug, args.url, args.title)
+    ok = run_pipeline(args.slug, args.url, args.title, args.feishu_rid, args.source)
     sys.exit(0 if ok else 1)
