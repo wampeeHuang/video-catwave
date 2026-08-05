@@ -11,11 +11,40 @@ Path conventions (single source of truth):
 """
 
 import dataclasses
+import os
 import re
 import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
+
+
+def get_deepseek_key() -> str | None:
+    """Get DeepSeek API key. Checks runtime env first, then Windows user env vars.
+
+    The key is stored once in Windows user environment variables and read by all
+    pipeline scripts — no per-session export needed.
+    """
+    key = os.environ.get("DEEPSEEK_API_KEY")
+    if key:
+        return key
+    try:
+        result = subprocess.run(
+            ["powershell", "-Command",
+             "[Environment]::GetEnvironmentVariable('DEEPSEEK_API_KEY', 'User')"],
+            capture_output=True, text=True, timeout=5,
+        )
+        key = result.stdout.strip()
+        if key:
+            return key
+    except Exception:
+        pass
+    return None
+
+
+def sanitize_filename(title: str) -> str:
+    """Replace characters invalid in Windows filenames: \\ / : * ? " < > |"""
+    return re.sub(r'[\\/:*?"<>|]', '-', title)
 
 
 def clean_srt_text(text: str) -> str:
@@ -24,6 +53,54 @@ def clean_srt_text(text: str) -> str:
     text = re.sub(r">>\s*", "", text)
     text = re.sub(r"  +", " ", text)
     return text.strip()
+
+# ── Pixel width measurement (PIL textbbox) ────────────────────────────────────
+
+_FONT_CACHE: dict[tuple[str, int], object] = {}
+
+def text_pixel_width(text: str, font_name: str = "simhei.ttf", font_size: int = 42) -> int:
+    """Measure pixel width of text using PIL ImageFont.getbbox().
+    Caches font objects — never uses character-type heuristics.
+    """
+    key = (font_name, font_size)
+    font = _FONT_CACHE.get(key)
+    if font is None:
+        from PIL import ImageFont
+        fonts_dir = Path("C:/Windows/Fonts")
+        candidates = [
+            fonts_dir / font_name,
+            fonts_dir / font_name.replace(".ttf", ".ttc"),
+        ]
+        loaded = False
+        for fp in candidates:
+            if fp.exists():
+                try:
+                    font = ImageFont.truetype(str(fp), font_size)
+                    _FONT_CACHE[key] = font
+                    loaded = True
+                    break
+                except Exception:
+                    continue
+        if not loaded:
+            # Fallback: search for any matching font
+            stem = font_name.rsplit(".", 1)[0].lower()
+            for hit in fonts_dir.glob(f"{stem}.*"):
+                try:
+                    font = ImageFont.truetype(str(hit), font_size)
+                    _FONT_CACHE[key] = font
+                    loaded = True
+                    break
+                except Exception:
+                    continue
+        if not loaded:
+            # Last resort: PIL default
+            font = ImageFont.load_default()
+            _FONT_CACHE[key] = font
+    if text:
+        bbox = font.getbbox(text)
+        return bbox[2] - bbox[0]
+    return 0
+
 
 # ── Path roots ───────────────────────────────────────────────────────────────
 

@@ -17,7 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _lib import (
-    SubEntry, find_video, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
+    SubEntry, find_video, get_deepseek_key, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
 )
 
 MIN_DURATION_MS = 100
@@ -33,7 +33,7 @@ def run(slug: str, *, api_key: str | None = None, force: bool = False):
         print("=" * 60)
         sys.exit(1)
 
-    api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
+    api_key = api_key or get_deepseek_key()
 
     video = find_video(slug)
     if not video or not video.exists():

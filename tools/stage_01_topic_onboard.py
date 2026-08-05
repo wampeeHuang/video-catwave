@@ -12,6 +12,10 @@ Usage:
       --summary "中文摘要（一句话）" \
       --timeliness 3 --exclusivity 3 --authority 2 --longevity 2
       [--slug custom-slug] [--date 2026-06-07] [--status 候选] [--create] [--dry-run]
+
+Exclusion gates:
+  - 点赞/播放 < 1%  → 一票否决 (hard exclude)
+  - 点赞/播放 >= 1% → 通过
 """
 
 import argparse
@@ -19,8 +23,11 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime
 from pathlib import Path
+
+LIKE_RATIO_EXCLUDE = 0.01   # below → hard exclude
+LIKE_RATIO_WARN = 0.02      # below → warn zone
+MIN_DURATION_SEC = 600       # 10 分钟最低门禁
 
 
 def fetch_youtube_metadata(url: str) -> dict:
@@ -29,10 +36,11 @@ def fetch_youtube_metadata(url: str) -> dict:
         result = subprocess.run(
             [
                 "yt-dlp",
-                "--print", "%(title)s||%(view_count)s||%(like_count)s||%(upload_date)s||%(duration)s",
+                "--print", "%(title)s||%(view_count)s||%(like_count)s||%(comment_count)s||%(upload_date)s||%(duration)s||%(duration_string)s",
                 url,
             ],
             capture_output=True, text=True, timeout=30, check=True,
+            encoding='utf-8', errors='replace',
         )
     except subprocess.CalledProcessError as e:
         print(f"ERROR: yt-dlp failed\n{e.stderr}", file=sys.stderr)
@@ -48,15 +56,21 @@ def fetch_youtube_metadata(url: str) -> dict:
 
     views = int(parts[1]) if parts[1].isdigit() else 0
     likes = int(parts[2]) if parts[2].isdigit() else 0
-    upload_date = parts[3]
+    comments = int(parts[3]) if len(parts) > 3 and (parts[3] or "").isdigit() else 0
+    upload_date = parts[4] if len(parts) > 4 else ""
     if len(upload_date) == 8:
         upload_date = f"{upload_date[:4]}-{upload_date[4:6]}-{upload_date[6:8]}"
+    duration_s = int(parts[5]) if len(parts) > 5 and parts[5].isdigit() else 0
+    duration_str = parts[6] if len(parts) > 6 else ""
 
     return {
         "yt_title": parts[0],
         "views": views,
         "likes": likes,
+        "comments": comments,
         "upload_date": upload_date,
+        "duration_s": duration_s,
+        "duration_str": duration_str,
     }
 
 
@@ -90,21 +104,22 @@ def generate_slug(guest: str, source: str, url: str) -> str:
 def validate_scores(timeliness: int, exclusivity: int, authority: int, longevity: int):
     for name, val in [("时效性", timeliness), ("独占性", exclusivity),
                        ("人物权威", authority), ("长期价值", longevity)]:
-        if not 0 <= val <= 5:
-            print(f"ERROR: {name} must be 0-5, got {val}", file=sys.stderr)
+        if not 1 <= val <= 3:
+            print(f"ERROR: {name} must be 1-3, got {val}", file=sys.stderr)
             sys.exit(1)
 
 
-def calc_total(timeliness: int, exclusivity: int, authority: int, longevity: int) -> int:
-    return timeliness * 3 + exclusivity * 3 + authority * 2 + longevity * 2
+def calc_total(timeliness: int, exclusivity: int, authority: int, longevity: int) -> float:
+    return timeliness * 0.3 + exclusivity * 0.3 + authority * 0.2 + longevity * 0.2
 
 
 def build_record(title: str, guest: str, source: str, summary: str, url: str,
                  slug: str, date: str, status: str, yt_title: str | None,
-                 views: int, likes: int,
-                 timeliness: int, exclusivity: int, authority: int, longevity: int) -> dict:
+                 views: int, likes: int, comments: int,
+                 timeliness: int, exclusivity: int, authority: int, longevity: int,
+                 exclude_reason: str = "") -> dict:
     """Build a complete Feishu record as a flat dict (field-name → CellValue)."""
-    return {
+    rec = {
         # ── core identifiers ──
         "Slug": slug,
         "URL": url,
@@ -115,10 +130,11 @@ def build_record(title: str, guest: str, source: str, summary: str, url: str,
         "中文摘要": summary,
         # ── status ──
         "状态": status,
-        "日期": f"{date} 00:00:00",
+        "视频发布日期": f"{date} 00:00:00",
         # ── YouTube metadata (auto-fetched) ──
         "YouTube播放量": views,
         "YouTube点赞": likes,
+        "YouTube评论": comments,
         # ── scores ──
         "时效性": timeliness,
         "独占性": exclusivity,
@@ -126,6 +142,9 @@ def build_record(title: str, guest: str, source: str, summary: str, url: str,
         "长期价值": longevity,
         "总分": calc_total(timeliness, exclusivity, authority, longevity),
     }
+    if exclude_reason:
+        rec["废弃原因"] = exclude_reason
+    return rec
 
 
 def main():
@@ -133,7 +152,7 @@ def main():
         description="Stage ①: Onboard a topic to Feishu 选题库",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Scoring formula: 总分 = 时效性×3 + 独占性×3 + 人物权威×2 + 长期价值×2 (max 30)
+Scoring formula: 总分 = 时效性×0.3 + 独占性×0.3 + 人物权威×0.2 + 长期价值×0.2 (range 1.0–3.0)
 
 Examples:
   %(prog)s --url "https://youtube.com/watch?v=RJjl1TwyfWM" \\
@@ -154,13 +173,13 @@ Examples:
 
     # Scores
     parser.add_argument("--timeliness", type=int, required=True,
-                        help="时效性 (0-5)")
+                        help="时效性 (1-3)")
     parser.add_argument("--exclusivity", type=int, required=True,
-                        help="独占性 (0-5)")
+                        help="独占性 (1-3)")
     parser.add_argument("--authority", type=int, required=True,
-                        help="人物权威 (0-5)")
+                        help="人物权威 (1-3)")
     parser.add_argument("--longevity", type=int, required=True,
-                        help="长期价值 (0-5)")
+                        help="长期价值 (1-3)")
 
     # Optional
     parser.add_argument("--slug", default=None,
@@ -196,11 +215,37 @@ Examples:
     print(f"  Title:     {yt['yt_title']}")
     print(f"  Views:     {yt['views']:,}")
     print(f"  Likes:     {yt['likes']:,}")
+    print(f"  Comments:  {yt['comments']:,}")
     print(f"  Published: {yt['upload_date']}")
+
+    # 3b. Duration gate — hard minimum
+    dur_s = yt.get("duration_s", 0)
+    dur_str = yt.get("duration_str", "?")
+    if dur_s > 0 and dur_s < MIN_DURATION_SEC:
+        print(f"\n  HARD EXCLUDE: duration {dur_str} ({dur_s}s) < {MIN_DURATION_SEC}s minimum")
+        print(f"  Auto-setting status=排除, 废弃原因=时长 {dur_str} < 10分钟门禁")
+        args.status = "排除"
+        setattr(args, "exclude_reason", f"时长 {dur_str}")
+
+    # 3c. Engagement gate — like/view ratio
+    views, likes = yt["views"], yt["likes"]
+    if views > 0:
+        ratio = likes / views
+        print(f"  Like/View: {ratio:.1%}  ({likes:,} / {views:,})")
+        if ratio < LIKE_RATIO_EXCLUDE:
+            print(f"\n  HARD EXCLUDE: like/View {ratio:.1%} < {LIKE_RATIO_EXCLUDE:.0%}")
+            print(f"  Auto-setting status=排除, 废弃原因=点赞/播放 {ratio:.1%}")
+            args.status = "排除"
+            args.exclude_reason = f"点赞/播放 {ratio:.1%}"
+        elif ratio < LIKE_RATIO_WARN:
+            print(f"\n  INFO: like/View {ratio:.1%} in {LIKE_RATIO_EXCLUDE:.0%}-{LIKE_RATIO_WARN:.0%} zone — low engagement, consider reviewing topic quality")
+    else:
+        print(f"  Like/View: N/A (0 views)")
 
     # 4. Resolve defaults
     slug = args.slug or generate_slug(args.guest, args.source, args.url)
-    date = args.date or yt["upload_date"]
+    # 日期 = YouTube 视频发布日期（yt-dlp 自动抓取），不是策展录入日期
+    date = args.date or yt.get("upload_date", "") or (__import__('datetime').date.today().isoformat())
 
     # 5. Build record
     total = calc_total(args.timeliness, args.exclusivity, args.authority, args.longevity)
@@ -208,14 +253,15 @@ Examples:
         title=args.title, guest=args.guest, source=args.source,
         summary=args.summary, url=args.url, slug=slug, date=date,
         status=args.status, yt_title=yt["yt_title"],
-        views=yt["views"], likes=yt["likes"],
+        views=yt["views"], likes=yt["likes"], comments=yt["comments"],
         timeliness=args.timeliness, exclusivity=args.exclusivity,
         authority=args.authority, longevity=args.longevity,
+        exclude_reason=getattr(args, "exclude_reason", ""),
     )
 
     # 6. Validate completeness
-    required = ["标题", "URL", "嘉宾", "来源频道名", "中文摘要", "Slug", "日期",
-                "YouTube播放量", "YouTube点赞", "时效性", "独占性", "人物权威", "长期价值", "总分"]
+    required = ["标题", "URL", "嘉宾", "来源频道名", "中文摘要", "Slug", "视频发布日期",
+                "YouTube播放量", "YouTube点赞", "YouTube评论", "时效性", "独占性", "人物权威", "长期价值", "总分"]
     missing = [k for k in required if k not in record or record[k] in (None, "", 0)]
     if missing:
         print(f"ERROR: missing required fields: {missing}", file=sys.stderr)
@@ -224,7 +270,7 @@ Examples:
     # 7. Output
     json_str = json.dumps(record, ensure_ascii=False, indent=2)
     print(f"\n  Slug:     {slug}")
-    print(f"  Score:    {total} (T{args.timeliness}×3 + E{args.exclusivity}×3 + A{args.authority}×2 + L{args.longevity}×2)")
+    print(f"  Score:    {total:.1f} (T{args.timeliness}×0.3 + E{args.exclusivity}×0.3 + A{args.authority}×0.2 + L{args.longevity}×0.2)")
 
     if args.dry_run or not args.create:
         if args.out:
@@ -236,20 +282,21 @@ Examples:
         return
 
     # 8. Create Feishu record
-    tmp = Path.home() / "_runtime" / f"stage01_{slug}.json"
+    tmp = Path("_runtime") / f"stage01_{slug}.json"
     tmp.parent.mkdir(parents=True, exist_ok=True)
     tmp.write_text(json_str, encoding="utf-8")
 
     try:
         result = subprocess.run(
             [
-                "lark-cli", "base", "+record-upsert",
+                r"C:\Users\Administrator\AppData\Roaming\npm\lark-cli.cmd", "base", "+record-upsert",
                 "--base-token", args.base_token,
                 "--table-id", args.table_id,
-                "--json", f"@_runtime/{tmp.name}",
+                "--json", f"@{tmp}",
                 "--as", "bot",
             ],
             capture_output=True, text=True, timeout=15,
+            encoding='utf-8', errors='replace',
         )
         print(f"\nlark-cli stdout:\n{result.stdout}")
         if result.returncode != 0:

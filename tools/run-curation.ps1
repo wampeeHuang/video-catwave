@@ -43,14 +43,21 @@ if (-not (Test-Path $logPath)) {
 }
 Write-Output "Agent log: $logPath ($((Get-Item $logPath).Length) bytes)"
 
-Write-Output "Step 2/3: Deploying catwave data..."
+Write-Output "Step 2/4: Onboarding to Feishu..."
+& python "D:\workspace\猫波信号站\tools\onboard_to_feishu.py" $date
+if ($LASTEXITCODE -ne 0) {
+    Write-Output "FATAL: onboard-to-feishu failed with exit code $LASTEXITCODE"
+    exit 1
+}
+
+Write-Output "Step 3/4: Deploying catwave data..."
 & python "D:\workspace\evopearl-data\sync_catwave.py"
 if ($LASTEXITCODE -ne 0) {
     Write-Output "FATAL: sync-catwave failed with exit code $LASTEXITCODE"
     exit 1
 }
 
-Write-Output "Step 3/3: Post-curation check..."
+Write-Output "Step 4/4: Post-curation check..."
 $curationFile = "D:\workspace\_output\猫波信号站\视频\_curation\$date.json"
 if (Test-Path $curationFile) {
     $curation = Get-Content $curationFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -63,8 +70,9 @@ if (Test-Path $curationFile) {
             content = "final_count = 0`n扫描源：$($curation.scanned_sources) 个`n原因：$qualityNote"
             bot = "jinhua-cat"
         }
-        $payloadFile = "$env:TEMP\catwave-notify-$date.json"
-        $notifyPayload | ConvertTo-Json -Depth 5 -Compress | Set-Content $payloadFile -Encoding UTF8
+        $payloadFile = "$env:TEMP\catwave-notify.json"
+        $payloadJson = $notifyPayload | ConvertTo-Json -Depth 5 -Compress
+        [System.IO.File]::WriteAllText($payloadFile, $payloadJson, [System.Text.UTF8Encoding]::new($false))
         & node "C:\Users\Administrator\.scheduler\feishu-notify.js" --payload-file $payloadFile
         if ($LASTEXITCODE -ne 0) {
             Write-Output "WARN: feishu notify failed (exit=$LASTEXITCODE)"

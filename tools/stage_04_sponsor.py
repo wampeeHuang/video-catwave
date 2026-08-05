@@ -24,13 +24,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _lib import (
-    SubEntry, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
+    SubEntry, get_deepseek_key, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
 )
 
 
 def run(slug: str, *, api_key: str | None = None, batch_size: int = 20,
         min_duration: float = 10.0):
-    api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
+    api_key = api_key or get_deepseek_key()
     srt = srt_path(slug, "02_seg.srt")
     if not srt.exists():
         print(f"ERROR: {srt} not found. Run stage_03 first.")

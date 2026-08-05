@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _lib import (
-    SubEntry, extract_transcript, ms_to_time, read_srt, srt_path, time_to_ms, write_srt,
+    SubEntry, extract_transcript, ms_to_time, read_srt, srt_path, text_pixel_width, time_to_ms, write_srt,
 )
 
 CN_FS = 42       # SimHei
@@ -89,17 +89,8 @@ def _cn_only(e: SubEntry) -> SubEntry:
 
 
 def _px_width(text: str, fs: int) -> int:
-    """Estimate pixel width at given font size."""
-    w = 0
-    for ch in text:
-        cp = ord(ch)
-        if cp < 128:
-            w += int(fs * 0.50)
-        elif 0x4E00 <= cp <= 0x9FFF or 0x3000 <= cp <= 0x303F:
-            w += fs
-        else:
-            w += fs
-    return w
+    """Measure pixel width at given font size using PIL textbbox."""
+    return text_pixel_width(text, "simhei.ttf", fs)
 
 
 def _bg_box(cn_text: str, en_text: str, padding: int, alpha_hex: str) -> str:

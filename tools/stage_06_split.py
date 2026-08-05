@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _lib import SubEntry, clean_srt_text, ms_to_time, read_srt, srt_path, time_to_ms, write_srt
+from _lib import SubEntry, clean_srt_text, ms_to_time, read_srt, srt_path, text_pixel_width, time_to_ms, write_srt
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
@@ -102,19 +102,8 @@ def run(slug: str, max_px: int = MAX_PX):
 
 
 def _cn_pixel_width(text: str) -> int:
-    """Estimate pixel width of text rendered in SimHei @ CN_FONT_SIZE.
-    Uses character-type heuristics: CJK char ≈ font_size px, Latin ≈ 0.55x.
-    """
-    w = 0
-    for ch in text:
-        cp = ord(ch)
-        if cp < 128:
-            w += int(CN_FONT_SIZE * 0.55)  # Latin
-        elif 0x4E00 <= cp <= 0x9FFF or 0x3000 <= cp <= 0x303F:
-            w += CN_FONT_SIZE  # CJK
-        else:
-            w += CN_FONT_SIZE  # Fullwidth punct, etc.
-    return w
+    """Measure pixel width of text rendered in SimHei @ CN_FONT_SIZE using PIL textbbox."""
+    return text_pixel_width(text, "simhei.ttf", CN_FONT_SIZE)
 
 
 # ── Punctuation-first splitting ──────────────────────────────────────────────

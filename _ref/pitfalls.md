@@ -123,7 +123,7 @@ Dialogue: 0,0:00:01.00,0:00:04.00,Default,,0,0,45,,{\fnSimHei\fs42}中文\N{\fnS
 
 ## 5. Windows PIL 中文字体：只有 SimHei 够粗
 
-type: diagnosis
+type: diagnosis [HISTORICAL — 2026-06-23 已回退 msyhbd.ttc]
 date: 2026-06-16
 source: 封面字体加粗迭代
 
@@ -151,7 +151,7 @@ draw.text((x, y), text, font=font, fill=accent)
 
 ### 预防
 
-- 中文封面/海报 → SimHei，不碰 NotoSansSC
+- ~~中文封面/海报 → SimHei，不碰 NotoSansSC~~ **[2026-06-23 已废弃]** gen_cover.py 已回退 msyhbd.ttc 纯色无描边。当前真相源: `gen_cover.py`（生产）+ `validate_cover.py`（验证）。SimHei 作为 gen_cover.py 的 fallback (#3 in chain)。
 - 需要更粗 → 考虑 ImageMagick 预处理或换用 HTML→截图 方案
 - `gen_cover.py` 已内置字体查找逻辑（`_find_font()`），自动搜 `C:\Windows\Fonts\`
 

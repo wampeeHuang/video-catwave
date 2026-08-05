@@ -131,6 +131,32 @@ def upsert_record(record_id, fields_dict, base_token=None, table_id=None):
             _os.remove(tmp_path)
 
 
+def create_record(fields_dict, base_token=None, table_id=None):
+    """Create a new Feishu record. Returns (record_id, ok) tuple."""
+    import os as _os
+    bt = base_token or APP_TOKEN
+    tid = table_id or TABLE_ID
+    tmp_path = _os.path.join(_os.getcwd(), "_lark_tmp_create.json")
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(fields_dict, f, ensure_ascii=False)
+    try:
+        resp = _lark(
+            "base", "+record-upsert",
+            "--base-token", bt,
+            "--table-id", tid,
+            "--as", "bot",
+            "--json", "@_lark_tmp_create.json",
+            timeout=15,
+        )
+        if resp.get("ok"):
+            rid = resp.get("data", {}).get("record", {}).get("record_id_list", [None])[0]
+            return rid, True
+        return None, False
+    finally:
+        if _os.path.exists(tmp_path):
+            _os.remove(tmp_path)
+
+
 def build_slug_index(records):
     """Build slug -> {status, record_id, title, ...} index."""
     idx = {}

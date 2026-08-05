@@ -57,7 +57,8 @@ def _load_font(size: int, weight: str = "bold") -> ImageFont.FreeTypeFont:
 
 
 def _fit_size(draw, text: str, max_fs: int, min_fs: int = MIN_TITLE_FS) -> tuple[int, ImageFont.FreeTypeFont]:
-    """Return (font_size, font) that fits text in 4:3 safe area."""
+    """Return (font_size, font) that fits text in 4:3 safe area.
+    Clamps to min_fs as hard floor — text may overflow safe area but stays legible."""
     font = _load_font(max_fs, "bold")
     tw = draw.textbbox((0, 0), text, font=font)[2]
     safe_max = SAFE_W - SAFE_PAD * 2
@@ -65,14 +66,12 @@ def _fit_size(draw, text: str, max_fs: int, min_fs: int = MIN_TITLE_FS) -> tuple
         return max_fs, font
     fs = int(max_fs * safe_max / tw)
     if fs < min_fs:
-        print(f"  WARN: {len(text)}字需缩至{fs}px (底线{min_fs}px) — 请精简封面标题")
-    # Verify at chosen size; shrink further if still over
+        print(f"  WARN: {len(text)}字需缩至{fs}px, 钳位到底线{min_fs}px (文字可能溢出安全区)")
+        fs = min_fs
     font_at_fs = _load_font(fs, "bold")
     tw_at_fs = draw.textbbox((0, 0), text, font=font_at_fs)[2]
     if tw_at_fs > safe_max:
-        fs2 = int(fs * safe_max / tw_at_fs)
-        print(f"  WARN: {fs}px仍超{safe_max}px({tw_at_fs}px), 再缩至{fs2}px")
-        return fs2, _load_font(fs2, "bold")
+        print(f"  WARN: {fs}px仍超{safe_max}px({tw_at_fs}px), 文字溢出安全区")
     return fs, font_at_fs
 
 

@@ -5,8 +5,10 @@ Input:  YouTube URL
 Output: <output>/_runtime/素材/source.mp4 + 01_raw.srt
 """
 import argparse
+import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -17,18 +19,35 @@ def run(url: str, slug: str) -> Path:
     dl_dir = slug_dir(slug) / "_runtime" / "素材"
     dl_dir.mkdir(parents=True, exist_ok=True)
 
+    proxy = os.environ.get("VORTEX_PROXY", "")
+
     cmd = [
         "yt-dlp",
         "--remote-components", "ejs:github",
-        "--write-auto-subs", "--sub-langs", "en", "--convert-subs", "srt",
-        "-f", "bestvideo[height<=720][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio[ext=m4a]/best[height<=720]",
+        "-f", "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio[ext=m4a]/best[height<=1080]",
         "--output", str(dl_dir / "%(title)s.%(ext)s"),
-        "--write-sub", "--sub-format", "srt",
-        url,
+        "--sleep-interval", "5", "--max-sleep-interval", "30",
+        "--retries", "5", "--fragment-retries", "5",
     ]
+    if proxy:
+        cmd[1:1] = ["--proxy", f"http://{proxy}"]
+    cmd.append(url)
 
-    print(f"[②] Downloading: {url}")
-    subprocess.run(cmd, check=True, cwd=str(dl_dir))
+    delays = [60, 120, 240]
+    for attempt, delay in enumerate([0] + delays):
+        if attempt > 0:
+            print(f"[②] Retry {attempt}/{len(delays)} after {delay}s...")
+            time.sleep(delay)
+        print(f"[②] Downloading: {url}")
+        try:
+            subprocess.run(cmd, check=True, cwd=str(dl_dir))
+            break
+        except subprocess.CalledProcessError as e:
+            if attempt < len(delays):
+                print(f"  WARN: Download failed (exit {e.returncode}), will retry...")
+            else:
+                print(f"  ERROR: Download failed after {len(delays)} retries")
+                raise
 
     # Rename English SRT to 01_raw.srt
     srt_files = sorted(dl_dir.glob("*.en.srt"))

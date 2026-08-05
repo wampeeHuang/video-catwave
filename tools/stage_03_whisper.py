@@ -12,13 +12,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-# Auto-add NVIDIA CUDA DLL paths for CTranslate2 GPU support
+# Auto-add NVIDIA CUDA DLL paths for CTranslate2 GPU support.
+# os.add_dll_directory() affects the current process; PATH + _ctranslate2_bindings
+# sys.path entry helps ctranslate2's compiled extension find DLLs in subprocess context.
 _nv_root = Path(sys.base_prefix) / "Lib" / "site-packages" / "nvidia"
 if _nv_root.exists():
     for _d in ["cublas/bin", "cuda_nvrtc/bin", "cufft/bin", "curand/bin", "cusolver/bin", "cusparse/bin"]:
         _p = str(_nv_root / _d)
-        if os.path.isdir(_p) and _p not in os.environ["PATH"]:
+        if os.path.isdir(_p):
             os.add_dll_directory(_p)
+            if _p not in os.environ["PATH"]:
+                os.environ["PATH"] = _p + ";" + os.environ["PATH"]
 
 from _lib import SubEntry, ms_to_time, slug_dir
 

@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _lib import SubEntry, clean_srt_text, read_srt, srt_path, write_srt
+from _lib import SubEntry, clean_srt_text, get_deepseek_key, read_srt, srt_path, write_srt
 
 
 # Proper noun whitelist: patterns in Chinese → correct English
@@ -26,7 +26,7 @@ PROPER_NOUN_FIXES: list[tuple[str, str]] = [
 
 
 def run(slug: str, *, api_key: str | None = None, batch_size: int = 10):
-    api_key = api_key or os.environ.get("DEEPSEEK_API_KEY")
+    api_key = api_key or get_deepseek_key()
     src = srt_path(slug, "02_seg_clean.srt")
     if not src.exists():
         print(f"ERROR: {src} not found. Run stage_04 first.")

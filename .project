@@ -1,6 +1,7 @@
 {
   "id": "catwave-signal-station",
   "name": "猫波信号站",
-  "created": "2026-06-16",
-  "status": "stable"
+  "description": "YouTube → B站完整搬运管线，视频下载+字幕翻译+AI配音",
+  "status": "stable",
+  "created": "2026-06-16"
 }

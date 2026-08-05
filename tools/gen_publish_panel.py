@@ -16,47 +16,6 @@ sys.path.insert(0, str(Path(__file__).parent))
 from _lib import slug_dir
 
 
-def _extract_quotes(transcript_path: Path, max_quotes: int = 5) -> list[str]:
-    """Extract candidate quotes from transcript — length + signal words.
-
-    Signal words indicate information density:
-    - Contrast markers: 不是…而是, 但, 却, 然而, 反而
-    - Numerals/digits: concrete data points
-    - Named entities: capitalized multi-word (company/product names)
-    Lines with ≥1 signal type score higher than bare length.
-    """
-    import re
-
-    if not transcript_path.exists():
-        return []
-    text = transcript_path.read_text(encoding="utf-8")
-    lines = [l.strip() for l in text.split("\n") if 20 < len(l.strip()) < 120]
-
-    contrast_re = re.compile(r"不是.{0,20}而是|但|却|然而|反而|其实|真正")
-    digit_re = re.compile(r"\d")
-    entity_re = re.compile(r"[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+")
-
-    def _score(line: str) -> int:
-        s = len(line)  # base score = length
-        if contrast_re.search(line):
-            s += 50
-        if digit_re.search(line):
-            s += 30
-        if entity_re.search(line):
-            s += 40
-        return s
-
-    seen = set()
-    quotes = []
-    for line in sorted(set(lines), key=_score, reverse=True):
-        if len(quotes) >= max_quotes:
-            break
-        normalized = line.strip()
-        if normalized not in seen:
-            seen.add(normalized)
-            quotes.append(normalized)
-    return quotes
-
 
 def render(slug: str) -> str:
     sdir = slug_dir(slug)
@@ -69,6 +28,9 @@ def render(slug: str) -> str:
     title = meta["title"]
     tags = meta.get("tags", [])
     source = meta.get("source", "")
+    source_url = meta.get("source_url", "")
+    author = meta.get("author", "")
+    publish_date = meta.get("publish_date", "")
     chapters = meta.get("chapters", [])
     description = meta.get("description", "")
 
@@ -119,11 +81,6 @@ def render(slug: str) -> str:
         f"{ch[0]} {ch[1]}" for ch in chapters[:10]
     )
 
-    # Quotes
-    transcript = sdir / "_runtime" / "字幕" / "transcript.txt"
-    quotes = _extract_quotes(transcript)
-    quotes_html = "\n".join(f"{i+1}. {q}" for i, q in enumerate(quotes))
-
     # Compliance report
     compliance_html = ""
     cr_path = sdir / "_runtime" / "compliance_report.txt"
@@ -149,6 +106,16 @@ def render(slug: str) -> str:
                 '  </div>\n'
             )
 
+    # Build 转载声明 (B站单行文本 ≤200字)
+    copyright_source = source.replace("YouTube @", "").strip() if source else ""
+    copyright_text = f"转自 {source_url}"
+    if copyright_source:
+        copyright_text += f" ({copyright_source})"
+    if publish_date:
+        copyright_text += f", {publish_date}"
+    copyright_info = f'    <div><b>来源注明：</b>{copyright_text}</div>\n'
+    copyright_info += f'    <div class="note">上传页 → 创作声明 → 选择「内容为转载」→ 粘贴以上文字（{len(copyright_text)}字）</div>'
+
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -168,6 +135,8 @@ def render(slug: str) -> str:
   .note {{ color: #888; font-size: 12px; margin-top: 4px; }}
   .tag-row {{ display: inline-flex; align-items: center; gap: 6px; margin-right: 12px; margin-bottom: 4px; }}
   .tag-row span {{ background: #1a1a2e; padding: 2px 8px; border-radius: 3px; font-size: 13px; }}
+  .field.copyright {{ background: #1e2d1e; border: 1px solid #2e7d32; }}
+  .field.copyright .field-label {{ color: #4caf50; }}
 </style>
 </head>
 <body>
@@ -176,16 +145,27 @@ def render(slug: str) -> str:
 
 <div class="field">
   <div class="field-header">
-    <span class="field-label">标题（≤80字）</span>
+    <span class="field-label">1. 标题（≤80字）</span>
     <button class="copy-btn" onclick="copyField(this, 'title')">复制</button>
   </div>
   <div class="field-body" id="title">{title}</div>
   <div class="note">字数：{len(title)} / 80</div>
 </div>
 
+<div class="field copyright">
+  <div class="field-header"><span class="field-label">2. 创作声明</span></div>
+  <div class="field-body" id="copyright">内容为转载
+{copyright_info}  </div>
+</div>
+
+<div class="field">
+  <div class="field-header"><span class="field-label">3. 分区</span><button class="copy-btn" onclick="copyField(this, 'category')">复制</button></div>
+  <div class="field-body" id="category">知识 > 科技 > 人工智能</div>
+</div>
+
 <div class="field">
   <div class="field-header">
-    <span class="field-label">标签（最多10个）</span>
+    <span class="field-label">4. 标签（最多10个）</span>
     <button class="copy-btn" onclick="copyField(this, 'tags')">复制</button>
   </div>
   <div class="field-body" id="tags">
@@ -194,18 +174,13 @@ def render(slug: str) -> str:
 </div>
 
 <div class="field">
-  <div class="field-header"><span class="field-label">分区</span><button class="copy-btn" onclick="copyField(this, 'category')">复制</button></div>
-  <div class="field-body" id="category">知识 > 科技 > 人工智能</div>
-</div>
-
-<div class="field">
-  <div class="field-header"><span class="field-label">合集</span><button class="copy-btn" onclick="copyField(this, 'collection')">复制</button></div>
+  <div class="field-header"><span class="field-label">5. 合集</span><button class="copy-btn" onclick="copyField(this, 'collection')">复制</button></div>
   <div class="field-body" id="collection">猫波译站</div>
 </div>
 
 <div class="field">
   <div class="field-header">
-    <span class="field-label">简介（≤2000字）</span>
+    <span class="field-label">6. 简介（≤2000字）</span>
     <button class="copy-btn" onclick="copyField(this, 'desc')">复制</button>
   </div>
   <div class="field-body" id="desc">{description}</div>
@@ -213,13 +188,8 @@ def render(slug: str) -> str:
 </div>
 
 <div class="field">
-  <div class="field-header"><span class="field-label">章节时间戳（{len(chapters)}个）</span><button class="copy-btn" onclick="copyField(this, 'chapters')">复制</button></div>
+  <div class="field-header"><span class="field-label">7. 章节时间戳（{len(chapters)}个）</span><button class="copy-btn" onclick="copyField(this, 'chapters')">复制</button></div>
   <div class="field-body" id="chapters">{chapters_text}</div>
-</div>
-
-<div class="field">
-  <div class="field-header"><span class="field-label">金句候选（封面/标题用）</span></div>
-  <div class="field-body" id="quotes">{quotes_html}</div>
 </div>
 
 <div class="field">

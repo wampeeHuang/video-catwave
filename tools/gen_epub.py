@@ -10,7 +10,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _lib import slug_dir
+from _lib import slug_dir, sanitize_filename
+from pipeline_manifest import duration_profile
 
 from ebooklib import epub
 
@@ -117,7 +118,7 @@ h2 {{ font-size: 1.2em; margin: 1em 0 0.3em; color: #333; }}
     book.add_item(title_page)
 
     chapters = []
-    CHUNK_SECONDS = 300
+    epub_chunk_sec = duration_profile(total_seconds)["epub_chunk_sec"]
     chunk = []
     chapter_idx = 0
 
@@ -147,7 +148,7 @@ h2 {{ font-size: 1.2em; margin: 1em 0 0.3em; color: #333; }}
 
     for e in entries:
         t = time_to_seconds(e["start"])
-        if chunk and t - time_to_seconds(chunk[0]["start"]) >= CHUNK_SECONDS:
+        if chunk and t - time_to_seconds(chunk[0]["start"]) >= epub_chunk_sec:
             flush_chapter()
         chunk.append(e)
     flush_chapter()
@@ -185,7 +186,7 @@ def main():
     base = slug_dir(args.slug)
     srt = base / "_runtime/字幕/03_zh.srt"
     cover = base / "cover.jpg"
-    safe_title = args.title.replace("：", "-").replace(":", "-")
+    safe_title = sanitize_filename(args.title)
     out = base / "电子书" / f"{safe_title}.epub"
 
     if not srt.exists():
